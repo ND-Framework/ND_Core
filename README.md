@@ -2,7 +2,7 @@
 <p align='center'><b><a href="discord.gg/nc82d8zvjm">Discord</a></b>
 
 # Description:
-This is a dojrp based framework, with a money system and extra features.
+This is a dojrp inspired framework, with a money system and extra features.
 
 # Addons:
 You can find most free addons in the ND_Framework repository and you can find more paid ones on [tebex](https://andyyy.tebex.io/category/fivem-scripts?currency=USD).
