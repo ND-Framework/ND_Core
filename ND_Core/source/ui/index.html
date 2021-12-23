@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://use.fontawesome.com/releases/v5.15.4/js/all.js" data-auto-a11y="true"></script>
+        <script src="js/jquery-3.6.0.min.js" type="text/javascript"></script>
+        <script src="js/listener.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <script>
+            function spawnMenu(bool) {
+                if (bool) {
+                    $("#characterCreator").hide();
+                    $("#characterEditor").hide();
+                    $("#exitGameMenu").hide();
+                    $("#deleteCharacterMenu").hide();
+                    $("#spawnLocation").fadeIn("slow");
+                } else {
+                    $("#spawnLocation").fadeOut("slow");
+                }
+            }
+            function tp(x, y, z, name) {
+                $.post("https://ND_Core/tpToLocation", JSON.stringify({
+                    x: x,
+                    y: y,
+                    z: z,
+                    name: name
+                }));
+                spawnMenu(false)
+                setTimeout(function(){
+                    $("#spawnMenuContainer").empty();
+                }, 550);
+                return
+            }
+        </script>
+        
+        <!--Main page design-->
+        <section id="overlay">
+            <div id="logoContainer">
+                <img src="Logo.png" id="logo">
+            </div>
+            <div>
+                <h1 id="serverName"></h1>
+                <p id="aop" class="mainPage" style="margin-bottom: -1vh;"></p>
+                <p class="mainPage">Select or create a character:</p>
+            </div>
+            <div>
+                <button class="homeScreenButton" id="newCharacterButton"><a class="fas fa-plus-circle" style="color:white;"></a> Create New Character <a id="playerAmount"></a></button>
+                <br>
+                <button class="homeScreenButton" id="quitGameButton"><a class="fas fa-sign-out-alt" style="color:white;"></a> Quit Game</button>
+            </div>
+            <div id="charactersSection">
+            </div>
+        </section>
+
+        <!--Create character menu design-->
+        <form id="characterCreator" class="characterMenu">
+            <div>
+                <p id="characterCreatorTopText"><a class="fas fa-user-edit" style="color:white;"></a> Character Creation</p>
+                <hr id="characterCreatorTopTextLine">
+            </div>
+            <div id="characterInfoContainer">
+                <div>
+                    <label class="firstRowText" style="margin-right: 15.7vw;" for="firstname">First Name</label>
+                    <label class="firstRowText" style="margin-right: 15.7vw;" for="lastname">Last Name</label>
+                    <input id="firstName" class="firstRowInput" style="margin-right: 4.1vw;" type="text" placeholder="First Name" name="firstname" required>
+                    <input id="lastName" class="firstRowInput" style="margin-right: 4.1vw;" type="text" placeholder="Last Name" name="lastname" required>
+                </div>
+                <div>
+                    <label class="secondRowText" style="margin-right: 15vw;" for="dob">Date of Birth</label>
+                    <label class="secondRowText" style="margin-right: 15vw;" for="gender">Gender</label>
+                    <input id="dateOfBirth" class="secondRowInput" style="margin-right: 4.35vw;" type="date" name="dob" required>
+                    <select id="gender" class="secondRowInput" style="margin-right: 4.35vw;" name="gender" required>
+                        <option class="secondRowInput">Male</option>
+                        <option class="secondRowInput">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="thirdRowText" style="margin-right: 14.38vw;" for="twotter">Twotter Name</label>
+                    <label class="thirdRowText" style="margin-right: 14.38vw;" for="department">Department</label>
+                    <input id="twtName" class="thirdRowInput" style="margin-right: 4.2vw;" type="text" placeholder="Twotter Name" name="twotter" required>
+                    <select id="department" class="thirdRowInput departments" style="margin-right: 4.2vw;" name="department" required></select>
+                </div>
+                <div>
+                    <label class="fourthRowText" style="margin-right: 18.2vw;" for="startingcash">Cash</label>
+                    <label class="fourthRowText" style="margin-right: 18.2vw;" for="startingbank">Bank</label>
+                    <input id="startingCash" class="fourthRowInput" style="margin-right: 4.2vw;" type="number" pattern="[0-9]+" placeholder="$2500" name="startingcash" required>
+                    <input id="startingBank" class="fourthRowInput" style="margin-right: 4.2vw;" type="number" pattern="[0-9]+" placeholder="$8000" name="startingbank" required>
+                </div>
+            </div>
+            <div>
+                <hr id="characterCreatorTopTextLine" style="margin-top: 5vh;">
+                <button id="submitCharacterCreation" class="characterSubmitButton" type="submit" form="characterCreator"><a class="fas fa-plus-circle" style="color:white;"></a> Create Character</button>
+                <button id="cancelCharacterCreation" class="characterResetButton" type="reset"><a class="fas fa-times-circle" style="color:white;"></a> Cancel</button>
+            </div>
+        </form>
+
+        <!--Edit character menu design-->
+        <form id="characterEditor" class="characterMenu">
+            <div>
+                <p id="characterCreatorTopText"><a class="fas fa-user-edit" style="color:white;"></a> Character Editor</p>
+                <hr id="characterCreatorTopTextLine">
+            </div>
+            <div id="characterInfoContainer">
+                <div>
+                    <label class="firstRowText" style="margin-right: 15.7vw;" for="firstname">First Name</label>
+                    <label class="firstRowText" style="margin-right: 15.7vw;" for="lastname">Last Name</label>
+                    <input id="newFirstName" class="firstRowInput" style="margin-right: 4.1vw;" type="text" placeholder="First Name" name="firstname" required>
+                    <input id="newLastName" class="firstRowInput" style="margin-right: 4.1vw;" type="text" placeholder="Last Name" name="lastname" required>
+                </div>
+                <div>
+                    <label class="secondRowText" style="margin-right: 15vw;" for="dob">Date of Birth</label>
+                    <label class="secondRowText" style="margin-right: 15vw;" for="gender">Gender</label>
+                    <input id="newDateOfBirth" class="secondRowInput" style="margin-right: 4.35vw;" type="date" name="dob" required>
+                    <select id="newGender" class="secondRowInput" style="margin-right: 4.35vw;" name="gender" required>
+                        <option class="secondRowInput">Male</option>
+                        <option class="secondRowInput">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="thirdRowText" style="margin-right: 14.38vw;" for="twotter">Twotter Name</label>
+                    <label class="thirdRowText" style="margin-right: 14.38vw;" for="department">Department</label>
+                    <input id="newTwtName" class="thirdRowInput" style="margin-right: 4.2vw;" type="text" placeholder="Twotter Name" name="twotter" required>
+                    <select id="newDepartment" class="thirdRowInput departments" style="margin-right: 4.2vw;" name="department" required></select>
+                </div>
+                <!--
+                <div>
+                    <label class="fourthRowText" style="margin-right: 18.2vw;" for="startingcash">Cash</label>
+                    <label class="fourthRowText" style="margin-right: 18.2vw;" for="startingbank">Bank</label>
+                    <input id="newStartingCash" class="fourthRowInput" style="margin-right: 4.2vw;" type="number" pattern="[0-9]+" placeholder="$2500" name="startingcash" required>
+                    <input id="newStartingBank" class="fourthRowInput" style="margin-right: 4.2vw;" type="number" pattern="[0-9]+" placeholder="$8000" name="startingbank" required>
+                </div>
+                -->
+            </div>
+            <div>
+                <hr id="characterCreatorTopTextLine" style="margin-top: 5vh;">
+                <button id="submitCharacterEditing" class="characterSubmitButton" type="submit" form="characterEditor"><a class="fas fa-plus-circle" style="color:white;"></a> Save Changes</button>
+                <button id="cancelCharacterEditing" class="characterResetButton" type="reset"><a class="fas fa-times-circle" style="color:white;"></a> Cancel</button>
+            </div>
+        </form>
+
+        <!--Character Spawn options-->
+        <section id="spawnLocation" class="spawnMenu">
+            <div>
+                <p id="characterCreatorTopText"><a class="fas fa-map-marker-alt" style="color:white;"></a> Spawn Location</p>
+                <hr id="characterCreatorTopTextLine">
+            </div>
+            <div id="spawnMenuContainer">
+            </div>
+            <div>
+                <hr id="characterCreatorTopTextLine" style="margin-top: 3vh;">
+                <button id="tpDoNot" class="characterSubmitButton" style="margin-left: 26vw; margin-bottom: 2vh;"><a class="fas fa-compass" style="color:white;"></a> Do not teleport</button>
+                <button id="tpCancel" class="characterResetButton"><a class="fas fa-times-circle" style="color:white;"></a> Cancel</button>
+            </div>
+        </section>
+
+        <!--Confirm exit game menu design-->
+        <section id="exitGameMenu" class="confirmationScreen">
+            <p id="characterCreatorTopText">Are you sure you'd like to quit the game?</p>
+            <hr id="characterCreatorTopTextLine">
+            <button id="exitGameConfirm" class="confirmationScreenConfirm"><a class="fas fa-check-circle" style="color:white;"></a> Confirm</button>
+            <button id="exitGameCancel" class="confirmationScreenCancel"><a class="fas fa-times-circle" style="color:white;"></a> Cancel</button>
+        </section>
+
+        <!--Confirm delete character button-->
+        <section id="deleteCharacterMenu" class="confirmationScreen">
+            <p id="characterCreatorTopText">Are you sure you'd like to delete this character?</p>
+            <hr id="characterCreatorTopTextLine">
+            <button id="deleteCharacterConfirm" class="confirmationScreenConfirm"><a class="fas fa-check-circle" style="color:white;"></a> Confirm</button>
+            <button id="deleteCharacterCancel" class="confirmationScreenCancel"><a class="fas fa-times-circle" style="color:white;"></a> Cancel</button>
+        </section>
+
+        <!--Money hud-->
+        <div id="money">
+            <p id="cash" class="text"></p>
+            <p id="bank" class="text"></p>
+        </div>
+    </body>
+</html>
