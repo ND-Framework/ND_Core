@@ -6,13 +6,14 @@
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 
-started = true
+local started = true
 registered = false
 admin = false
 
+-- This is used to add department drop down on the ui.
 RegisterNetEvent("permsChecked")
 AddEventHandler("permsChecked", function(role, rolePermission)
-    if rolePermission == true then
+    if rolePermission then
         if role == "ADMIN" then
             admin = true
         else
@@ -31,15 +32,12 @@ Citizen.CreateThread(function()
         if IsPedOnFoot(ped) or IsPedInVehicle(ped, GetVehiclePedIsIn(ped, false), false) then
             print("^0This framework is created by ^5Andyyy#7666 ^0for support you can join the ^5discord: ^0https://discord.gg/Z9Mxu72zZ6")
             for i = 1, #config.departments do -- if you have an error that says attempt to index a nil value (global 'config') it's beacuse you have edited the config wrong.
-                TriggerServerEvent("checkPerms", config.departments[i])
+                TriggerServerEvent("checkPerms", config.departments[i]) -- check permissions for each department with the department names.
             end
-            Citizen.Wait(10)
-            TriggerServerEvent("checkPerms", "ADMIN")
-            Citizen.Wait(10)
+            TriggerServerEvent("checkPerms", "ADMIN") -- check if the player has the admin role.
             TriggerServerEvent("getCharacters")
             Citizen.Wait(100)
             TriggerServerEvent("getAop")
-            Citizen.Wait(10)
             SwitchOutPlayer(ped, 0, 1)
             FreezeEntityPosition(ped, true)
             SetEntityVisible(ped, false, 0)
@@ -49,16 +47,13 @@ Citizen.CreateThread(function()
 end)
 
 RegisterNUICallback("exitGame", function(data)
-    TriggerServerEvent("exitGame", GetPlayerServerId(PlayerId()))
+    TriggerServerEvent("exitGame")
 end)
 
 RegisterNetEvent("returnCharacters")
 AddEventHandler("returnCharacters", function(characters)
     for i = 1, #characters do
         index = characters[i]
-        if config.debugMode then
-            print(index.id .. " " .. index.firstName .. " " .. index.lastName .. " " .. index.dob .. " " .. index.gender .. index.twt .. " " .. index.department .. " " .. index.cash .. " " .. index.bank)
-        end
         SendNUIMessage({
             type = "character",
             id = index.id,
@@ -73,12 +68,10 @@ AddEventHandler("returnCharacters", function(characters)
         })
     end
     characterAmount = #characters
-    if config.debugMode then
-        print("Characters: " .. characterAmount .. "/" .. config.characterLimit)
-    end
     SetDisplay(true, "ui")
 end)
 
+-- Creating a character
 RegisterNUICallback("newCharacter", function(data)
     if characterAmount < config.characterLimit then
         newCharacter = {
@@ -113,6 +106,7 @@ AddEventHandler("returnNewCharacter", function(id, character)
     })
 end)
 
+-- editing a character
 RegisterNUICallback("editCharacter", function(data)
     newCharacter = {
         firstName = data.firstName,
@@ -121,13 +115,12 @@ RegisterNUICallback("editCharacter", function(data)
         gender = data.gender,
         twtName = data.twtName,
         department = data.department,
-        --startingCash = data.startingCash,
-        --startingBank = data.startingBank,
         id = data.id
     }
     TriggerServerEvent("editCharacter", newCharacter)
 end)
 
+-- deleting a character
 RegisterNUICallback("delCharacter", function(data)
     TriggerServerEvent("delCharacter", data.character)
     characterAmount = characterAmount -1
@@ -136,6 +129,7 @@ RegisterNUICallback("delCharacter", function(data)
     })
 end)
 
+-- Once the player clicks on the character in the ui, it will be set as the main character or the current character. This info can be used later in exports or elsewhere in this resource.
 RegisterNUICallback("setMainCharacter", function(data)
     mainFirstName = data.firstName
     mainLastName = data.lastName
@@ -146,12 +140,6 @@ RegisterNUICallback("setMainCharacter", function(data)
     mainStartingCash = data.startingCash
     mainStartingBank = data.startingBank
     mainCharaterId = data.character
-
-    if config.debugMode then
-        for k, v in pairs(data) do
-            print(v)
-        end
-    end
 
     for i = 1, #config.departments do
         validDept = config.departments[i]
@@ -171,13 +159,12 @@ RegisterNUICallback("setMainCharacter", function(data)
     registered = true
 end)
 
+-- This will display the money that the player has.
 RegisterNetEvent("returnMoney")
 AddEventHandler("returnMoney", function(cash, bank)
     while not registered do
-        Citizen.Wait(100)
+        Citizen.Wait(10)
     end
-    cash = cash
-    bank = bank
     SendNUIMessage({
         type = "Money",
         cash = "Cash: $" .. cash,
@@ -185,6 +172,7 @@ AddEventHandler("returnMoney", function(cash, bank)
     })
 end)
 
+-- Teleporting
 RegisterNUICallback("tpToLocation", function(data)
     local ped = PlayerPedId()
     FreezeEntityPosition(ped, false)
@@ -199,6 +187,7 @@ RegisterNUICallback("tpToLocation", function(data)
     TriggerServerEvent("getMoney", mainCharaterId)
 end)
 
+-- Choosing the do not tp button.
 RegisterNUICallback("tpDoNot", function(data)
     local ped = PlayerPedId()
     SwitchInPlayer(ped)
@@ -221,12 +210,12 @@ function SetDisplay(bool, typeName)
     })
 end
 
-if config.enableRichPrecence == true then
+if config.enableRichPrecence then
     Citizen.CreateThread(function()
         while true do
             Citizen.Wait(config.updateIntervall * 1000)
             SetDiscordAppId(config.appId)
-            if registered == true then
+            if registered then
                 SetRichPresence(" Playing : " .. config.serverName .. " as " .. mainFirstName .. " " .. mainLastName)
                 SetDiscordRichPresenceAsset(config.largeLogo)
                 SetDiscordRichPresenceAssetText("Playing: " .. config.serverName)
@@ -239,117 +228,46 @@ if config.enableRichPrecence == true then
     end)
 end
 
--- Shot spotter
-if config.shotSpotterEnabled then
-    local activateShotSpotter = false
-    local alreadyShot = false
-    RegisterNetEvent("shotSpotterReport")
-    AddEventHandler("shotSpotterReport", function(x, y, z, postal)
-        if registered then
-            if mainDepartment == "SAHP" or mainDepartment == "LSPD" or mainDepartment == "BCSO" then
-                activateShotSpotter = true
-                while activateShotSpotter do
-                    Citizen.Wait(0)
-                    blip = AddBlipForCoord(x, y, z)
-                    SetBlipSprite(blip, 161)
-                    SetBlipAsShortRange(blip, true)
-                    BeginTextCommandSetBlipName("STRING")
-                    AddTextComponentString("Shot Spotter")
-                    EndTextCommandSetBlipName(blip)
-                    if not postal then
-                        msg = "~r~Dispatch: ~w~Shotspotter detected in " .. GetStreetNameFromHashKey(GetStreetNameAtCoord(x, y, z)) .. "."
-                    else
-                        msg = "~r~Dispatch: ~w~Shotspotter detected in " .. GetStreetNameFromHashKey(GetStreetNameAtCoord(x, y, z)) .. ", postal: " .. postal .. "."
-                    end
-                    TriggerEvent('chat:addMessage', {
-                        args = {msg}
-                    })
-                    Citizen.Wait(config.shotSpotterTimer * 1000)
-                    activateShotSpotter = false
-                    break
-                end
-                RemoveBlip(blip)
-            end
-        end
-    end)
-    Citizen.CreateThread(function()
-        while true do
-            Citizen.Wait(0)
-            local ped = PlayerPedId()
-            if registered then
-                if mainDepartment == "CIV" then
-                    if IsPedShooting(ped) then
-                        if not alreadyShot then
-                            Citizen.Wait(config.shotSpotterDelay * 1000)
-                            pedCoords = GetEntityCoords(ped)
-                            if config.shotSpotterUsePostal then
-                                postal = exports["nearest_postal123"]:getPostal()
-                            else
-                                postal = false
-                            end
-                            TriggerServerEvent("shotSpotterActive", pedCoords.x, pedCoords.y, pedCoords.z, postal)
-                            if config.debugMode then
-                                print(pedCoords.x, pedCoords.y, pedCoords.z)
-                            end
-                        end
-                        alreadyShot = true
-                        Citizen.Wait(config.shotSpotterCooldown * 1000)
-                        alreadyShot = false
-                    end
-                end
-            end
-        end
-    end)
-end
-
 -- hide gta default cash, ammo and reticle hud.
-if config.hideAmmoAndMoney == true or config.hideReticle == true then
+if config.hideAmmoAndMoney or config.hideReticle then
     Citizen.CreateThread(function()
         while true do
             Citizen.Wait(0)
-            if config.hideAmmoAndMoney == true then
+            if config.hideAmmoAndMoney then
                 HideHudComponentThisFrame(3) -- CASH
                 HideHudComponentThisFrame(4) -- MP_CASH
                 HideHudComponentThisFrame(13) -- CASH_CHANGE
                 HideHudComponentThisFrame(2) -- WEAPON_ICON
             end
-            if config.hideReticle == true then
-                --if IsPlayerFreeAiming(PlayerPedId()) then
-                    HideHudComponentThisFrame(14) -- RETICLE
-                --end
+            if config.hideReticle then
+                HideHudComponentThisFrame(14) -- RETICLE
             end
-            if config.customPauseMenu then
-                if registered then
-                    if IsPauseMenuActive() then
-                        BeginScaleformMovieMethodOnFrontendHeader("SET_HEADING_DETAILS")
-                        AddTextEntry("FE_THDR_GTAO", config.serverName) 
-                        ScaleformMovieMethodAddParamPlayerNameString(mainFirstName .. " " .. mainLastName)
-                        --PushScaleformMovieFunctionParameterString("Cash: $" .. cash)
-                        --PushScaleformMovieFunctionParameterString("Bank: $" .. bank)
-                        EndScaleformMovieMethod()
-                    end
+            if config.customPauseMenu and registered then
+                if IsPauseMenuActive() then
+                    BeginScaleformMovieMethodOnFrontendHeader("SET_HEADING_DETAILS")
+                    AddTextEntry("FE_THDR_GTAO", config.serverName) 
+                    ScaleformMovieMethodAddParamPlayerNameString(mainFirstName .. " " .. mainLastName)
+                    --PushScaleformMovieFunctionParameterString("Cash: $" .. cash)
+                    --PushScaleformMovieFunctionParameterString("Bank: $" .. bank)
+                    EndScaleformMovieMethod()
                 end
             end
         end
     end)
 end
 
+-- Planning on moving everything money related to server side.
 RegisterNetEvent("receiveBank")
 AddEventHandler("receiveBank", function(amount, playerSending, name)
-    if config.debugMode then
-        print("Recived $" .. amount .. " from " .. name .. " [".. playerSending .."]")
-    end
     SetNotificationTextEntry("STRING")
 	AddTextComponentString("Recived $" .. amount .. " from " .. name .. " [".. playerSending .."]")
 	SetNotificationMessage("CHAR_BANK_FLEECA", "CHAR_BANK_FLEECA", true, 9,"FleecaBank", "")
 	TriggerServerEvent("addBank", amount, mainCharaterId)
 end)
 
+-- Planning on moving everything money related to server side.
 RegisterNetEvent("receiveCash")
 AddEventHandler("receiveCash", function(amount, playerSending, name)
-    if config.debugMode then
-        print("Recived $" .. amount .. " from " .. name .. " [".. playerSending .."]")
-    end
 	SetNotificationTextEntry("STRING")
 	AddTextComponentString(name .. " gave you $" .. amount .. ".")
 	SetNotificationMessage("CHAR_DEFAULT", "CHAR_DEFAULT", true, 9, name .. " [".. playerSending .."]", "")
@@ -361,6 +279,7 @@ AddEventHandler("updateMoney", function()
     TriggerServerEvent("getMoney", mainCharaterId)
 end)
 
+-- Salary | Planning on moving everything money related to server side.
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(config.salaryInterval * 60000)
@@ -373,12 +292,14 @@ Citizen.CreateThread(function()
     end
 end)
 
+-- Planning on moving everything money related to server side.
 function sendBank(sendingCharacterId, receiveingPlayerId, amount, sendingPlayerId)
     if registered then
         TriggerServerEvent("bankPay", sendingCharacterId, receiveingPlayerId, amount, sendingPlayerId, mainFirstName .. " " .. mainLastName)
     end
 end
 
+-- Planning on moving everything money related to server side.
 function sendCash(sendingCharacterId, amount, sendingPlayerId)
     if registered then
         target, distance = GetClosestPlayer()
@@ -390,6 +311,7 @@ function sendCash(sendingCharacterId, amount, sendingPlayerId)
     end
 end
 
+-- Notification above the map.
 function notify(message)
 	SetNotificationTextEntry("STRING")
 	AddTextComponentString(message)
@@ -429,26 +351,25 @@ function GetPlayers()
     return players
 end
 
-function getCharacterInfo(int)
+function getCharacterInfo(infoType)
     if registered then
-        if int == 1 then
-            return mainFirstName
-        elseif int == 2 then
-            return mainLastName
-        elseif int == 3 then
-            return mainDateOfBirth
-        elseif int == 4 then
-            return mainGender
-        elseif int == 5 then
-            return mainTwtName
-        elseif int == 6 then
-            return mainDepartment
-        elseif int == 7 then
-            return mainStartingCash
-        elseif int == 8 then
-            return mainStartingBank
-        elseif int == 9 then
-            return mainCharaterId
+        mainCharacter = {
+            [1] = mainFirstName,
+            [2] = mainLastName,
+            [3] = mainDateOfBirth,
+            [4] = mainGender,
+            [5] = mainTwtName,
+            [6] = mainDepartment,
+            [7] = mainStartingCash,
+            [8] = mainStartingBank,
+            [9] = mainCharaterId
+        }
+        for k, v in pairs(mainCharacter) do
+            if k == infoType then
+                return v
+            end
         end
+    else
+        return "Error: Player not registered"
     end
 end
