@@ -16,7 +16,7 @@ if config.enableAopCommand then
         TriggerServerEvent("getAop")
     end, false)
     RegisterCommand(config.aopCommand, function(source, args, raw)
-        if admin == true then
+        if admin then
             TriggerServerEvent("registerAop", string.gsub(raw, config.aopCommand .. " ", ""))
         else
             TriggerEvent("chat:addMessage", {
