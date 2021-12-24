@@ -85,7 +85,7 @@ $(function() {
     window.addEventListener('message', function(event) {
         const item = event.data;
         if (item.type === "ui") {
-            if (item.status == true) {
+            if (item.status) {
                 $('#serverName').text(item.serverName);
                 $("body").css("background-image", "url(" + item.background + ")");
                 display(true)
@@ -151,22 +151,6 @@ $(function() {
         })
     }
 
-    /*
-    function tp(x, y, z, name) {
-        $.post("https://ND_Core/tpToLocation", JSON.stringify({
-            x: x,
-            y: y,
-            z: z,
-            name: name
-        }));
-        spawnMenu(false)
-        setTimeout(function(){
-            $("#spawnMenuContainer").empty();
-        }, 550);
-        return
-    }
-    */
-
     function createSpawnButtons(x, y, z, name) {
         $("#spawnMenuContainer").empty();
         setTimeout(function(){
@@ -198,8 +182,6 @@ $(function() {
             gender: $("#newGender").val(),
             twtName: $("#newTwtName").val(),
             department: $("#newDepartment").val(),
-            //startingCash: $("#newStartingCash").val(),
-            //startingBank: $("#newStartingBank").val(),
             id: characterEdited
         }));
         $("#characterButton" + characterEdited).text($("#newFirstName").val() + " " + $("#newLastName").val() + " (" + $("#newDepartment").val() + ")");
