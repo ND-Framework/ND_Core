@@ -32,8 +32,7 @@ PerformHttpRequest("https://raw.githubusercontent.com/Andyyy7666/ND_Framework/ma
             print("^1[^4" .. expectedName .. "^1] WARNING^0")
             print("^4" .. expectedName .. "s ^0version number is higher than we expected. | Current Version: ^3" .. verFile .. " ^0| Expected Version: ^2" .. resp .. " ^0|")
         else
-            print("^1[^4" .. expectedName .. "^1] WARNING^0")
-            print("^4" .. expectedName .. " ^0is up to date | Current Versin: ^2" .. verFile .. " ^0|")
+            print("^4" .. expectedName .. " ^0is up to date | Current Version: ^2" .. verFile .. " ^0|")
         end
     else
         print("^1[^4" .. expectedName .. "^1] WARNING^0")
