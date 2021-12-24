@@ -31,7 +31,7 @@ client_scripts {
 }
 
 exports {
-    "getCharacterInfo", -- getCharacterInfo(int), 1 will return return FirstName, 2 LastName, 3 DateOfBirth, 4 Gender, 5 TwtName, 6 Department, 7 Cash, 8 Bank. 9 will return their character id.
+    "getCharacterInfo", -- getCharacterInfo(infoType), 1 will return return FirstName, 2 LastName, 3 DateOfBirth, 4 Gender, 5 TwtName, 6 Department, 7 Cash, 8 Bank. 9 will return their character id.
     "sendBank", -- sendBank(sendingCharacterId, receiveingPlayerId, amount, sendingPlayerId)
     "sendCash" -- sendCash(sendingCharacterId, amount, sendingPlayerId)
 }
