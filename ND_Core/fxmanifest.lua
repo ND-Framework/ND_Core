@@ -6,13 +6,13 @@
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 
-fx_version "cerulean"
-game "gta5"
-lua54 "yes"
-
 author "Andyyy#7666"
 description "ND Framework Core"
 version "1.0"
+
+fx_version "cerulean"
+game "gta5"
+lua54 "yes"
 
 files {
 	"source/ui/index.html",
