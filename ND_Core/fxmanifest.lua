@@ -18,6 +18,7 @@ files {
 
 ui_page "source/ui/index.html"
 
+shared_script "config_client.lua"
 server_scripts {
     "config_server.lua",
     "source/server/discord.lua",
@@ -25,7 +26,6 @@ server_scripts {
     "source/server/commands.lua"
 }
 client_scripts {
-    "config_client.lua",
     "source/client/main.lua",
     "source/client/commands.lua"
 }
