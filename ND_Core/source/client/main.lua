@@ -354,21 +354,17 @@ end
 function getCharacterInfo(infoType)
     if registered then
         mainCharacter = {
-            [1] = mainFirstName,
-            [2] = mainLastName,
-            [3] = mainDateOfBirth,
-            [4] = mainGender,
-            [5] = mainTwtName,
-            [6] = mainDepartment,
-            [7] = mainStartingCash,
-            [8] = mainStartingBank,
-            [9] = mainCharaterId
+            mainFirstName,
+            mainLastName,
+            mainDateOfBirth,
+            mainGender,
+            mainTwtName,
+            mainDepartment,
+            mainStartingCash,
+            mainStartingBank,
+            mainCharaterId
         }
-        for k, v in pairs(mainCharacter) do
-            if k == infoType then
-                return v
-            end
-        end
+        return mainCharacter[infoType]
     else
         return "Error: Player not registered"
     end
