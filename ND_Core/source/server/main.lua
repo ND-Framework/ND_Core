@@ -93,17 +93,21 @@ RegisterNetEvent("newCharacter")
 AddEventHandler("newCharacter", function(newCharacter)
     local player = source
     local license = GetPlayerIdentifierFromType("license", player)
-    exports.oxmysql:execute("SELECT MAX(character_id) AS nextID FROM characters WHERE license = ?", {license}, function(result)
-        if result then
-            character_id = result[1].nextID
-            if not character_id then
-                character_id = 1
-            else
-                character_id = character_id + 1
-            end
-            exports.oxmysql:execute("INSERT INTO characters (license, character_id, first_name, last_name, dob, gender, twt, department, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, character_id, newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, newCharacter.startingCash, newCharacter.startingBank}, function(id)
-                if id then
-                    TriggerClientEvent("returnNewCharacter", player, id, newCharacter)
+    exports.oxmysql:execute("SELECT character_id FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
+        if (result) and (config.characterLimit > #result) then
+            exports.oxmysql:execute("SELECT MAX(character_id) AS nextID FROM characters WHERE license = ?", {license}, function(result)
+                if result then
+                    character_id = result[1].nextID
+                    if not character_id then
+                        character_id = 1
+                    else
+                        character_id = character_id + 1
+                    end
+                    exports.oxmysql:execute("INSERT INTO characters (license, character_id, first_name, last_name, dob, gender, twt, department, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, character_id, newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, newCharacter.startingCash, newCharacter.startingBank}, function(id)
+                        if id then
+                            TriggerClientEvent("returnNewCharacter", player, id, newCharacter)
+                        end
+                    end)
                 end
             end)
         end
