@@ -63,8 +63,8 @@ Citizen.CreateThread(function()
 	local guild = DiscordRequest("GET", "guilds/"..config.GuildId, {})
 	if guild.code == 200 then
 		local data = json.decode(guild.data)
-		print("Permission system guild set to: "..data.name.." ("..data.id..")")
+		print("[source/server/discord.lua] Permission system guild set to: "..data.name.." ("..data.id..")")
 	else
-		print("An error occured, please check your config and ensure everything is correct. Error: "..(guild.data or guild.code)) 
+		print("[source/server/discord.lua] An error occured, please check your config and ensure everything is correct. Error: "..(guild.data or guild.code)) 
 	end
 end)
