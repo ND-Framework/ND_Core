@@ -1,10 +1,4 @@
-------------------------------------------------------------------------
-------------------------------------------------------------------------
---			DO NOT EDIT IF YOU DON'T KNOW WHAT YOU'RE DOING			  --
---     							 									  --
---	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
-------------------------------------------------------------------------
-------------------------------------------------------------------------
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 author "Andyyy#7666"
 description "ND Framework Core"
@@ -24,14 +18,14 @@ files {
 
 ui_page "source/ui/index.html"
 
-shared_script "config.lua"
-
 server_scripts {
+    "config_server.lua",
     "source/server/discord.lua",
     "source/server/main.lua",
     "source/server/commands.lua"
 }
 client_scripts {
+    "config_client.lua",
     "source/client/main.lua",
     "source/client/commands.lua"
 }
