@@ -10,8 +10,13 @@ local aop = "Unknown" -- aop unknown if it's not set.
 -- Aop command events
 RegisterNetEvent("registerAop")
 AddEventHandler("registerAop", function(aopRegistered)
-    aop = aopRegistered
-    TriggerClientEvent("setAop", -1, aop)
+    local player = source
+    if IsRolePresent(player, "ADMIN") then
+        aop = aopRegistered
+        TriggerClientEvent("setAop", -1, aop)
+    else
+        DropPlayer(player, "Tried to use a mod menu to change the aop.")
+    end
 end)
 RegisterNetEvent("getAop")
 AddEventHandler("getAop", function()
