@@ -5,37 +5,33 @@
 --	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
+local aop = "Unknown" -- aop unknown if it's not set.
 
--- Aop command
-if config.enableAopCommand then
-    RegisterNetEvent("registerAop")
-    AddEventHandler("registerAop", function(aopRegistered)
-        aop = aopRegistered
-        TriggerClientEvent("setAop", -1, aop)
-    end)
-    RegisterNetEvent("getAop")
-    AddEventHandler("getAop", function()
-        local player = source
-        if aop == nil then
-            aop = config.defaultAop
-        end
-        TriggerClientEvent("returnAop", player, aop)
-    end)
-end
+-- Aop command events
+RegisterNetEvent("registerAop")
+AddEventHandler("registerAop", function(aopRegistered)
+    aop = aopRegistered
+    TriggerClientEvent("setAop", -1, aop)
+end)
+RegisterNetEvent("getAop")
+AddEventHandler("getAop", function()
+    local player = source
+    TriggerClientEvent("returnAop", player, aop)
+end)
 
--- Twotter command
+-- Twotter command event
 RegisterNetEvent("twt")
 AddEventHandler("twt", function(id, twtName, twt)
     TriggerClientEvent("twt", -1, id, twtName, twt)
 end)
 
--- Me command
+-- Me command event
 RegisterNetEvent("me")
 AddEventHandler("me", function(id, name, msg, coords)
     TriggerClientEvent("me", -1, id, name, msg, coords)
 end)
 
--- OOC command
+-- OOC command event
 RegisterCommand("ooc", function(source, args, rawCommand)
     TriggerClientEvent("chat:addMessage", -1, {
         color = {150, 150, 150},
@@ -43,7 +39,7 @@ RegisterCommand("ooc", function(source, args, rawCommand)
     })
 end, false)
 
--- Darkweb command
+-- Darkweb command event
 RegisterCommand("darkweb", function(source, args, rawCommand)
     TriggerClientEvent("chat:addMessage", -1, {
         color = {0, 0, 0},
