@@ -8,9 +8,10 @@ This is a dojrp inspired framework, with a money system and extra features.
 You can find most free addons in the ND_Framework repository and you can find more paid ones on [tebex](https://andyyy.tebex.io/category/fivem-scripts?currency=USD).
 
 # How to install:
-* Download the [Dependency (OxMySQL)](https://forum.cfx.re/t/standalone-oxmysql-lightweight-mysql-wrapper/4755120?u=andyyy7666) and set it up.
+* Make sure your [server build](https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/) is on 5104 or higher
+* Download the latest [OxMySQL](https://github.com/overextended/oxmysql/releases) release
 * Import the query.sql file
-* Configure it to your liking in Config.lua
+* Write ´start oxmysql´ and ´ND_Core´ in your server.cfg
   
 # Features:
 * Money system
