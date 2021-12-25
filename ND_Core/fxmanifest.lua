@@ -20,8 +20,8 @@ ui_page "source/ui/index.html"
 
 shared_script "config_client.lua"
 server_scripts {
-    "source/server/discord.lua",
     "config_server.lua",
+    "source/server/discord.lua",
     "source/server/main.lua",
     "source/server/commands.lua"
 }
