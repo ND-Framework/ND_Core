@@ -76,7 +76,7 @@ end)
 RegisterNetEvent("getCharacters")
 AddEventHandler("getCharacters", function()
     local player = source
-    exports.oxmysql:execute("SELECT * FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
+    exports.oxmysql:query("SELECT * FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
         if result then
             characters = {}
             for i = 1, #result do
@@ -93,9 +93,9 @@ RegisterNetEvent("newCharacter")
 AddEventHandler("newCharacter", function(newCharacter)
     local player = source
     local license = GetPlayerIdentifierFromType("license", player)
-    exports.oxmysql:execute("SELECT character_id FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
+    exports.oxmysql:query("SELECT character_id FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
         if (result) and (config.characterLimit > #result) then
-            exports.oxmysql:execute("SELECT MAX(character_id) AS nextID FROM characters WHERE license = ?", {license}, function(result)
+            exports.oxmysql:query("SELECT MAX(character_id) AS nextID FROM characters WHERE license = ?", {license}, function(result)
                 if result then
                     character_id = result[1].nextID
                     if not character_id then
@@ -103,7 +103,7 @@ AddEventHandler("newCharacter", function(newCharacter)
                     else
                         character_id = character_id + 1
                     end
-                    exports.oxmysql:execute("INSERT INTO characters (license, character_id, first_name, last_name, dob, gender, twt, department, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, character_id, newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, newCharacter.startingCash, newCharacter.startingBank}, function(id)
+                    exports.oxmysql:query("INSERT INTO characters (license, character_id, first_name, last_name, dob, gender, twt, department, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, character_id, newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, newCharacter.startingCash, newCharacter.startingBank}, function(id)
                         if id then
                             TriggerClientEvent("returnNewCharacter", player, id, newCharacter)
                         end
@@ -118,41 +118,41 @@ end)
 RegisterNetEvent("delCharacter")
 AddEventHandler("delCharacter", function(character_id)
     local player = source
-    exports.oxmysql:execute("DELETE FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), character_id})
+    exports.oxmysql:query("DELETE FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), character_id})
 end)
 
 -- Update the character info when edited.
 RegisterNetEvent("editCharacter")
 AddEventHandler("editCharacter", function(newCharacter)
     local player = source
-    exports.oxmysql:execute("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, department = ? WHERE license = ? AND character_id = ?", {newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, GetPlayerIdentifierFromType("license", player), newCharacter.id})
+    exports.oxmysql:query("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, department = ? WHERE license = ? AND character_id = ?", {newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, GetPlayerIdentifierFromType("license", player), newCharacter.id})
 end)
 
 -- Planning on moving everything money related to server.
 RegisterNetEvent("bankPay")
 AddEventHandler("bankPay", function(characterid, playerid, amount, playerSending, name)
     local player = source
-    exports.oxmysql:execute("UPDATE characters SET bank = bank - ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), characterid})
+    exports.oxmysql:query("UPDATE characters SET bank = bank - ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), characterid})
     TriggerClientEvent("receiveBank", playerid, amount, playerSending, name)
     TriggerClientEvent("updateMoney", player)
 end)
 RegisterNetEvent("addBank")
 AddEventHandler("addBank", function(amount, characterid)
     local player = source
-    exports.oxmysql:execute("UPDATE characters SET bank = bank + ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), characterid})
+    exports.oxmysql:query("UPDATE characters SET bank = bank + ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), characterid})
     TriggerClientEvent("updateMoney", player)
 end)
 RegisterNetEvent("cashPay")
 AddEventHandler("cashPay", function(characterid, playerid, amount, playerSending, name)
     local player = source
-    exports.oxmysql:execute("UPDATE characters SET cash = cash - ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), characterid})
+    exports.oxmysql:query("UPDATE characters SET cash = cash - ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), characterid})
     TriggerClientEvent("receiveCash", playerid, amount, playerSending, name)
     TriggerClientEvent("updateMoney", player)
 end)
 RegisterNetEvent("addCash")
 AddEventHandler("addCash", function(amount, characterid)
     local player = source
-    exports.oxmysql:execute("UPDATE characters SET cash = cash + ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), characterid})
+    exports.oxmysql:query("UPDATE characters SET cash = cash + ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), characterid})
     TriggerClientEvent("updateMoney", player)
 end)
 
@@ -160,7 +160,7 @@ end)
 RegisterNetEvent("getMoney")
 AddEventHandler("getMoney", function(characterid)
     local player = source
-    exports.oxmysql:execute("SELECT cash, bank FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), characterid}, function(result)
+    exports.oxmysql:query("SELECT cash, bank FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), characterid}, function(result)
         if result then
             for i = 1, #result do
                 cash = result[i].cash
