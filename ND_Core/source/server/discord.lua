@@ -1,5 +1,5 @@
 -- This is a edited version of discord-roles, original discord-roles resource: https://forum.cfx.re/t/discord-roles-for-permissions-im-creative-i-know/233805?u=andyyy7666
-local FormattedToken = "Bot "..config.DiscordToken
+local FormattedToken = "Bot " .. server_config.DiscordToken
 
 function DiscordRequest(method, endpoint, jsondata)
     local data = nil
@@ -28,14 +28,14 @@ function IsRolePresent(user, role)
 	if type(role) == "number" then
 		theRole = tostring(role)
 	else
-		theRole = config.roles[role]
+		theRole = server_config.roles[role]
 	end
 
     if theRole == "0" then
-        --print("Role Given (0 in config)")
+        --print("Role Given (0 in server_config)")
         return true
     elseif discordId then
-		local endpoint = ("guilds/%s/members/%s"):format(config.GuildId, discordId)
+		local endpoint = ("guilds/%s/members/%s"):format(server_config.GuildId, discordId)
 		local member = DiscordRequest("GET", endpoint, {})
 		if member.code == 200 then
 			local data = json.decode(member.data)
@@ -60,11 +60,11 @@ function IsRolePresent(user, role)
 end
 
 Citizen.CreateThread(function()
-	local guild = DiscordRequest("GET", "guilds/"..config.GuildId, {})
+	local guild = DiscordRequest("GET", "guilds/" .. server_config.GuildId, {})
 	if guild.code == 200 then
 		local data = json.decode(guild.data)
 		print("[source/server/discord.lua] Permission system guild set to: "..data.name.." ("..data.id..")")
 	else
-		print("[source/server/discord.lua] An error occured, please check your config and ensure everything is correct. Error: "..(guild.data or guild.code)) 
+		print("[source/server/discord.lua] An error occured, please check your server_config and ensure everything is correct (You might not have a valid token). Error: "..(guild.data or guild.code)) 
 	end
 end)
