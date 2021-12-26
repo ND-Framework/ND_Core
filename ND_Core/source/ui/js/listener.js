@@ -2,9 +2,11 @@ $(function() {
     // Hide/show ui function
     function display(bool) {
         if (bool) {
+            displayOn = true
             $("body").show();
             Money(false)
         } else {
+            displayOn = false
             $("body").hide();
         }
     }
@@ -68,7 +70,9 @@ $(function() {
             $("#money").show();
             $("body").css("background-image", "none");
             $("body").show();
-            $("#overlay").hide();
+            if (displayOn === false) {
+                $("#overlay").hide();
+            }
         } else {
             $("#money").hide();
             $("#overlay").show();
