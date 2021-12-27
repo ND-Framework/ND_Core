@@ -71,7 +71,7 @@ end)
 
 -- Me command
 RegisterCommand("me", function(source, args, rawCommand)
-    TriggerServerEvent("me", GetPlayerServerId(PlayerId()), mainFirstName .. " " .. mainLastName, string.gsub(rawCommand, "twt", ""), GetEntityCoords(PlayerPedId()))
+    TriggerServerEvent("me", GetPlayerServerId(PlayerId()), mainFirstName .. " " .. mainLastName, string.gsub(rawCommand, "me", ""), GetEntityCoords(PlayerPedId()))
 end, false)
 RegisterNetEvent("me")
 AddEventHandler("me", function(id, name, msg, coords)
