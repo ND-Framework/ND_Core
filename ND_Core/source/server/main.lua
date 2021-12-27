@@ -157,15 +157,13 @@ AddEventHandler("addCash", function(amount, characterid)
 end)
 
 -- This is used to find out how much money the player has and use it in the client to show it on the ui.
-RegisterNetEvent("getMoney")
-AddEventHandler("getMoney", function(characterid)
+RegisterNetEvent("updateMoney")
+AddEventHandler("updateMoney", function(characterid)
     local player = source
     exports.oxmysql:query("SELECT cash, bank FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), characterid}, function(result)
         if result then
-            for i = 1, #result do
-                cash = result[i].cash
-                bank = result[i].bank
-            end
+            cash = result[1].cash
+            bank = result[1].bank
             TriggerClientEvent("returnMoney", player, cash, bank)
         end
     end)
