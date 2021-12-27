@@ -31,7 +31,8 @@ if config.enableAopCommand then
             aop = "Current AOP: " .. aop
         })
         TriggerEvent("chat:addMessage", {
-            args = {"~b~Aop has been changed to: " .. aop}
+            color = {0, 150, 250},
+            args = {"Aop has been changed to", aop}
         })
     end)
     RegisterNetEvent("returnAop")
@@ -41,7 +42,8 @@ if config.enableAopCommand then
             aop = "Current AOP: " .. aop
         })
         TriggerEvent("chat:addMessage", {
-            args = {"~b~The current AOP is: " .. aop}
+            color = {0, 150, 250},
+            args = {"The current AOP is", aop}
         })
     end)
 end
