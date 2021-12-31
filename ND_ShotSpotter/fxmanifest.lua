@@ -2,7 +2,7 @@
 
 author "Andyyy#7666"
 description "Shot Spotter Script (ND Framework)"
-version "1.0"
+version "1.1"
 
 fx_version "cerulean"
 game "gta5"
