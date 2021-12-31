@@ -9,6 +9,8 @@
 local started = true
 registered = false
 admin = false
+cash = nil
+bank = nil
 
 -- This is used to add department drop down on the ui.
 RegisterNetEvent("permsChecked")
@@ -42,6 +44,11 @@ Citizen.CreateThread(function()
             FreezeEntityPosition(ped, true)
             SetEntityVisible(ped, false, 0)
             started = false
+            SendNUIMessage({
+                type = "onStart",
+                maxStartingBank = config.maxStartingBank,
+                maxStartingCash = config.maxStartingCash
+            })
         end
     end
 end)
@@ -156,15 +163,18 @@ RegisterNUICallback("setMainCharacter", function(data)
         end
     end
 
+    TriggerServerEvent("characterOnline", mainCharaterId)
     registered = true
 end)
 
 -- This will display the money that the player has.
 RegisterNetEvent("returnMoney")
-AddEventHandler("returnMoney", function(cash, bank)
+AddEventHandler("returnMoney", function(newCash, newBank)
     while not registered do
         Citizen.Wait(10)
     end
+    cash = newCash
+    bank = newBank
     SendNUIMessage({
         type = "Money",
         cash = "Cash: $" .. cash,
@@ -256,99 +266,44 @@ if config.hideAmmoAndMoney or config.hideReticle then
     end)
 end
 
--- Planning on moving everything money related to server side.
-RegisterNetEvent("receiveBank")
-AddEventHandler("receiveBank", function(amount, playerSending, name)
-    SetNotificationTextEntry("STRING")
-	AddTextComponentString("Recived $" .. amount .. " from " .. name .. " [".. playerSending .."]")
-	SetNotificationMessage("CHAR_BANK_FLEECA", "CHAR_BANK_FLEECA", true, 9,"FleecaBank", "")
-	TriggerServerEvent("addBank", amount, mainCharaterId)
-end)
-
--- Planning on moving everything money related to server side.
-RegisterNetEvent("receiveCash")
-AddEventHandler("receiveCash", function(amount, playerSending, name)
-	SetNotificationTextEntry("STRING")
-	AddTextComponentString(name .. " gave you $" .. amount .. ".")
-	SetNotificationMessage("CHAR_DEFAULT", "CHAR_DEFAULT", true, 9, name .. " [".. playerSending .."]", "")
-    TriggerServerEvent("addCash", amount, mainCharaterId)
-end)
-
+-- This is to update the players money on the ui.
 RegisterNetEvent("updateMoney")
 AddEventHandler("updateMoney", function()
     TriggerServerEvent("getMoney", mainCharaterId)
 end)
 
--- Salary | Planning on moving everything money related to server side.
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(config.salaryInterval * 60000)
-        if registered then
-            TriggerServerEvent("addBank", config.salaryAmount, mainCharaterId)
-            SetNotificationTextEntry("STRING")
-            AddTextComponentString("Daily Salary + $" .. config.salaryAmount)
-            SetNotificationMessage("CHAR_BANK_FLEECA", "CHAR_BANK_FLEECA", true, 9,"FleecaBank", "")
-        end
+-- Notification when you recieve money.
+RegisterNetEvent("receiveBank")
+AddEventHandler("receiveBank", function(amount, playerSending, playerId)
+    BeginTextCommandThefeedPost("STRING")
+	AddTextComponentSubstringPlayerName("Received $" .. amount .. " from " .. playerSending .. " [".. playerId .."]")
+	EndTextCommandThefeedPostMessagetext("CHAR_BANK_FLEECA", "CHAR_BANK_FLEECA", true, 9,"FleecaBank", "")
+end)
+
+-- Notification when you receive cash.
+RegisterNetEvent("receiveCash")
+AddEventHandler("receiveCash", function(amount, playerSending, playerId)
+	BeginTextCommandThefeedPost("STRING")
+	AddTextComponentSubstringPlayerName(playerSending .. " gave you $" .. amount .. ".")
+	EndTextCommandThefeedPostMessagetext("CHAR_DEFAULT", "CHAR_DEFAULT", true, 9, playerSending .. " [".. playerId .."]", "")
+end)
+
+-- Notification when receiving salary.
+RegisterNetEvent("receiveSalary")
+AddEventHandler("receiveSalary", function(amount)
+    if registered then
+        BeginTextCommandThefeedPost("STRING")
+        AddTextComponentSubstringPlayerName("Daily Salary + $" .. config.salaryAmount)
+        EndTextCommandThefeedPostMessagetext("CHAR_BANK_FLEECA", "CHAR_BANK_FLEECA", true, 9,"FleecaBank", "")
+        TriggerServerEvent("getMoney", mainCharaterId)
     end
 end)
 
--- Planning on moving everything money related to server side.
-function sendBank(sendingCharacterId, receiveingPlayerId, amount, sendingPlayerId)
-    if registered then
-        TriggerServerEvent("bankPay", sendingCharacterId, receiveingPlayerId, amount, sendingPlayerId, mainFirstName .. " " .. mainLastName)
-    end
-end
-
--- Planning on moving everything money related to server side.
-function sendCash(sendingCharacterId, amount, sendingPlayerId)
-    if registered then
-        target, distance = GetClosestPlayer()
-        if (distance ~= -1 and distance < 3) then
-            TriggerServerEvent("cashPay", sendingCharacterId, GetPlayerServerId(target), amount, sendingPlayerId, mainFirstName .. " " .. mainLastName)
-        else
-            notify("No players nearby")
-        end
-    end
-end
-
 -- Notification above the map.
 function notify(message)
-	SetNotificationTextEntry("STRING")
-	AddTextComponentString(message)
-	DrawNotification(0,1)
-end
-
-function GetClosestPlayer()
-    local players = GetPlayers()
-    local closestDistance = -1
-    local closestPlayer = -1
-    local ply = GetPlayerPed(-1)
-    local plyCoords = GetEntityCoords(ply, 0)
-
-    for index,value in ipairs(players) do
-        local target = GetPlayerPed(value)
-        if(target ~= ply) then
-            local targetCoords = GetEntityCoords(GetPlayerPed(value), 0)
-            local distance = GetDistanceBetweenCoords(targetCoords["x"], targetCoords["y"], targetCoords["z"], plyCoords["x"], plyCoords["y"], plyCoords["z"], true)
-            if(closestDistance == -1 or closestDistance > distance) then
-                closestPlayer = value
-                closestDistance = distance
-            end
-        end
-    end
-    return closestPlayer, closestDistance
-end
-
-function GetPlayers()
-    local players = {}
-
-    for i = 0, 255 do
-        if NetworkIsPlayerActive(i) then
-            table.insert(players, i)
-        end
-    end
-
-    return players
+	BeginTextCommandThefeedPost("STRING")
+	AddTextComponentSubstringPlayerName(message)
+	EndTextCommandThefeedPostTicker(0,1)
 end
 
 function getCharacterInfo(infoType)
@@ -360,8 +315,8 @@ function getCharacterInfo(infoType)
             mainGender,
             mainTwtName,
             mainDepartment,
-            mainStartingCash,
-            mainStartingBank,
+            cash,
+            bank,
             mainCharaterId
         }
         return mainCharacter[infoType]
