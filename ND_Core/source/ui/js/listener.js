@@ -1,4 +1,6 @@
 $(function() {
+    let displayOn = true
+
     // Hide/show ui function
     function display(bool) {
         if (bool) {
@@ -123,6 +125,19 @@ $(function() {
             Money(true)
             $("#cash").text(item.cash);
             $("#bank").text(item.bank);
+        }
+
+        if (item.type === "onStart") {
+            $("#characterInfoContainer").append('<label class="fourthRowText" style="margin-right: 18.2vw;" for="startingcash">Cash</label>');
+            $("#characterInfoContainer").append('<label class="fourthRowText" style="margin-right: 18.2vw;" for="startingbank">Bank</label>');
+            $("#characterInfoContainer").append('<input id="startingCash" class="fourthRowInput" style="margin-right: 4.2vw;" type="number" pattern="[0-9]+" placeholder="$2500" name="startingcash" required>');
+            $("#characterInfoContainer").append('<input id="startingBank" class="fourthRowInput" style="margin-right: 4.2vw;" type="number" pattern="[0-9]+" placeholder="$8000" name="startingbank" required>');
+            $("#startingBank").attr({
+                "max": item.maxStartingBank,
+            });
+            $("#startingCash").attr({
+                "max": item.maxStartingCash,
+            });
         }
     })
 
