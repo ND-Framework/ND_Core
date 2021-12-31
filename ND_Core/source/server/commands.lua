@@ -6,6 +6,7 @@
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
 local aop = "Unknown" -- aop unknown if it's not set.
+playerBank = nil
 
 -- Aop command events
 RegisterNetEvent("registerAop")
