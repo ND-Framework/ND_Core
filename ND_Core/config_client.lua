@@ -7,8 +7,7 @@
 ------------------------------------------------------------------------
 
 config = {
-    -- Server name to display on the ui.
-    serverName = "Andy's Development",
+    serverName = "Andy's Development", -- Server name to display on the ui.
     characterLimit = 15,
     changeCharacterCommand = "changecharacter", -- this is the command to open the ui again and change your character.
 
@@ -61,12 +60,16 @@ config = {
     },
 
     -- Money related
+    maxStartingCash = 2500,
+    maxStartingBank = 8000,
+
     payCommand = "pay", -- Command to transfer someone money from bank account.
     giveCommand = "give", -- Command to give someone close money from wallet.
     
     salaryAmount = 300, -- the daily amount that players will receive.
     salaryInterval = 24, -- every x minutes the player will receive the salaryAmount.
 
+    -- Area of Play
     enableAopCommand = true,
     aopCommand = "setaop",
     checkAopCommand = "aop",
@@ -86,5 +89,5 @@ config = {
     firstButtonName = "DISCORD",
     firstButtonLink = "https://discord.gg/Z9Mxu72zZ6",
     secondButtonName = "TEBEX",
-    secondButtonLink = "https://andyyy.tebex.io/category/fivem-scripts",
+    secondButtonLink = "https://andyyy.tebex.io/category/fivem-scripts"
 }
