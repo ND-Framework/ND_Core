@@ -55,13 +55,16 @@ $(function() {
     confirmationScreen(false)
     successScreen(false)
 
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const d = new Date();
+
     window.addEventListener("message", function(event) {
         const item = event.data;
         if (item.status) {
             display(true)
             $("#playername").text(item.playerName)
             $("#balance").text(item.balance)
-            $("#date").text(item.date)
+            $("#date").text(item.date + ", " + months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear())
             $("#time").text(item.time)
         } else {
             display(false)
