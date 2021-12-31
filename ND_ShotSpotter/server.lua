@@ -35,6 +35,14 @@ PerformHttpRequest("https://raw.githubusercontent.com/Andyyy7666/ND_Framework/ma
 end)
 
 RegisterNetEvent("ND:shotSpotterActive")
-AddEventHandler("ND:shotSpotterActive", function(x, y, z, postal)
-    TriggerClientEvent("ND:shotSpotterReport", -1, x, y, z, postal)
+AddEventHandler("ND:shotSpotterActive", function(pedCoords, postal)
+    TriggerClientEvent("ND:shotSpotterReport", -1, pedCoords, postal)
+end)
+
+RegisterNetEvent("ND:getDept")
+AddEventHandler("ND:getDept", function()
+    local players = exports["ND_Core"]:getCharacterTable()
+    for k, v in pairs(players) do
+        TriggerClientEvent("ND:returnDept", k, players[k].dept)
+    end
 end)
