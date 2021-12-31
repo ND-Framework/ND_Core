@@ -48,14 +48,6 @@ if config.enableAopCommand then
     end)
 end
 
--- Money commands
-RegisterCommand(config.payCommand, function(source, args, raw)
-    sendBank(mainCharaterId, args[1], args[2], GetPlayerServerId(PlayerId()))
-end)
-RegisterCommand(config.giveCommand, function(source, args, raw)
-    sendCash(mainCharaterId, args[1], GetPlayerServerId(PlayerId()))
-end)
-
 -- Twotter command
 RegisterCommand("twt", function(source, args, rawCommand)
     TriggerServerEvent("twt", GetPlayerServerId(PlayerId()), mainTwtName, string.gsub(rawCommand, "twt", ""))
