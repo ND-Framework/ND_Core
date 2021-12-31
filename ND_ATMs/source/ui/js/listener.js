@@ -55,8 +55,8 @@ $(function() {
     confirmationScreen(false)
     successScreen(false)
 
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const d = new Date();
+    const options = {year: 'numeric', month: 'long', day: 'numeric'};
+    const today = new Date();
 
     window.addEventListener("message", function(event) {
         const item = event.data;
@@ -64,7 +64,7 @@ $(function() {
             display(true)
             $("#playername").text(item.playerName)
             $("#balance").text(item.balance)
-            $("#date").text(item.date + ", " + months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear())
+            $("#date").text(`${item.date}, ${today.toLocaleDateString("en-US", options)}`)
             $("#time").text(item.time)
         } else {
             display(false)
