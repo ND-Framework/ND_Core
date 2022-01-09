@@ -105,7 +105,16 @@ AddEventHandler("newCharacter", function(newCharacter)
                     end
                     exports.oxmysql:query("INSERT INTO characters (license, character_id, first_name, last_name, dob, gender, twt, department, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, character_id, newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, newCharacter.startingCash, newCharacter.startingBank}, function(id)
                         if id then
-                            TriggerClientEvent("returnNewCharacter", player, id, newCharacter)
+                            exports.oxmysql:query("SELECT * FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
+                                if result then
+                                    characters = {}
+                                    for i = 1, #result do
+                                        temp = result[i]
+                                        table.insert(characters, {id = temp.character_id, firstName = temp.first_name, lastName = temp.last_name, dob = temp.dob, gender = temp.gender, twt = temp.twt, department = temp.department, cash = temp.cash, bank = temp.bank})
+                                    end
+                                    TriggerClientEvent("returnCharacters", player, characters)
+                                end
+                            end)
                         end
                     end)
                 end
