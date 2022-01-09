@@ -69,6 +69,8 @@ config = {
     salaryAmount = 300, -- the daily amount that players will receive.
     salaryInterval = 24, -- every x minutes the player will receive the salaryAmount.
 
+    legacyMoneyDisplay = true, -- set to tru if you want to use the standalone money system hud.
+
     -- Area of Play
     enableAopCommand = true,
     aopCommand = "setaop",
