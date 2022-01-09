@@ -139,6 +139,10 @@ $(function() {
                 "max": item.maxStartingCash,
             });
         }
+
+        if (item.type === "refresh") {
+            $("#charactersSection").empty();
+        }
     })
 
     function createCharacter(firstName, lastName, dateOfBirth, gender, twtName, department, startingCash, startingBank, id) {
@@ -189,6 +193,7 @@ $(function() {
             startingBank: $("#startingBank").val()
         }));
         characterCreatorMenu(false)
+        $("#firstName, #lastName, #dateOfBirth, #twtName, #startingCash, #startingBank").val("")
         return false
     })
 
