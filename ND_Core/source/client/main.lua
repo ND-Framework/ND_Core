@@ -5,7 +5,7 @@
 --	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
-
+local background = config.backgrounds[math.random(1, #config.backgrounds)]
 local started = true
 registered = false
 admin = false
@@ -59,6 +59,9 @@ end)
 
 RegisterNetEvent("returnCharacters")
 AddEventHandler("returnCharacters", function(characters)
+    SendNUIMessage({
+        type = "refresh"
+    })
     for i = 1, #characters do
         index = characters[i]
         SendNUIMessage({
@@ -75,7 +78,7 @@ AddEventHandler("returnCharacters", function(characters)
         })
     end
     characterAmount = #characters
-    SetDisplay(true, "ui")
+    SetDisplay(true, "ui", background)
 end)
 
 -- Creating a character
@@ -93,24 +96,6 @@ RegisterNUICallback("newCharacter", function(data)
         }
         TriggerServerEvent("newCharacter", newCharacter)
     end
-end)
-
-RegisterNetEvent("returnNewCharacter")
-AddEventHandler("returnNewCharacter", function(id, character)
-    characterAmount = characterAmount +1
-    SendNUIMessage({
-        type = "character",
-        id = character.id,
-        firstName = character.firstName,
-        lastName = character.lastName,
-        dateOfBirth = character.dob,
-        gender = character.gender,
-        twtName = character.twt,
-        department = character.department,
-        startingCash = character.cash,
-        startingBank = character.bank,
-        characterAmount = characterAmount .. "/" .. config.characterLimit
-    })
 end)
 
 -- editing a character
@@ -175,11 +160,23 @@ AddEventHandler("returnMoney", function(newCash, newBank)
     end
     cash = newCash
     bank = newBank
-    SendNUIMessage({
-        type = "Money",
-        cash = "Cash: $" .. cash,
-        bank = "Bank: $" .. bank
-    })
+    if config.legacyMoneyDisplay then
+        if registered then
+            while true do
+                Citizen.Wait(0)
+                text("💵", 0.885, 0.028, 0.35)
+                text("💳", 0.885, 0.068, 0.35)
+                text("~g~$~w~".. cash, 0.91, 0.03, 0.55)
+                text("~b~$~w~".. bank, 0.91, 0.07, 0.55)
+            end
+        end
+    else
+        SendNUIMessage({
+            type = "Money",
+            cash = "Cash: $" .. cash,
+            bank = "Bank: $" .. bank
+        })
+    end
 end)
 
 -- Teleporting
@@ -209,11 +206,14 @@ RegisterNUICallback("tpDoNot", function(data)
     TriggerServerEvent("getMoney", mainCharaterId)
 end)
 
-function SetDisplay(bool, typeName)
+function SetDisplay(bool, typeName, bg)
+    if not bg then
+        background = config.backgrounds[math.random(1, #config.backgrounds)]
+    end
     SetNuiFocus(bool, bool)
     SendNUIMessage({
         type = typeName,
-        background = config.backgrounds[math.random(1, #config.backgrounds)],
+        background = background,
         status = bool,
         serverName = config.serverName,
         characterAmount = characterAmount .. "/" .. config.characterLimit
@@ -323,4 +323,17 @@ function getCharacterInfo(infoType)
     else
         return "Error: Player not registered"
     end
+end
+
+function text(text, x, y, scale)
+    SetTextFont(7)
+    SetTextProportional(0)
+    SetTextScale(scale, scale)
+    SetTextEdge(1, 0, 0, 0, 255)
+    SetTextDropShadow(0, 0, 0, 0,255)
+    SetTextOutline()
+	SetTextJustification(1)
+    SetTextEntry("STRING")
+    AddTextComponentString(text)
+    DrawText(x, y)
 end
