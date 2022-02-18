@@ -17,7 +17,7 @@ if config.enableAopCommand then
     end, false)
     RegisterCommand(config.aopCommand, function(source, args, rawCommand)
         if admin then
-            TriggerServerEvent("registerAop", string.sub(rawCommand, string.len(config.aopCommand + 1), string.len(rawCommand)))
+            TriggerServerEvent("registerAop", string.sub(rawCommand, string.len(config.aopCommand) + 1, string.len(rawCommand)))
         else
             TriggerEvent("chat:addMessage", {
                 args = {"~r~You don't have permission to set the aop."}
