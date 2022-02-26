@@ -1,30 +1,65 @@
-------------------------------------------------------------------------
-------------------------------------------------------------------------
---			DO NOT EDIT IF YOU DON'T KNOW WHAT YOU'RE DOING			  --
---     							 									  --
---	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
-------------------------------------------------------------------------
-------------------------------------------------------------------------
-local aop = "Unknown" -- aop unknown if it's not set.
-playerBank = nil
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
--- Aop command events
-RegisterNetEvent("registerAop")
-AddEventHandler("registerAop", function(aopRegistered)
-    local player = source
-    if IsRolePresent(player, "ADMIN") then
-        aop = aopRegistered
-        TriggerClientEvent("setAop", -1, aop)
-    else
-        DropPlayer(player, "Tried to use a mod menu to change the aop.")
+local aop = config.defaultAop
+
+if config.enableAopCommand then
+    local priority = "Priority Status: ~g~Available"
+    RegisterNetEvent("getAop")
+    AddEventHandler("getAop", function()
+        local player = source
+        TriggerClientEvent("returnAop", player, aop)
+    end)
+    RegisterCommand(config.aopCommand, function(source, args, rawCommand)
+        local player = source
+        local canChangeAOP = false
+        for role, _ in pairs(config.canChangeAOP) do
+            if IsRolePresent(player, role, config.canChangeAOP) then
+                canChangeAOP = true
+                break
+            end
+        end
+        if canChangeAOP then
+            aop = string.sub(rawCommand, string.len(config.aopCommand) + 1, string.len(rawCommand))
+            TriggerClientEvent("setAop", -1, aop)
+        else
+            TriggerClientEvent("chat:addMessage", player, {
+                args = {"~r~You don't have permission to set the aop."}
+            })
+        end
+    end, false)
+end
+
+if config.enablePriorityCooldown then
+    RegisterNetEvent("getPriority")
+    AddEventHandler("getPriority", function() -- update priority
+        local player = source
+        TriggerClientEvent("returnPriority", player, priority)
+    end)
+    RegisterCommand(config.startPriorityCommand, function(source, args, rawCommand) -- start a priority & update.
+        local player = source
+        priority = "Priority Status: ~r~Active ~c~(" .. GetPlayerName(player) .. ")"
+        TriggerClientEvent("returnPriority", -1, priority)
+    end, false)
+    RegisterCommand(config.stopPriorityCommand, function(source, args, rawCommand) -- stop the priority & update.
+        priorityCooldown(config.cooldownAfterPriority)
+    end, false)
+
+    -- Priority count down and updates.
+    function priorityCooldown(time)
+        for cooldown = time, 1, -1 do
+            if cooldown > 1 then
+                priority = "Priority Cooldown: ~c~" .. cooldown .. " minutes"
+            else
+                priority = "Priority Cooldown: ~c~" .. cooldown .. " minute"
+            end
+            TriggerClientEvent("returnPriority", -1, priority)
+            Citizen.Wait(60000)
+        end
+        priority = "Priority Status: ~g~Available"
+        TriggerClientEvent("returnPriority", -1, priority)
     end
-end)
-RegisterNetEvent("getAop")
-AddEventHandler("getAop", function()
-    local player = source
-    TriggerClientEvent("returnAop", player, aop)
-end)
-
+end
+    
 -- Twotter command
 RegisterCommand("twt", function(source, args, rawCommand)
     local player = source
@@ -62,13 +97,22 @@ RegisterCommand("ooc", function(source, args, rawCommand)
 end, false)
 
 -- Darkweb command event
-RegisterCommand("darkweb", function(source, args, rawCommand)
-    local player = source
-    TriggerClientEvent("chat:addMessage", -1, {
-        color = {0, 0, 0},
-        args = {"^*Dark web | ^0Anonymous (#" .. player .. ")", string.sub(rawCommand, 8, string.len(rawCommand))}
-    })
-end, false)
+if config.enableDarkweb then
+    RegisterCommand("darkweb", function(source, args, rawCommand)
+        local player = source
+        for playerId, playerData in pairs(onlinePlayers) do
+            for _, department in pairs(config.canSeeDarkweb) do
+                if playerData.dept == department then
+                    TriggerClientEvent("chat:addMessage", playerId, {
+                        color = {0, 0, 0},
+                        args = {"^*Dark web | ^0Anonymous (#" .. player .. ")", string.sub(rawCommand, 8, string.len(rawCommand))}
+                    })
+                    break
+                end
+            end
+        end
+    end, false)
+end
 
 -- 911 command event
 RegisterCommand("911", function(source, args, rawCommand)
