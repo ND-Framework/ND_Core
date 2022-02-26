@@ -1,28 +1,13 @@
-------------------------------------------------------------------------
-------------------------------------------------------------------------
---			DO NOT EDIT IF YOU DON'T KNOW WHAT YOU'RE DOING			  --
---     							 									  --
---	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
-------------------------------------------------------------------------
-------------------------------------------------------------------------
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 -- Aop command
 if config.enableAopCommand then
     TriggerEvent("chat:addSuggestion", "/" .. config.aopCommand, "Change the Area of Play.", {
         { name="Area", help="Area of Play" }
     })
-    TriggerEvent("chat:addSuggestion", "/" .. config.checkAopCommand, "Check the current Area of Play.", {})
+    TriggerEvent("chat:addSuggestion", "/" .. config.checkAopCommand, "Check the current Area of Play.")
     RegisterCommand(config.checkAopCommand, function(source, args, rawCommand)
         TriggerServerEvent("getAop")
-    end, false)
-    RegisterCommand(config.aopCommand, function(source, args, rawCommand)
-        if admin then
-            TriggerServerEvent("registerAop", string.sub(rawCommand, string.len(config.aopCommand) + 1, string.len(rawCommand)))
-        else
-            TriggerEvent("chat:addMessage", {
-                args = {"~r~You don't have permission to set the aop."}
-            })
-        end
     end, false)
     RegisterNetEvent("setAop")
     AddEventHandler("setAop", function(aop)
@@ -48,6 +33,7 @@ if config.enableAopCommand then
     end)
 end
 
+-- 911 command
 RegisterNetEvent("911")
 AddEventHandler("911", function(coords, rawCommand)
     local location = GetStreetNameFromHashKey(GetStreetNameAtCoord(coords.x, coords.y, coords.z))
@@ -67,7 +53,7 @@ AddEventHandler("911", function(coords, rawCommand)
 end)
 
 -- Change character command
-TriggerEvent("chat:addSuggestion", "/" .. config.changeCharacterCommand, "Switch your framework character.", {})
+TriggerEvent("chat:addSuggestion", "/" .. config.changeCharacterCommand, "Switch your framework character.")
 RegisterCommand(config.changeCharacterCommand, function()
     SwitchOutPlayer(PlayerPedId(), 0, 1)
     Citizen.Wait(2000)
@@ -85,10 +71,12 @@ RegisterCommand("help", function(source, args, rawCommand)
 end, false)
 
 -- chat suggestions
-TriggerEvent("chat:addSuggestion", "/" .. config.payCommand, "Transfer money to player", {{ name="id", help="Player server id" }, { name="amount", help="amount to pay" }})
-TriggerEvent("chat:addSuggestion", "/" .. config.giveCommand, "Give money to closeby player", {{ name="amount", help="amount to give" }})
-TriggerEvent("chat:addSuggestion", "/twt", "Send a Twotter in game. (Global Chat)", {{ name="Message", help="Twotter Message."}})
-TriggerEvent("chat:addSuggestion", "/ooc", "Out Of Character chat Message. (Global Chat)", {{ name="Message", help="Put your questions or help request."}})
+if config.enableMoneySystem then
+    TriggerEvent("chat:addSuggestion", "/" .. config.payCommand, "Transfer money to player", {{name="id", help="Player server id" }, {name="amount", help="amount to pay"}})
+    TriggerEvent("chat:addSuggestion", "/" .. config.giveCommand, "Give money to closeby player", {{name="amount", help="amount to give"}})
+end
+TriggerEvent("chat:addSuggestion", "/twt", "Send a Twotter in game. (Global Chat)", {{name="Message", help="Twotter Message."}})
+TriggerEvent("chat:addSuggestion", "/ooc", "Out Of Character chat Message. (Global Chat)", {{name="Message", help="Put your questions or help request."}})
 TriggerEvent("chat:addSuggestion", "/darkweb", "Send a anonymous message in game. (Global Chat)", {{ name="Message", help="Anonymous Message."}})
 TriggerEvent("chat:addSuggestion", "/me", "Send message in the third person. (Proximity Chat)", {{ name="Action", help="action."}})
-TriggerEvent("chat:addSuggestion", "/help", "", {})
+TriggerEvent("chat:addSuggestion", "/help", "View a list of all commands")
