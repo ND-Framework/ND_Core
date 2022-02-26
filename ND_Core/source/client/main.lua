@@ -1,10 +1,5 @@
-------------------------------------------------------------------------
-------------------------------------------------------------------------
---			DO NOT EDIT IF YOU DON'T KNOW WHAT YOU'RE DOING			  --
---     							 									  --
---	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
-------------------------------------------------------------------------
-------------------------------------------------------------------------
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6
+
 local background = config.backgrounds[math.random(1, #config.backgrounds)]
 local started = true
 local priorityText = nil
@@ -281,7 +276,6 @@ if config.enablePriorityCooldown then
     AddEventHandler("returnPriority", function(priority)
         priorityText = nil
         for _, departmentName in pairs(config.canSeePriority) do
-            print(departmentName)
             if departmentName == mainDepartment then
                 priorityText = priority
                 break
