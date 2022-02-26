@@ -88,7 +88,14 @@ end
 RegisterNetEvent("checkPerms")
 AddEventHandler("checkPerms", function(role)
     local player = source
-    local rolePermission = IsRolePresent(player, role, config.departments)
+    local rolePermission = false
+    for i = 1, #config.departments[role] do
+        rolePermission = IsRolePresent(player, role, config.departments[role][i], "start")
+        if rolePermission then
+            print(rolePermission)
+            break
+        end
+    end
     TriggerClientEvent("permsChecked", player, role, rolePermission)
 end)
 
