@@ -92,7 +92,6 @@ AddEventHandler("checkPerms", function(role)
     for i = 1, #config.departments[role] do
         rolePermission = IsRolePresent(player, role, config.departments[role][i], "start")
         if rolePermission then
-            print(rolePermission)
             break
         end
     end
