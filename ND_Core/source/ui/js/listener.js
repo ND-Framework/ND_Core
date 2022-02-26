@@ -1,7 +1,5 @@
 $(function() {
     let displayOn = true
-
-    // Hide/show ui function
     function display(bool) {
         if (bool) {
             displayOn = true
@@ -127,11 +125,9 @@ $(function() {
             $("#bank").text(item.bank);
         }
 
-        if (item.type === "onStart") {
-            $("#characterInfoContainer").append('<label class="fourthRowText" style="margin-right: 18.2vw;" for="startingcash">Cash</label>');
-            $("#characterInfoContainer").append('<label class="fourthRowText" style="margin-right: 18.2vw;" for="startingbank">Bank</label>');
-            $("#characterInfoContainer").append('<input id="startingCash" class="fourthRowInput" style="margin-right: 4.2vw;" type="number" pattern="[0-9]+" placeholder="$2500" name="startingcash" required>');
-            $("#characterInfoContainer").append('<input id="startingBank" class="fourthRowInput" style="margin-right: 4.2vw;" type="number" pattern="[0-9]+" placeholder="$8000" name="startingbank" required>');
+        if (item.type === "onStart" && item.enableMoneySystem === true) {
+            $("#characterInfoContainerLeft").append('<label class="fourthRowText" for="startingcash">Cash</label><br><input id="startingCash" class="fourthRowInput" type="number" pattern="[0-9]+" placeholder="$2500" name="startingcash" required>');
+            $("#characterInfoContainerRight").append('<label class="fourthRowText" for="startingbank">Bank</label><br><input id="startingBank" class="fourthRowInput" type="number" pattern="[0-9]+" placeholder="$8000" name="startingbank" style="width: 93%;" required>');
             $("#startingBank").attr({
                 "max": item.maxStartingBank,
             });
