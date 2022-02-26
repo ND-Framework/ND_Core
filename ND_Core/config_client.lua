@@ -19,13 +19,13 @@ config = {
         "https://i.imgur.com/7jM5nZT.png" -- Credits: 2XRondo#6374
     },
 
-    -- set up your departments here, then set up the permissions for them below.
+    -- set up the name of your departments and the discord role id for permission. A role id of 0 will allow anyone to choose that department.
     departments = {
-        "CIV",
-        "SAHP",
-        "LSPD",
-        "BCSO",
-        "LSFD"
+        ["CIV"] = "0", 
+        ["SAHP"] = "0",
+        ["LSPD"] = "0",
+        ["BCSO"] = "0",
+        ["LSFD"] = "0"
     },
 
     -- set up the spawn buttons for each department.
@@ -60,22 +60,40 @@ config = {
     },
 
     -- Money related
+    enableMoneySystem = true,
+    legacyMoneyDisplay = true, -- set to tru if you want to use the hud from my standalone money system.
     maxStartingCash = 2500,
     maxStartingBank = 8000,
-
     payCommand = "pay", -- Command to transfer someone money from bank account.
     giveCommand = "give", -- Command to give someone close money from wallet.
-    
     salaryAmount = 300, -- the daily amount that players will receive.
     salaryInterval = 24, -- every x minutes the player will receive the salaryAmount.
-
-    legacyMoneyDisplay = true, -- set to tru if you want to use the standalone money system hud.
 
     -- Area of Play
     enableAopCommand = true,
     aopCommand = "setaop",
     checkAopCommand = "aop",
     defaultAop = "Sandy Shores",
+    canChangeAOP = { -- Roles that can change the aop. (The name doesn't matter it's just for you to remember the which id belongs to which role)
+        ["ADMIN"] = "0",
+        ["STAFF"] = "0"
+    },
+
+    -- Prority cooldown
+    enablePriorityCooldown = true,
+    startPriorityCommand = "prio-start",
+    stopPriorityCommand = "prio-stop",
+    cooldownPriorityCommand = "prio-cd",
+    cooldownAfterPriority = 10, -- This is how long a cooldown will start after a priority is stopped.
+    canSeePriority = { -- Departments that can see the priority status on their screen. (It's usually just useful for civs)
+        "CIV"
+    },
+
+    -- Dark web
+    enableDarkweb = true,
+    canSeeDarkweb = { -- Departments that can see and use the darkweb command.
+        "CIV"
+    },
 
     -- Hide reticle or default gta money and ammo dispaly. WARNING: turning both to true will add a 0.01 to the resmon.
     hideReticle = true, -- hide weapon reticle.
