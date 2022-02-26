@@ -1,9 +1,13 @@
--- For support join my discord: https://discord.gg/Z9Mxu72zZ6
-
-local aop = config.defaultAop
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+--			DO NOT EDIT IF YOU DON'T KNOW WHAT YOU'RE DOING			  --
+--     							 									  --
+--	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
+------------------------------------------------------------------------
+------------------------------------------------------------------------
 
 if config.enableAopCommand then
-    local priority = "Priority Status: ~g~Available"
+    local aop = config.defaultAop
     RegisterNetEvent("getAop")
     AddEventHandler("getAop", function()
         local player = source
@@ -30,6 +34,7 @@ if config.enableAopCommand then
 end
 
 if config.enablePriorityCooldown then
+    local priority = "Priority Status: ~g~Available"
     RegisterNetEvent("getPriority")
     AddEventHandler("getPriority", function() -- update priority
         local player = source
