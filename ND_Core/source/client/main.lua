@@ -29,7 +29,7 @@ Citizen.CreateThread(function()
         if IsPedOnFoot(ped) or IsPedInVehicle(ped, GetVehiclePedIsIn(ped, false), false) then
             print("^0This framework is created by ^5Andyyy#7666 ^0for support you can join the ^5discord: ^0https://discord.gg/Z9Mxu72zZ6")
             for departmentName in pairs(config.departments) do -- if you have an error that says attempt to index a nil value (global 'config') it's beacuse you have edited the config wrong.
-                TriggerServerEvent("checkPerms", config.departments[departmentName]) -- check permissions for each department with the department names.
+                TriggerServerEvent("checkPerms", departmentName) -- check permissions for each department with the department names.
             end
             TriggerServerEvent("getCharacters")
             Citizen.Wait(100)
