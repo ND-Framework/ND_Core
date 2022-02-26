@@ -14,7 +14,7 @@ function DiscordRequest(method, endpoint, jsondata)
     return data
 end
 
-function IsRolePresent(user, role)
+function IsRolePresent(user, role, theTable)
 	local discordId = nil
 	for _, id in ipairs(GetPlayerIdentifiers(user)) do
 		if string.match(id, "discord:") then
@@ -28,7 +28,7 @@ function IsRolePresent(user, role)
 	if type(role) == "number" then
 		theRole = tostring(role)
 	else
-		theRole = server_config.roles[role]
+		theRole = theTable[role]
 	end
 
     if theRole == "0" then
