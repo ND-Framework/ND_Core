@@ -21,11 +21,11 @@ config = {
 
     -- set up the name of your departments and the discord role id for permission. A role id of 0 will allow anyone to choose that department.
     departments = {
-        ["CIV"] = "0", 
-        ["SAHP"] = "0",
-        ["LSPD"] = "0",
-        ["BCSO"] = "0",
-        ["LSFD"] = "0"
+        ["CIV"] = {"0"},
+        ["SAHP"] = {"0"},
+        ["LSPD"] = {"0"},
+        ["BCSO"] = {"0"},
+        ["LSFD"] = {"0"}
     },
 
     -- set up the spawn buttons for each department.
