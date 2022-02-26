@@ -2,7 +2,7 @@
 
 author "Andyyy#7666"
 description "ND Framework Core"
-version "1.1"
+version "1.2"
 
 fx_version "cerulean"
 game "gta5"
@@ -31,15 +31,26 @@ client_scripts {
 }
 
 exports {
-    "getCharacterInfo", -- getCharacterInfo(infoType), 1 will return return FirstName, 2 LastName, 3 DateOfBirth, 4 Gender, 5 TwtName, 6 Department, 7 Cash, 8 Bank. 9 will return their character id.
+    "getCharacterInfo", -- exports["ND_Core"]:getCharacterInfo(infoType)
 }
+--[[
+    Info types:
+
+    1: First name
+    2: Last name
+    3: Date of birth
+    4: Gender
+    5: Twotter name
+    6: Department
+    7: Cash
+    8: Bank
+    9: character id
+]]
 
 server_exports {
-    "getCharacterTable", -- exports["ND_Core"]:getCharacterTable() this will return a table with all the online players and their info. View below on how to use this.
+    "getCharacterTable", -- exports["ND_Core"]:getCharacterTable()
 }
-
 --[[
-    Info:
     characterId
     firstName
     lastName
@@ -50,7 +61,7 @@ server_exports {
     cash
     bank
 
-    Usage:
+    Example:
     players = exports["ND_Core"]:getCharacterTable()
-    print(players[3].bank) this will print the bank account of the player with id 3.
+    print(players[3].bank) this will print the bank account balance of the player with id 3.
 ]]
