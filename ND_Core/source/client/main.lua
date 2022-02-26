@@ -1,7 +1,13 @@
--- For support join my discord: https://discord.gg/Z9Mxu72zZ6
-
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+--			DO NOT EDIT IF YOU DON'T KNOW WHAT YOU'RE DOING			  --
+--     							 									  --
+--	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
+------------------------------------------------------------------------
+------------------------------------------------------------------------
 local background = config.backgrounds[math.random(1, #config.backgrounds)]
 local started = true
+local priorityText = nil
 registered = false
 cash = nil
 bank = nil
@@ -273,10 +279,13 @@ if config.enablePriorityCooldown then
     
     RegisterNetEvent("returnPriority")
     AddEventHandler("returnPriority", function(priority)
-        if config.canSeePriority[mainDepartment] then
-            priorityText = priority
-        else
-            priorityText = nil
+        priorityText = nil
+        for _, departmentName in pairs(config.canSeePriority) do
+            print(departmentName)
+            if departmentName == mainDepartment then
+                priorityText = priority
+                break
+            end
         end
     end)
 end
