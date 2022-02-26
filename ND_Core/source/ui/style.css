@@ -156,7 +156,7 @@ body {
 
 #characterCreatorTopTextLine {
     background: rgb(255, 255, 255);
-    background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(255,255,255,1) 15%, rgba(255,255,255,1) 85%, rgba(0,0,0,0) 100%);
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(255,255,255,1) 15%, rgba(255,255,255,1) 85%, rgba(0, 0, 0, 0.014) 100%);
     height: 0.1vh;
     width: 95%;
     border: none;
@@ -165,15 +165,19 @@ body {
 
 /* character info */
 #characterInfoContainer {
-    margin-top: 2vh;
-    margin-left: 6.5vw;
+    padding: 2vh 3vw;
+}
+#characterInfoContainerLeft {
+    width: 50%;
+    float: left;
+}
+#characterInfoContainerRight {
+    width: 50%;
+    display: inline-block;
 }
 
 .firstRowText, .secondRowText, .thirdRowText, .fourthRowText {
     color: white;
-    display: inline-block;
-    margin-top: 2vh;
-    margin-bottom: 1vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-weight: bold;
 }
@@ -181,16 +185,18 @@ body {
 .firstRowInput, .secondRowInput, .thirdRowInput, .fourthRowInput {
     background: white;
     color: black;
-    display: inline-block;
     border: none;
     border-radius: 0.2vw;
-    height: 4vh;
-    width: 36%;
+    height: 3vh;
+    width: 95%;
+    margin-top: 0.5vh;
+    margin-bottom: 2vh;
+    padding: 0 0 0 0.5vw;
 }
 
 .characterSubmitButton {
     margin-top: 1vh;
-    margin-left: 30.3vw;
+    margin-left: 33.7vw;
     margin-bottom: 2vh;
     width: 8vw;
     background-color: rgb(17, 113, 238);
