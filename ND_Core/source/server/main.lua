@@ -125,28 +125,54 @@ AddEventHandler("getCharacters", function()
         }
 
         PerformHttpRequest("https://api.sonorancad.com/civilian/get_characters", function(errorCode, resultData, resultHeaders)
-            for k, v in pairs(json.decode(resultData)) do
-                if v.sections[2].fields[6].value == "M" then
-                    gender = "Male"
-                else
-                    gender = "Female"
-                end
-                exports.oxmysql:query("SELECT cash, bank, twt FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), v.id}, function(result)
-                    if result then
-                        if result[1] and result[1].cash and result[1].bank then
-                            cash = result[1].cash
-                            bank = result[1].bank
-                            twt = result[1].twt
-                        else
-                            cash = config.maxStartingCash
-                            bank = config.maxStartingBank
-                            twt = v.sections[2].fields[1].value .. " " .. v.sections[2].fields[2].value
-                            exports.oxmysql:query("INSERT INTO characters (license, character_id, cash, bank, twt) VALUES (?, ?, ?, ?, ?)", {GetPlayerIdentifierFromType("license", player), v.id, cash, bank, twt})
-                        end
-                        characters[v.id] = {id = v.id, firstName = v.sections[2].fields[1].value, lastName = v.sections[2].fields[2].value, dob = v.sections[2].fields[4].value, gender = gender, twt = twt, department = "CIV", cash = cash, bank = bank}
-                        TriggerClientEvent("returnCharacters", player, characters)
+            if resultData then
+                for k, v in pairs(json.decode(resultData)) do
+                    if v.sections[2].fields[6].value == "M" then
+                        gender = "Male"
+                    else
+                        gender = "Female"
                     end
-                end)
+                    exports.oxmysql:query("SELECT cash, bank, twt FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), v.id}, function(result)
+                        if result then
+                            if result[1] and result[1].cash and result[1].bank then
+                                cash = result[1].cash
+                                bank = result[1].bank
+                                twt = result[1].twt
+                            else
+                                cash = config.maxStartingCash
+                                bank = config.maxStartingBank
+                                twt = v.sections[2].fields[1].value .. " " .. v.sections[2].fields[2].value
+                                exports.oxmysql:query("INSERT INTO characters (license, character_id, cash, bank, twt) VALUES (?, ?, ?, ?, ?)", {GetPlayerIdentifierFromType("license", player), v.id, cash, bank, twt})
+                            end
+                            local info = {
+                                ["id"] = server_config.SonoranCAD_CommunityID,
+                                ["key"] = server_config.SonoranCAD_APIKey,
+                                ["type"] = "GET_ACTIVE_UNITS",
+                                ["data"] = {
+                                    {
+                                        ["serverId"] = 1,
+                                        ["onlyUnits"] = true,
+                                        ["includeOffline"] = false,
+                                        ["limit"] = 100,
+                                        ["offset"] = 0
+                                    }
+                                }
+                            }
+                            PerformHttpRequest("https://api.sonorancad.com/emergency/get_active_units", function(errorCode, resultData, resultHeaders)
+                                if resultData then
+                                    for characterDepartment, characterDepartments in pairs(json.decode(resultData)) do
+                                        local fullName = v.sections[2].fields[1].value .. " " .. v.sections[2].fields[2].value
+                                        if characterDepartments.data.name == fullName then
+                                            department = characterDepartments.data.department
+                                        end
+                                    end
+                                end
+                                characters[v.id] = {id = v.id, firstName = v.sections[2].fields[1].value, lastName = v.sections[2].fields[2].value, dob = v.sections[2].fields[4].value, gender = gender, twt = twt, department = department, cash = cash, bank = bank}
+                                TriggerClientEvent("returnCharacters", player, characters)
+                            end, "POST", json.encode(info))
+                        end
+                    end)
+                end
             end
         end, "POST", json.encode(info))
     else
