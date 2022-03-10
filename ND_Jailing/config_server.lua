@@ -1,3 +1,3 @@
-config = {
+server_config = {
 	discordWebhook = "",
 }
