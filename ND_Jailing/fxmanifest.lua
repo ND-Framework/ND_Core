@@ -1,10 +1,4 @@
-------------------------------------------------------------------------
-------------------------------------------------------------------------
---			DO NOT EDIT IF YOU DON'T KNOW WHAT YOU'RE DOING			  --
---     							 									  --
---	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
-------------------------------------------------------------------------
-------------------------------------------------------------------------
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 version "1.0"
 description "Jail tablet"
@@ -32,7 +26,5 @@ server_scripts {
     "source/server.lua",
     "config_server.lua"
 }
-client_scripts {
-    "source/client.lua",
-    "config_client.lua"
-}
+shared_script "config_client.lua"
+client_script "source/client.lua"
