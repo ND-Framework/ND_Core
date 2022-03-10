@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="style.css">
+        <script src="js/jquery-3.6.0.min.js" type="text/javascript"></script>
+        <script src="js/listener.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <form id="overlay">
+            <p id="title">Jail Interface</p>
+            <hr id="line">
+            <div style="margin-top: 2vh; margin-left: 6.5vw;">
+                <label class="text" style="margin-right: 15.7vw;" for="playerid">Player id</label>
+                <select id="id" class="input" style="margin-right: 4.1vw;" name="Player" required>
+
+                </select>
+
+                <label class="text" style="margin-right: 15.7vw;" for="jailtime">Time</label>
+                <input id="time" class="input" style="margin-right: 4.1vw;" type="number" placeholder="In seconds" name="jailtime" min="1" required>
+
+                <label class="text" style="margin-right: 15.7vw;" for="reason">Reason</label>
+                <input id="reason" class="input" style="margin-right: 4.1vw;" type="text" placeholder="short reason" name="reason" required>
+            </div>
+            <hr id="line" style="margin-top: 5vh;">
+            <p id="error"></p>
+            <button class="resetButton" type="reset">Close</button>
+            <button class="submitButton" type="submit" form="overlay">Jail</button>
+        </form>
+    </body>
+</html>
