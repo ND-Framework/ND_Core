@@ -19,7 +19,8 @@ AddEventHandler("ND_Jailing:jailPlayer", function(id, name, time, reason)
     local player = source
     local players = exports["ND_Core"]:getCharacterTable()
     local dept = players[player].dept
-    for department in pairs(config.accessDepartments) do
+    for _, department in pairs(config.accessDepartments) do
+        print(department)
         if department == dept then
             TriggerClientEvent("ND_Jailing:jailPlayer", id, time)
             sendToDiscord("Jail Logs", "**" .. GetPlayerName(source) .. "** Jailed **" .. name .. "** for **" .. time .. " seconds** with the reason: **" .. reason .. "**.", 1595381)
