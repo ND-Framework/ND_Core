@@ -132,49 +132,40 @@ AddEventHandler("getCharacters", function()
                     else
                         gender = "Female"
                     end
-                    exports.oxmysql:query("SELECT cash, bank, twt FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), v.id}, function(result)
+                    exports.oxmysql:query("SELECT cash, bank, twt, department FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), v.id}, function(result)
                         if result then
                             if result[1] and result[1].cash and result[1].bank then
                                 cash = result[1].cash
                                 bank = result[1].bank
                                 twt = result[1].twt
+                                dept = result[1].department
                             else
                                 cash = config.maxStartingCash
                                 bank = config.maxStartingBank
                                 twt = v.sections[2].fields[1].value .. " " .. v.sections[2].fields[2].value
-                                exports.oxmysql:query("INSERT INTO characters (license, character_id, cash, bank, twt) VALUES (?, ?, ?, ?, ?)", {GetPlayerIdentifierFromType("license", player), v.id, cash, bank, twt})
+                                exports.oxmysql:query("INSERT INTO characters (license, character_id, cash, bank, twt, department) VALUES (?, ?, ?, ?, ?, ?)", {GetPlayerIdentifierFromType("license", player), v.id, cash, bank, twt, department})
                             end
-                            local info = {
-                                ["id"] = server_config.SonoranCAD_CommunityID,
-                                ["key"] = server_config.SonoranCAD_APIKey,
-                                ["type"] = "GET_ACTIVE_UNITS",
-                                ["data"] = {
-                                    {
-                                        ["serverId"] = 1,
-                                        ["onlyUnits"] = true,
-                                        ["includeOffline"] = false,
-                                        ["limit"] = 100,
-                                        ["offset"] = 0
-                                    }
-                                }
-                            }
-                            PerformHttpRequest("https://api.sonorancad.com/emergency/get_active_units", function(errorCode, resultData, resultHeaders)
-                                if resultData then
-                                    for characterDepartment, characterDepartments in pairs(json.decode(resultData)) do
-                                        local fullName = v.sections[2].fields[1].value .. " " .. v.sections[2].fields[2].value
-                                        if characterDepartments.data.name == fullName then
-                                            department = characterDepartments.data.department
-                                        end
-                                    end
-                                end
-                                characters[v.id] = {id = v.id, firstName = v.sections[2].fields[1].value, lastName = v.sections[2].fields[2].value, dob = v.sections[2].fields[4].value, gender = gender, twt = twt, department = department, cash = cash, bank = bank}
-                                TriggerClientEvent("returnCharacters", player, characters)
-                            end, "POST", json.encode(info))
+                            characters[v.id] = {id = v.id, firstName = v.sections[2].fields[1].value, lastName = v.sections[2].fields[2].value, dob = v.sections[2].fields[4].value, gender = gender, twt = twt, department = department, cash = cash, bank = bank}
+                            TriggerClientEvent("returnCharacters", player, characters)
                         end
                     end)
                 end
             end
         end, "POST", json.encode(info))
+    elseif server_config.useKVP then
+        -- SetResourceKvp("ND_Core:Characters", "") -- this will clear all the characters from everyone.
+        local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+        if kvp ~= nil and kvp ~= "" then
+            local kvpCharacters = kvp[GetPlayerIdentifierFromType("license", player)]
+            if kvpCharacters then
+                for characterId, temp in pairs(kvpCharacters) do
+                    if temp then
+                        characters[characterId] = {id = temp.character_id, firstName = temp.first_name, lastName = temp.last_name, dob = temp.dob, gender = temp.gender, twt = temp.twt, department = temp.department, cash = temp.cash, bank = temp.bank}
+                    end
+                end
+            end
+        end
+        TriggerClientEvent("returnCharacters", player, characters)
     else
         exports.oxmysql:query("SELECT * FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
             if result then
@@ -228,6 +219,37 @@ AddEventHandler("newCharacter", function(newCharacter)
         end, "POST", json.encode(info))
 
         TriggerClientEvent("refreshCharacters", player)
+    elseif server_config.useKVP then
+        local character_id = nil
+        local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+        if kvp == nil and kvp == "" then
+            kvp = {}
+            kvp[license] = {}
+            character_id = 0
+        end
+        if not kvp[license] then
+            kvp[license] = {}
+            character_id = 0
+        end
+        if kvp ~= nil and kvp ~= "" then
+            character_id = #kvp[license]
+        end
+        if tonumber(character_id) then
+            character_id = character_id + 1
+        end
+        kvp[license][character_id] = {
+            ["character_id"] = character_id,
+            ["first_name"] = newCharacter.firstName,
+            ["last_name"] = newCharacter.lastName,
+            ["dob"] = newCharacter.dateOfBirth,
+            ["gender"] = newCharacter.gender,
+            ["twt"] = newCharacter.twtName,
+            ["department"] = newCharacter.department,
+            ["cash"] = newCharacter.startingCash,
+            ["bank"] = newCharacter.startingBank
+        }
+        SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+        TriggerClientEvent("refreshCharacters", player)
     else
         exports.oxmysql:query("SELECT character_id FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
             if (result) and (config.characterLimit > #result) then
@@ -264,6 +286,7 @@ end)
 RegisterNetEvent("delCharacter")
 AddEventHandler("delCharacter", function(character_id)
     local player = source
+    local license = GetPlayerIdentifierFromType("license", player)
     if server_config.SonoranCAD_Enabled then
         local info = {
             ["id"] = server_config.SonoranCAD_CommunityID,
@@ -280,9 +303,13 @@ AddEventHandler("delCharacter", function(character_id)
             print("Returned data: " .. tostring(resultData))
             print("Returned result Headers: " .. tostring(resultHeaders))
         end, "POST", json.encode(info))
-        exports.oxmysql:query("DELETE FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), character_id})
+        exports.oxmysql:query("DELETE FROM characters WHERE license = ? AND character_id = ?", {license, character_id})
+    elseif server_config.useKVP then
+        local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+        kvp[license][character_id] = nil
+        SetResourceKvp("ND_Core:Characters", json.encode(kvp))
     else
-        exports.oxmysql:query("DELETE FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), character_id})
+        exports.oxmysql:query("DELETE FROM characters WHERE license = ? AND character_id = ?", {license, character_id})
     end
 end)
 
@@ -320,6 +347,24 @@ AddEventHandler("editCharacter", function(newCharacter)
             print("Returned data: " .. tostring(resultData))
             print("Returned result Headers: " .. tostring(resultHeaders))
         end, "POST", json.encode(info))
+    elseif server_config.useKVP then
+        local license = GetPlayerIdentifierFromType("license", player)
+        local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+        local cash = kvp[license][newCharacter.id].cash
+        local bank = kvp[license][newCharacter.id].bank
+        kvp[license][newCharacter.id] = {
+            ["character_id"] = newCharacter.id,
+            ["first_name"] = newCharacter.firstName,
+            ["last_name"] = newCharacter.lastName,
+            ["dob"] = newCharacter.dateOfBirth,
+            ["gender"] = newCharacter.gender,
+            ["twt"] = newCharacter.twtName,
+            ["department"] = newCharacter.department,
+            ["cash"] = cash,
+            ["bank"] = bank
+        }
+        SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+        TriggerClientEvent("refreshCharacters", player)
     else
         exports.oxmysql:query("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, department = ? WHERE license = ? AND character_id = ?", {newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, GetPlayerIdentifierFromType("license", player), newCharacter.id})
     end
@@ -330,15 +375,25 @@ if config.enableMoneySystem then
     RegisterNetEvent("getMoney")
     AddEventHandler("getMoney", function(characterid)
         local player = source
-        exports.oxmysql:query("SELECT cash, bank FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), characterid}, function(result)
-            if result then
-                cash = result[1].cash
-                bank = result[1].bank
-                onlinePlayers[player].cash = cash
-                onlinePlayers[player].bank = bank
-                TriggerClientEvent("returnMoney", player, cash, bank)
-            end
-        end)
+        local license = GetPlayerIdentifierFromType("license", player)
+        if server_config.useKVP then
+            local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+            local cash = kvp[license][characterid].cash
+            local bank = kvp[license][characterid].bank
+            onlinePlayers[player].cash = cash
+            onlinePlayers[player].bank = bank
+            TriggerClientEvent("returnMoney", player, cash, bank)
+        else
+            exports.oxmysql:query("SELECT cash, bank FROM characters WHERE license = ? AND character_id = ?", {license, characterid}, function(result)
+                if result then
+                    local cash = result[1].cash
+                    local bank = result[1].bank
+                    onlinePlayers[player].cash = cash
+                    onlinePlayers[player].bank = bank
+                    TriggerClientEvent("returnMoney", player, cash, bank)
+                end
+            end)
+        end
     end)
 
     -- paying command.
@@ -346,7 +401,172 @@ if config.enableMoneySystem then
         local player = source
         local target = tonumber(args[1])
         local amount = tonumber(args[2])
-        
+        transferBank(amount, player, target)
+    end)
+
+    -- Give money command.
+    RegisterCommand(config.giveCommand, function(source, args, raw)
+        local player = source
+        local amount = tonumber(args[1])
+        giveCashToClosestTarget(amount, player)
+    end)
+
+    -- Salary.
+    local salaryInterval = config.salaryInterval * 60000
+    Citizen.CreateThread(function()
+        while true do
+            Citizen.Wait(salaryInterval)
+            for k, v in pairs(onlinePlayers) do
+                local license = GetPlayerIdentifierFromType("license", k)
+                if server_config.useKVP then
+                    kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+                    kvp[license][v.characterId].bank = kvp[license][v.characterId].bank + config.salaryAmount
+                    SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+                else
+                    exports.oxmysql:query("UPDATE characters SET bank = bank + ? WHERE license = ? AND character_id = ?", {config.salaryAmount, license, v.characterId})
+                end
+                TriggerClientEvent("receiveSalary", k, config.salaryAmount)
+            end
+        end
+    end)
+end
+
+-- add a player to the table.
+RegisterNetEvent("characterOnline")
+AddEventHandler("characterOnline", function(id)
+    local player = source
+    local license = GetPlayerIdentifierFromType("license", player)
+
+    if server_config.SonoranCAD_Enabled then
+        local steam = string.gsub(GetPlayerIdentifierFromType("steam", player), "steam:", "")
+        local info = {
+            ["id"] = server_config.SonoranCAD_CommunityID,
+            ["key"] = server_config.SonoranCAD_APIKey,
+            ["type"] = "GET_CHARACTERS",
+            ["data"] = {
+                {
+                    ["apiId"] = steam
+                }
+            }
+        }
+        PerformHttpRequest("https://api.sonorancad.com/civilian/get_characters", function(errorCode, resultData, resultHeaders)
+            for k, v in pairs(json.decode(resultData)) do
+                if v.sections[2].fields[6].value == "M" then
+                    gender = "Male"
+                else
+                    gender = "Female"
+                end
+                exports.oxmysql:query("SELECT cash, bank, twt FROM characters WHERE license = ? AND character_id = ?", {license, v.id}, function(result)
+                    if result then
+                        if result[1] and result[1].cash and result[1].bank then
+                            cash = result[1].cash
+                            bank = result[1].bank
+                            twt = result[1].twt
+                        else
+                            cash = config.maxStartingCash
+                            bank = config.maxStartingBank
+                            twt = v.sections[2].fields[1].value .. " " .. v.sections[2].fields[2].value
+                            exports.oxmysql:query("INSERT INTO characters (license, character_id, cash, bank, twt) VALUES (?, ?, ?, ?, ?)", {license, v.id, cash, bank, twt})
+                        end
+                        if v.id == id then
+                            onlinePlayers[player] = {
+                                characterId = id,
+                                firstName = v.sections[2].fields[1].value,
+                                lastName = v.sections[2].fields[2].value,
+                                dob = v.sections[2].fields[4].value,
+                                gender = gender,
+                                twt = twt,
+                                dept = "CIV",
+                                cash = cash,
+                                bank = bank
+                            }
+                        end
+                    end
+                end)
+            end
+        end, "POST", json.encode(info))
+    elseif server_config.useKVP then
+        local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+        if kvp ~= nil and kvp ~= "" then
+            local kvpCharacters = kvp[license][id]
+            if kvpCharacters then
+                onlinePlayers[player] = {
+                    characterId = id,
+                    firstName = kvpCharacters.first_name,
+                    lastName = kvpCharacters.last_name,
+                    dob = kvpCharacters.dob,
+                    gender = kvpCharacters.gender,
+                    twt = kvpCharacters.twt,
+                    dept = kvpCharacters.department,
+                    cash = kvpCharacters.cash,
+                    bank = kvpCharacters.bank
+                }
+            end
+        end
+    else
+        exports.oxmysql:query("SELECT * FROM characters WHERE license = ? AND character_id = ?", {license, id}, function(result)
+            if result then
+                local i = result[1]
+                onlinePlayers[player] = {
+                    characterId = id,
+                    firstName = i.first_name,
+                    lastName = i.last_name,
+                    dob = i.dob,
+                    gender = i.gender,
+                    twt = i.twt,
+                    dept = i.department,
+                    cash = i.cash,
+                    bank = i.bank
+                }
+            end
+        end)
+    end
+end)
+
+-- Remove player from onlinePlayers table when they leave.
+AddEventHandler("playerDropped", function(reason)
+    local player = source
+    onlinePlayers[player] = nil
+end)
+
+function getCharacterTable()
+    return onlinePlayers
+end
+
+function transferBank(amount, player, target)
+    if server_config.useKVP then
+        local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+        local license = GetPlayerIdentifierFromType("license", player)
+        if player == target then
+            TriggerClientEvent("chat:addMessage", player, {
+                color = {255, 0, 0},
+                args = {"Error", "You can't send money to yourself."}
+            })
+        elseif GetPlayerPing(target) == 0 then
+            TriggerClientEvent("chat:addMessage", player, {
+                color = {255, 0, 0},
+                args = {"Error", "That player does not exist."}
+            })
+        elseif tonumber(kvp[license][onlinePlayers[player].characterId].bank) < amount then
+            TriggerClientEvent("chat:addMessage", player, {
+                color = {255, 0, 0},
+                args = {"Error", "You don't have enough money."}
+            })
+        else
+            local targetLicense = GetPlayerIdentifierFromType("license", target)
+            kvp[license][onlinePlayers[player].characterId].bank = kvp[license][onlinePlayers[player].characterId].bank - amount
+            TriggerClientEvent("updateMoney", player)
+            kvp[targetLicense][onlinePlayers[target].characterId].bank = kvp[targetLicense][onlinePlayers[target].characterId].bank + amount
+            TriggerClientEvent("updateMoney", target)
+            SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+
+            TriggerClientEvent("chat:addMessage", player, {
+                color = {0, 255, 0},
+                args = {"Success", "You paid " .. onlinePlayers[target].firstName .. " " .. onlinePlayers[target].lastName .. " $" .. amount .. "."}
+            })
+            TriggerClientEvent("receiveBank", target, amount, onlinePlayers[player].firstName .. " " .. onlinePlayers[player].lastName, player)
+        end
+    else
         exports.oxmysql:query("SELECT bank FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId}, function(result)
             if result then
                 if player == target then
@@ -378,13 +598,50 @@ if config.enableMoneySystem then
                 end
             end
         end)
-    end)
+    end
+end
 
-    -- Give money command.
-    RegisterCommand(config.giveCommand, function(source, args, raw)
-        local player = source
-        local amount = tonumber(args[1])
+function giveCashToClosestTarget(amount, player)
+    if server_config.useKVP then
+        local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+        local license = GetPlayerIdentifierFromType("license", player)
 
+        local playerFound = false
+        local playerCoords = GetEntityCoords(GetPlayerPed(player))
+        if tonumber(kvp[license][onlinePlayers[player].characterId].cash) < amount then
+            TriggerClientEvent("chat:addMessage", player, {
+                color = {255, 0, 0},
+                args = {"Error", "You don't have enough money."}
+            })
+        else
+            for k, v in pairs(onlinePlayers) do
+                local targetCoords = GetEntityCoords(GetPlayerPed(k))
+                if (#(playerCoords - targetCoords) < 2.0) and (k ~= player) and not playerFound then
+                    local targetLicense = GetPlayerIdentifierFromType("license", k)
+                    kvp[license][onlinePlayers[player].characterId].cash = kvp[license][onlinePlayers[player].characterId].cash - amount
+                    kvp[targetLicense][v.characterId].cash = kvp[targetLicense][v.characterId].cash + amount
+                    SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+
+                    TriggerClientEvent("updateMoney", player)
+                    TriggerClientEvent("updateMoney", k)
+                    playerFound = true
+                    TriggerClientEvent("chat:addMessage", player, {
+                        color = {0, 255, 0},
+                        args = {"Success", "You gave " .. onlinePlayers[k].firstName .. " " .. onlinePlayers[k].lastName .. " $" .. amount .. "."}
+                    })
+                    TriggerClientEvent("receiveCash", k, amount, onlinePlayers[player].firstName .. " " .. onlinePlayers[player].lastName, player)
+                    break
+                end 
+            end
+            if not playerFound then
+                TriggerClientEvent("chat:addMessage", player, {
+                    color = {255, 0, 0},
+                    args = {"Error", "No players nearby."}
+                })
+            end
+            playerFound = false
+        end
+    else
         exports.oxmysql:query("SELECT cash FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId}, function(result)
             if result then
                 local playerFound = false
@@ -421,101 +678,87 @@ if config.enableMoneySystem then
                 end
             end
         end)
-    end)
-
-    -- Salary.
-    local salaryInterval = config.salaryInterval * 60000
-    Citizen.CreateThread(function()
-        while true do
-            Citizen.Wait(salaryInterval)
-            for k, v in pairs(onlinePlayers) do
-                exports.oxmysql:query("UPDATE characters SET bank = bank + ? WHERE license = ? AND character_id = ?", {config.salaryAmount, GetPlayerIdentifierFromType("license", k), v.characterId})
-                TriggerClientEvent("receiveSalary", k, config.salaryAmount)
-            end
-        end
-    end)
+    end
 end
 
--- add a player to the table.
-RegisterNetEvent("characterOnline")
-AddEventHandler("characterOnline", function(id)
-    local player = source
-    local license = GetPlayerIdentifierFromType("license", player)
-
-    if server_config.SonoranCAD_Enabled then
-        local steam = string.gsub(GetPlayerIdentifierFromType("steam", player), "steam:", "")
-        local info = {
-            ["id"] = server_config.SonoranCAD_CommunityID,
-            ["key"] = server_config.SonoranCAD_APIKey,
-            ["type"] = "GET_CHARACTERS",
-            ["data"] = {
-                {
-                    ["apiId"] = steam
-                }
-            }
-        }
-        PerformHttpRequest("https://api.sonorancad.com/civilian/get_characters", function(errorCode, resultData, resultHeaders)
-            for k, v in pairs(json.decode(resultData)) do
-                if v.sections[2].fields[6].value == "M" then
-                    gender = "Male"
-                else
-                    gender = "Female"
-                end
-                exports.oxmysql:query("SELECT cash, bank, twt FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), v.id}, function(result)
-                    if result then
-                        if result[1] and result[1].cash and result[1].bank then
-                            cash = result[1].cash
-                            bank = result[1].bank
-                            twt = result[1].twt
-                        else
-                            cash = config.maxStartingCash
-                            bank = config.maxStartingBank
-                            twt = v.sections[2].fields[1].value .. " " .. v.sections[2].fields[2].value
-                            exports.oxmysql:query("INSERT INTO characters (license, character_id, cash, bank, twt) VALUES (?, ?, ?, ?, ?)", {GetPlayerIdentifierFromType("license", player), v.id, cash, bank, twt})
-                        end
-                        if v.id == id then
-                            onlinePlayers[player] = {
-                                characterId = id,
-                                firstName = v.sections[2].fields[1].value,
-                                lastName = v.sections[2].fields[2].value,
-                                dob = v.sections[2].fields[4].value,
-                                gender = gender,
-                                twt = twt,
-                                dept = "CIV",
-                                cash = cash,
-                                bank = bank
-                            }
-                        end
-                    end
-                end)
-            end
-        end, "POST", json.encode(info))
+function withdrawMoney(amount, player)
+    if server_config.useKVP then
+        local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+        local license = GetPlayerIdentifierFromType("license", player)
+        kvp[license][onlinePlayers[player].characterId].bank = kvp[license][onlinePlayers[player].characterId].bank - amount
+        kvp[license][onlinePlayers[player].characterId].cash = kvp[license][onlinePlayers[player].characterId].cash + amount
+        SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+        TriggerClientEvent("updateMoney", player)
     else
-        exports.oxmysql:query("SELECT * FROM characters WHERE license = ? AND character_id = ?", {GetPlayerIdentifierFromType("license", player), id}, function(result)
-            if result then
-                local i = result[1]
-                onlinePlayers[player] = {
-                    characterId = id,
-                    firstName = i.first_name,
-                    lastName = i.last_name,
-                    dob = i.dob,
-                    gender = i.gender,
-                    twt = i.twt,
-                    dept = i.department,
-                    cash = i.cash,
-                    bank = i.bank
-                }
-            end
-        end)
+        exports.oxmysql:query("UPDATE characters SET bank = bank - ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId})
+        exports.oxmysql:query("UPDATE characters SET cash = cash + ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId})
+        TriggerClientEvent("updateMoney", player)
     end
-end)
+end
 
--- Remove player from onlinePlayers table when they leave.
-AddEventHandler("playerDropped", function(reason)
-    local player = source
-    onlinePlayers[player] = nil
-end)
+function depositMoney(amount, player)
+    if server_config.useKVP then
+        local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+        local license = GetPlayerIdentifierFromType("license", player)
+        kvp[license][onlinePlayers[player].characterId].cash = kvp[license][onlinePlayers[player].characterId].cash - amount
+        kvp[license][onlinePlayers[player].characterId].bank = kvp[license][onlinePlayers[player].characterId].bank + amount
+        SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+        TriggerClientEvent("updateMoney", player)
+    else
+        exports.oxmysql:query("UPDATE characters SET cash = cash - ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId})
+        exports.oxmysql:query("UPDATE characters SET bank = bank + ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId})
+        TriggerClientEvent("updateMoney", player)
+    end
+end
 
-function getCharacterTable()
-    return onlinePlayers
+function deductMoney(amount, player, from)
+    if from == "bank" then
+        if server_config.useKVP then
+            local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+            local license = GetPlayerIdentifierFromType("license", player)
+            kvp[license][onlinePlayers[player].characterId].bank = kvp[license][onlinePlayers[player].characterId].bank - amount
+            SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+            TriggerClientEvent("updateMoney", player)
+        else
+            exports.oxmysql:query("UPDATE characters SET bank = bank - ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId})
+            TriggerClientEvent("updateMoney", player)
+        end
+    elseif from == "cash" then
+        if server_config.useKVP then
+            local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+            local license = GetPlayerIdentifierFromType("license", player)
+            kvp[license][onlinePlayers[player].characterId].cash = kvp[license][onlinePlayers[player].characterId].cash - amount
+            SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+            TriggerClientEvent("updateMoney", player)
+        else
+            exports.oxmysql:query("UPDATE characters SET cash = cash - ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId})
+            TriggerClientEvent("updateMoney", player)
+        end
+    end
+end
+
+function addMoney(amount, player, to)
+    if to == "bank" then
+        if server_config.useKVP then
+            local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+            local license = GetPlayerIdentifierFromType("license", player)
+            kvp[license][onlinePlayers[player].characterId].bank = kvp[license][onlinePlayers[player].characterId].bank + amount
+            SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+            TriggerClientEvent("updateMoney", player)
+        else
+            exports.oxmysql:query("UPDATE characters SET bank = bank + ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId})
+            TriggerClientEvent("updateMoney", player)
+        end
+    elseif to == "cash" then
+        if server_config.useKVP then
+            local kvp = json.decode(GetResourceKvpString("ND_Core:Characters"))
+            local license = GetPlayerIdentifierFromType("license", player)
+            kvp[license][onlinePlayers[player].characterId].cash = kvp[license][onlinePlayers[player].characterId].cash + amount
+            SetResourceKvp("ND_Core:Characters", json.encode(kvp))
+            TriggerClientEvent("updateMoney", player)
+        else
+            exports.oxmysql:query("UPDATE characters SET cash = cash + ? WHERE license = ? AND character_id = ?", {amount, GetPlayerIdentifierFromType("license", player), onlinePlayers[player].characterId})
+            TriggerClientEvent("updateMoney", player)
+        end
+    end
 end
