@@ -1,10 +1,4 @@
-------------------------------------------------------------------------
-------------------------------------------------------------------------
---     							 									  --
---	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
---     							 									  --
-------------------------------------------------------------------------
-------------------------------------------------------------------------
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 config = {
     serverName = "Andy's Development", -- Server name to display on the ui.
@@ -15,8 +9,7 @@ config = {
     backgrounds = {
         "https://i.imgur.com/E51ckFx.png", -- Credits: Fuzzman270#0270
         "https://i.imgur.com/SeZD7TP.png", -- Credits: Fuzzman270#0270
-        "https://i.imgur.com/ZWKfYD9.png", -- Credits: 2XRondo#6374
-        "https://i.imgur.com/7jM5nZT.png" -- Credits: 2XRondo#6374
+        "https://i.imgur.com/ZWKfYD9.png" -- Credits: 2XRondo#6374
     },
 
     -- set up the name of your departments and the discord role id for permission. A role id of 0 will allow anyone to choose that department.
@@ -61,7 +54,7 @@ config = {
 
     -- Money related
     enableMoneySystem = true,
-    legacyMoneyDisplay = true, -- set to tru if you want to use the hud from my standalone money system.
+    legacyMoneyDisplay = false, -- set to tru if you want to use the hud from my standalone money system.
     maxStartingCash = 2500,
     maxStartingBank = 8000,
     payCommand = "pay", -- Command to transfer someone money from bank account.
@@ -74,16 +67,19 @@ config = {
     aopCommand = "setaop",
     checkAopCommand = "aop",
     defaultAop = "Sandy Shores",
-    canChangeAOP = { -- Roles that can change the aop. (The name doesn't matter it's just for you to remember the which id belongs to which role)
+    canChangeAOP = { -- Roles that can change the aop.
         ["ADMIN"] = "0",
         ["STAFF"] = "0"
     },
 
     -- Prority cooldown
     enablePriorityCooldown = true,
+    enablePriorityDefaulyHUD = false,
     startPriorityCommand = "prio-start",
     stopPriorityCommand = "prio-stop",
     cooldownPriorityCommand = "prio-cd",
+    joinPriorityCommand = "prio-join",
+    leavePriorityCommand = "prio-leave",
     cooldownAfterPriority = 10, -- This is how long a cooldown will start after a priority is stopped.
     canSeePriority = { -- Departments that can see the priority status on their screen. (It's usually just useful for civs)
         "CIV"
