@@ -1,5 +1,7 @@
 $(function() {
     let displayOn = true
+
+    // Hide/show ui function
     function display(bool) {
         if (bool) {
             displayOn = true
