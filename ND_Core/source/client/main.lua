@@ -309,7 +309,7 @@ if config.hideAmmoAndMoney or config.hideReticle or config.customPauseMenu or co
                     EndScaleformMovieMethod()
                 end
             end
-            if config.enablePriorityCooldown and priorityText then
+            if config.enablePriorityCooldown and priorityText and config.enablePriorityDefaulyHUD then
                 text(priorityText, 0.182, 0.891, 0.4, 4)
             end
         end
@@ -334,7 +334,8 @@ function getCharacterInfo(infoType)
             mainDepartment,
             cash,
             bank,
-            mainCharaterId
+            mainCharaterId,
+            priorityText
         }
         return mainCharacter[infoType]
     else
@@ -349,7 +350,7 @@ function text(text, x, y, scale, font)
     SetTextEdge(1, 0, 0, 0, 255)
     SetTextDropShadow(0, 0, 0, 0,255)
     SetTextOutline()
-	SetTextJustification(1)
+    SetTextJustification(1)
     SetTextEntry("STRING")
     AddTextComponentString(text)
     DrawText(x, y)
