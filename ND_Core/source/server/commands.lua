@@ -1,10 +1,4 @@
-------------------------------------------------------------------------
-------------------------------------------------------------------------
---			DO NOT EDIT IF YOU DON'T KNOW WHAT YOU'RE DOING			  --
---     							 									  --
---	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
-------------------------------------------------------------------------
-------------------------------------------------------------------------
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 if config.enableAopCommand then
     local aop = config.defaultAop
@@ -47,6 +41,29 @@ if config.enablePriorityCooldown then
     end, false)
     RegisterCommand(config.stopPriorityCommand, function(source, args, rawCommand) -- stop the priority & update.
         priorityCooldown(config.cooldownAfterPriority)
+    end, false)
+    RegisterCommand(config.cooldownPriorityCommand, function(source, args, rawCommand)
+        local time = tonumber(args[1])
+        if time then
+            priorityCooldown(time)
+        end
+    end, false)
+    RegisterCommand(config.joinPriorityCommand, function(source, args, rawCommand)
+        if string.find(priority, "Active") then
+            if not string.find(priority, GetPlayerName(source)) then
+                priority = string.gsub(priority, "%)", "")
+                priority = priority .. ", " .. GetPlayerName(source) .. ")"
+                TriggerClientEvent("returnPriority", -1, priority)
+            end
+        end
+    end, false)
+    RegisterCommand(config.leavePriorityCommand, function(source, args, rawCommand)
+        if string.find(priority, "Active") then
+            if string.find(priority, GetPlayerName(source)) then
+                priority = string.gsub(priority, ", " .. GetPlayerName(source), "")
+                TriggerClientEvent("returnPriority", -1, priority)
+            end
+        end
     end, false)
 
     -- Priority count down and updates.
