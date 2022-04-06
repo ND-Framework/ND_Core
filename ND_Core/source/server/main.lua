@@ -185,6 +185,18 @@ AddEventHandler("newCharacter", function(newCharacter)
     local player = source
     local license = GetPlayerIdentifierFromType("license", player)
 
+    local startingCash = newCharacter.startingCash
+    local startingBank = newCharacter.startingBank
+    -- Don't trust the client, validate maximum amounts
+    local moneyCheck = validateMoney(startingCash, startingBank)
+    
+    -- Set money to maximum amount in the config 
+    -- Only triggers if the client is sending an amount that exceeds the maximum.
+    if not moneyCheck then
+        startingCash = config.maxStartingCash
+        startingBank = config.maxStartingBank
+    end
+
     if server_config.SonoranCAD_Enabled then
         local steam = string.gsub(GetPlayerIdentifierFromType("steam", player), "steam:", "")
         if newCharacter.gender == "Male" then
@@ -237,6 +249,7 @@ AddEventHandler("newCharacter", function(newCharacter)
         if tonumber(character_id) then
             character_id = character_id + 1
         end
+
         kvp[license][character_id] = {
             ["character_id"] = character_id,
             ["first_name"] = newCharacter.firstName,
@@ -245,8 +258,8 @@ AddEventHandler("newCharacter", function(newCharacter)
             ["gender"] = newCharacter.gender,
             ["twt"] = newCharacter.twtName,
             ["department"] = newCharacter.department,
-            ["cash"] = newCharacter.startingCash,
-            ["bank"] = newCharacter.startingBank
+            ["cash"] = startingCash,
+            ["bank"] = startingBank
         }
         SetResourceKvp("ND_Core:Characters", json.encode(kvp))
         TriggerClientEvent("refreshCharacters", player)
@@ -261,7 +274,7 @@ AddEventHandler("newCharacter", function(newCharacter)
                         else
                             character_id = character_id + 1
                         end
-                        exports.oxmysql:query("INSERT INTO characters (license, character_id, first_name, last_name, dob, gender, twt, department, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, character_id, newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, newCharacter.startingCash, newCharacter.startingBank}, function(id)
+                        exports.oxmysql:query("INSERT INTO characters (license, character_id, first_name, last_name, dob, gender, twt, department, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, character_id, newCharacter.firstName, newCharacter.lastName, newCharacter.dateOfBirth, newCharacter.gender, newCharacter.twtName, newCharacter.department, startingCash, startingBank}, function(id)
                             if id then
                                 exports.oxmysql:query("SELECT * FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
                                     if result then
@@ -762,3 +775,10 @@ function addMoney(amount, player, to)
         end
     end
 end
+
+function validateMoney(cash, bank) 
+    if tonumber(cash) > config.maxStartingCash or tonumber(bank) > config.maxStartingBank then
+        return false
+    end
+    return true
+end 
