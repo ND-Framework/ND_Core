@@ -61,6 +61,7 @@ if config.enablePriorityCooldown then
         if string.find(priority, "Active") then
             if string.find(priority, GetPlayerName(source)) then
                 priority = string.gsub(priority, ", " .. GetPlayerName(source), "")
+                priority = string.gsub(priority, GetPlayerName(source), "")
                 TriggerClientEvent("returnPriority", -1, priority)
             end
         end
