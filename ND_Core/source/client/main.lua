@@ -309,7 +309,7 @@ if config.hideAmmoAndMoney or config.hideReticle or config.customPauseMenu or co
                     EndScaleformMovieMethod()
                 end
             end
-            if config.enablePriorityCooldown and priorityText and config.enablePriorityDefaulyHUD then
+            if config.enablePriorityCooldown and priorityText and config.enablePriorityDefaultHUD then
                 text(priorityText, 0.182, 0.891, 0.4, 4)
             end
         end
