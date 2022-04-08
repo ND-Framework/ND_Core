@@ -74,7 +74,7 @@ config = {
 
     -- Prority cooldown
     enablePriorityCooldown = true,
-    enablePriorityDefaulyHUD = false,
+    enablePriorityDefaultHUD = true, -- this will remove the hud of the priority, if you're using ModernHUD set this to false and go into ModernHUD config and change it to true from there.
     startPriorityCommand = "prio-start",
     stopPriorityCommand = "prio-stop",
     cooldownPriorityCommand = "prio-cd",
@@ -98,10 +98,10 @@ config = {
 
     -- Discord Rich precence
     enableRichPrecence = true,
-    updateIntervall = 60, -- how many seconds delay until it updates status.
-    appId = 912361433273102356,
-    largeLogo = "anyydevlogo",
-    smallLogo = "anyydevlogo",
+    updateIntervall = 10, -- how many seconds delay until it updates status.
+    appId = 858146067018416128,
+    largeLogo = "andyyy",
+    smallLogo = "andyyy",
     firstButtonName = "DISCORD",
     firstButtonLink = "https://discord.gg/Z9Mxu72zZ6",
     secondButtonName = "TEBEX",
