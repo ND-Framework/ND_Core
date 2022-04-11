@@ -147,7 +147,7 @@ $(function() {
         $("#charactersSection").append('<button id="characterButton' + id + '" class="createdButton" style="text-transform: capitalize;">' + firstName + " " + lastName + " (" + department +')</button><button id="characterButtonEdit' + id + '" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete' + id + '" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>');
         $("#characterButton" + id).click(function() {
             spawnMenu(true)
-            $.post("https://ND_Core/setMainCharacter", JSON.stringify({
+            $.post(`https://${GetParentResourceName()}/setMainCharacter`, JSON.stringify({
                 firstName: firstName,
                 lastName: lastName,
                 dateOfBirth: dateOfBirth,
@@ -180,7 +180,7 @@ $(function() {
     }
 
     $("#characterCreator").submit(function() {
-        $.post("https://ND_Core/newCharacter", JSON.stringify({
+        $.post(`https://${GetParentResourceName()}/newCharacter`, JSON.stringify({
             firstName: $("#firstName").val(),
             lastName: $("#lastName").val(),
             dateOfBirth: $("#dateOfBirth").val(),
@@ -197,7 +197,7 @@ $(function() {
 
     $("#characterEditor").submit(function() {
         characterEditorMenu(false)
-        $.post("https://ND_Core/editCharacter", JSON.stringify({
+        $.post(`https://${GetParentResourceName()}/editCharacter`, JSON.stringify({
             firstName: $("#newFirstName").val(),
             lastName: $("#newLastName").val(),
             dateOfBirth: $("#newDateOfBirth").val(),
@@ -221,7 +221,7 @@ $(function() {
         $("#characterButtonDelete" + characterDeleting).fadeOut("slow",function(){
             $("#characterButtonDelete" + characterDeleting).remove();
         })
-        $.post("https://ND_Core/delCharacter", JSON.stringify({
+        $.post(`https://${GetParentResourceName()}/delCharacter`, JSON.stringify({
             character: characterDeleting
         }));
         return
@@ -253,9 +253,7 @@ $(function() {
         return
     })
     $("#tpDoNot").click(function() {
-        $.post("https://ND_Core/tpDoNot", JSON.stringify({
-            test: "test"
-        }));
+        $.post(`https://${GetParentResourceName()}/tpDoNot`);
         spawnMenu(false)
         setTimeout(function(){
             $("#spawnMenuContainer").empty();
@@ -272,7 +270,7 @@ $(function() {
         return
     })
     $("#exitGameConfirm").click(function() {
-        $.post("https://ND_Core/exitGame", JSON.stringify({}));
+        $.post(`https://${GetParentResourceName()}/exitGame`);
         return
     })
 });
