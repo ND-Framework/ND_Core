@@ -22,7 +22,7 @@
                 }
             }
             function tp(x, y, z, name) {
-                $.post("https://ND_Core/tpToLocation", JSON.stringify({
+                $.post(`https://${GetParentResourceName()}/tpToLocation`, JSON.stringify({
                     x: x,
                     y: y,
                     z: z,
