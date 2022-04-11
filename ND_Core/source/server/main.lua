@@ -122,7 +122,7 @@ AddEventHandler("newCharacter", function(newCharacter)
     local departmentCheck = validateDepartment(player, newCharacter.department)
     if not departmentCheck then return end
 
-    if config.enableMoneySystem
+    if config.enableMoneySystem then
         local startingCash = newCharacter.startingCash
 	local startingBank = newCharacter.startingBank
 	-- Don't trust the client, validate maximum amounts.
