@@ -1,6 +1,8 @@
 <h1 align='center'>ND Framework</h1>
 <p align='center'><b><a href="discord.gg/nc82d8zvjm">Discord</a></b>
 
+<p align='center'><b><a href="https://andyyy7666.gitbook.io/nd-framework/">Documentation</a></b>
+
 # Description:
 This is a dojrp inspired framework, with a money system and extra features.
 
