@@ -122,18 +122,19 @@ AddEventHandler("newCharacter", function(newCharacter)
     local departmentCheck = validateDepartment(player, newCharacter.department)
     if not departmentCheck then return end
 
+    local startingCash = newCharacter.startingCash
+    local startingBank = newCharacter.startingBank
+    print(startingCash)
     if config.enableMoneySystem then
-        local startingCash = newCharacter.startingCash
-	local startingBank = newCharacter.startingBank
-	-- Don't trust the client, validate maximum amounts.
-	local moneyCheck = validateMoney(startingCash, startingBank)
+        -- Don't trust the client, validate maximum amounts.
+        local moneyCheck = validateMoney(startingCash, startingBank)
 
-	-- Set money to maximum amount in the config .
-	-- Only triggers if the client is sending an amount that exceeds the maximum.
-	if not moneyCheck then
-	    startingCash = config.maxStartingCash
-	    startingBank = config.maxStartingBank
-	end
+        -- Set money to maximum amount in the config .
+        -- Only triggers if the client is sending an amount that exceeds the maximum.
+        if not moneyCheck then
+            startingCash = config.maxStartingCash
+            startingBank = config.maxStartingBank
+        end
     end
 
     exports.oxmysql:query("SELECT character_id FROM characters WHERE license = ?", {GetPlayerIdentifierFromType("license", player)}, function(result)
