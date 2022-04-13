@@ -151,8 +151,8 @@ if config.enableMoneySystem then
         while not registered do
             Citizen.Wait(10)
         end
-        cash = newCash
-        bank = newBank
+        cash = tostring(newCash)
+        bank = tostring(newBank)
         if config.legacyMoneyDisplay then
             if registered then
                 while true do
@@ -222,7 +222,7 @@ RegisterNUICallback("tpToLocation", function(data)
 end)
 
 -- Choosing the do not tp button.
-RegisterNUICallback("tpDoNot", function(data)
+RegisterNUICallback("tpDoNot", function()
     local ped = PlayerPedId()
     SwitchInPlayer(ped)
     Citizen.Wait(500)
@@ -350,7 +350,7 @@ function text(text, x, y, scale, font)
     SetTextEdge(1, 0, 0, 0, 255)
     SetTextDropShadow(0, 0, 0, 0,255)
     SetTextOutline()
-    SetTextJustification(1)
+	SetTextJustification(1)
     SetTextEntry("STRING")
     AddTextComponentString(text)
     DrawText(x, y)
