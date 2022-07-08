@@ -2,13 +2,19 @@
 
 author "Andyyy#7666"
 description "Shot Spotter Script (ND Framework)"
-version "1.1"
+version "2.0.0"
 
 fx_version "cerulean"
 game "gta5"
+lua54 "yes"
 
-server_script "server.lua"
-client_scripts {
-    "config.lua",
-    "client.lua"
+server_scripts {
+    "config_server.lua",
+    "source/server.lua"
 }
+client_scripts {
+    "config_client.lua",
+    "source/client.lua"
+}
+
+dependency "ND_Core"
