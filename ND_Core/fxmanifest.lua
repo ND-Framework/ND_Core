@@ -1,8 +1,8 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 author "Andyyy#7666"
-description "ND Framework Core"
-version "1.4.0"
+description "ND-Core"
+version "2.0.0"
 
 fx_version "cerulean"
 game "gta5"
@@ -10,29 +10,22 @@ lua54 "yes"
 
 files {
 	"source/ui/index.html",
-	"source/ui/js/jquery-3.6.0.min.js",
-	"source/ui/js/listener.js",
-	"source/ui/Logo.png",
-	"source/ui/style.css",
+	"source/ui/script.js",
+	"source/ui/style.css"
 }
-
 ui_page "source/ui/index.html"
 
 shared_script "config_client.lua"
+client_script "source/client.lua"
 server_scripts {
     "config_server.lua",
-    "source/server/discord.lua",
-    "source/server/main.lua",
-    "source/server/commands.lua"
-}
-client_scripts {
-    "source/client/main.lua",
-    "source/client/commands.lua"
+    "source/server.lua"
 }
 
 exports {
-    "getCharacterInfo", -- getCharacterInfo(infoType), 1 will return return FirstName, 2 LastName, 3 DateOfBirth, 4 Gender, 5 TwtName, 6 Department, 7 Cash, 8 Bank. 9 will return their character id.
+    "getCharacterInfo",
 }
+
 server_exports {
     "transferBank", -- exports["ND_Core"]:transferBank(amount, player, target)
     "giveCashToClosestTarget", -- exports["ND_Core"]:giveCashToClosestTarget(amount, player)
@@ -40,9 +33,10 @@ server_exports {
     "depositMoney", -- exports["ND_Core"]:depositMoney(amount, player)
     "deductMoney", -- exports["ND_Core"]:deductMoney(amount, player, from)
     "addMoney", -- exports["ND_Core"]:addMoney(amount, player, to)
-
     "getCharacterTable" -- exports["ND_Core"]:getCharacterTable() this will return a table with all the online players and their info. View below on how to use this.
 }
+
+dependency "oxmysql"
 
 --[[
     Keys in the getCharacterTable:

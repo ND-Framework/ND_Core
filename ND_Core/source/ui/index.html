@@ -4,42 +4,14 @@
         <meta charset="utf-8">
         <link rel="stylesheet" href="style.css">
         <script src="https://use.fontawesome.com/releases/v5.15.4/js/all.js" data-auto-a11y="true"></script>
-        <script src="js/jquery-3.6.0.min.js" type="text/javascript"></script>
-        <script src="js/listener.js" type="text/javascript"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="script.js" type="text/javascript"></script>
     </head>
     <body>
-        <script>
-            // spawning script
-            function spawnMenu(bool) {
-                if (bool) {
-                    $("#characterCreator").hide();
-                    $("#characterEditor").hide();
-                    $("#exitGameMenu").hide();
-                    $("#deleteCharacterMenu").hide();
-                    $("#spawnLocation").fadeIn("slow");
-                } else {
-                    $("#spawnLocation").fadeOut("slow");
-                }
-            }
-            function tp(x, y, z, name) {
-                $.post(`https://${GetParentResourceName()}/tpToLocation`, JSON.stringify({
-                    x: x,
-                    y: y,
-                    z: z,
-                    name: name
-                }));
-                spawnMenu(false)
-                setTimeout(function(){
-                    $("#spawnMenuContainer").empty();
-                }, 550);
-                return
-            }
-        </script>
-        
         <!--Main page design-->
         <section id="overlay">
             <div id="logoContainer">
-                <img src="Logo.png" id="logo">
+                <img src="https://i.imgur.com/02A5Cgl.png" id="logo">
             </div>
 
             <h1 id="serverName"></h1>

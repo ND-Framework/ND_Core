@@ -104,6 +104,7 @@ body {
     border-radius: 0.5vh;
     transition: 0.3s;
     white-space: nowrap;
+    text-transform: capitalize;
 }
 
 .createdButtonEdit {

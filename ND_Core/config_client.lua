@@ -1,9 +1,10 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 config = {
-    serverName = "Andy's Development", -- Server name to display on the ui.
+    serverName = "Andy's Development",
     characterLimit = 15,
     changeCharacterCommand = "changecharacter", -- this is the command to open the ui again and change your character.
+    customPauseMenu = true, -- this will create a custom pause menu. It will display your money, characters name. And server name in the pause menu.
 
     -- set your backgrounds, if you have more than 1 then it will randomly change everytime you open the ui.
     backgrounds = {
@@ -12,13 +13,12 @@ config = {
         "https://i.imgur.com/ZWKfYD9.png" -- Credits: 2XRondo#6374
     },
 
-    -- set up the name of your departments and the discord role id for permission. A role id of 0 will allow anyone to choose that department.
     departments = {
-        ["CIV"] = {"0"},
-        ["SAHP"] = {"0"},
-        ["LSPD"] = {"0"},
-        ["BCSO"] = {"0"},
-        ["LSFD"] = {"0"}
+        ["CIV"] = {"872921520719142932"},
+        ["SAHP"] = {"872921520719142932"},
+        ["LSPD"] = {"872921520719142932"},
+        ["BCSO"] = {"872921520719142932"},
+        ["LSFD"] = {"872921520719142932"}
     },
 
     -- set up the spawn buttons for each department.
@@ -54,51 +54,14 @@ config = {
 
     -- Money related
     enableMoneySystem = true,
-    legacyMoneyDisplay = false, -- set to tru if you want to use the hud from my standalone money system.
     maxStartingCash = 2500,
     maxStartingBank = 8000,
     payCommand = "pay", -- Command to transfer someone money from bank account.
     giveCommand = "give", -- Command to give someone close money from wallet.
-    salaryAmount = 300, -- the daily amount that players will receive.
-    salaryInterval = 24, -- every x minutes the player will receive the salaryAmount.
-
-    -- Area of Play
-    enableAopCommand = true,
-    aopCommand = "setaop",
-    checkAopCommand = "aop",
-    defaultAop = "Sandy Shores",
-    canChangeAOP = { -- Roles that can change the aop.
-        ["ADMIN"] = "0",
-        ["STAFF"] = "0"
-    },
-
-    -- Prority cooldown
-    enablePriorityCooldown = true,
-    enablePriorityDefaultHUD = true, -- this will remove the hud of the priority, if you're using ModernHUD set this to false and go into ModernHUD config and change it to true from there.
-    startPriorityCommand = "prio-start",
-    stopPriorityCommand = "prio-stop",
-    cooldownPriorityCommand = "prio-cd",
-    joinPriorityCommand = "prio-join",
-    leavePriorityCommand = "prio-leave",
-    cooldownAfterPriority = 10, -- This is how long a cooldown will start after a priority is stopped.
-    canSeePriority = { -- Departments that can see the priority status on their screen. (It's usually just useful for civs)
-        "CIV"
-    },
-
-    -- Dark web
-    enableDarkweb = true,
-    canSeeDarkweb = { -- Departments that can see and use the darkweb command.
-        "CIV"
-    },
-
-    -- Hide reticle or default gta money and ammo dispaly. WARNING: turning both to true will add a 0.01 to the resmon.
-    hideReticle = true, -- hide weapon reticle.
-    hideAmmoAndMoney = true, -- hides the default gta ammo & money.
-    customPauseMenu = true, -- this will create a custom pause menu. It will display your money, characters name. And server name in the pause menu.
-
+    
     -- Discord Rich precence
     enableRichPrecence = true,
-    updateIntervall = 10, -- how many seconds delay until it updates status.
+    updateIntervall = 60, -- how many seconds delay until it updates status.
     appId = 858146067018416128,
     largeLogo = "andyyy",
     smallLogo = "andyyy",

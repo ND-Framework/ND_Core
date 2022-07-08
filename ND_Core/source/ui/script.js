@@ -4,68 +4,53 @@ $(function() {
     // Hide/show ui function
     function display(bool) {
         if (bool) {
-            displayOn = true
+            displayOn = true;
             $("body").show();
             Money(false)
         } else {
-            displayOn = false
+            displayOn = false;
             $("body").hide();
         }
     }
     function characterCreatorMenu(bool) {
         if (bool) {
             $("#characterCreator").fadeIn("slow");
-            $("#characterEditor").hide();
-            $("#exitGameMenu").hide();
-            $("#deleteCharacterMenu").hide();
-            $("#spawnLocation").hide();
-        } else {
-            $("#characterCreator").fadeOut("slow");
+            $("#characterEditor, #exitGameMenu, #deleteCharacterMenu, #spawnLocation").hide();
+            return;
         }
+        $("#characterCreator").fadeOut("slow");
     }
     function characterEditorMenu(bool) {
         if (bool) {
-            $("#characterCreator").hide();
             $("#characterEditor").fadeIn("slow");
-            $("#exitGameMenu").hide();
-            $("#deleteCharacterMenu").hide();
-            $("#spawnLocation").hide();
-        } else {
-            $("#characterEditor").fadeOut("slow");
+            $("#characterCreator, #exitGameMenu, #deleteCharacterMenu, #spawnLocation").hide();
+            return;
         }
+        $("#characterEditor").fadeOut("slow");
     }
     function exitGameMenu(bool) {
         if (bool) {
-            $("#characterCreator").hide();
-            $("#characterEditor").hide();
             $("#exitGameMenu").fadeIn("slow");
-            $("#deleteCharacterMenu").hide();
-            $("#spawnLocation").hide();
-        } else {
-            $("#exitGameMenu").fadeOut("slow");
+            $("#characterCreator, #characterEditor, #deleteCharacterMenu, #spawnLocation").hide();
+            return;
         }
+        $("#exitGameMenu").fadeOut("slow");
     }
     function confirmDeleteMenu(bool) {
         if (bool) {
-            $("#characterCreator").hide();
-            $("#characterEditor").hide();
-            $("#exitGameMenu").hide();
             $("#deleteCharacterMenu").fadeIn("slow");
-            $("#spawnLocation").hide();
-        } else {
-            $("#deleteCharacterMenu").fadeOut("slow");
+            $("#characterCreator, #characterEditor, #exitGameMenu, #spawnLocation").hide();
+            return;
         }
+        $("#deleteCharacterMenu").fadeOut("slow");
     }
     function spawnMenu(bool) {
         if (bool) {
-            $("#characterCreator").hide();
-            $("#characterEditor").hide();
-            $("#exitGameMenu").hide();
-            $("#deleteCharacterMenu").hide();
             $("#spawnLocation").fadeIn("slow");
-        } else {
-            $("#spawnLocation").fadeOut("slow");
+            $("#characterCreator, #characterEditor, #exitGameMenu, #deleteCharacterMenu").hide();
+            return;
         }
+        $("#spawnLocation").fadeOut("slow");
     }
     function Money(bool) {
         if (bool) {
@@ -80,13 +65,13 @@ $(function() {
             $("#overlay").show();
         }
     }
-    display(false)
-    characterCreatorMenu(false)
-    characterEditorMenu(false)
-    exitGameMenu(false)
-    confirmDeleteMenu(false)
-    spawnMenu(false)
-    Money(false)
+    display(false);
+    characterCreatorMenu(false);
+    characterEditorMenu(false);
+    exitGameMenu(false);
+    confirmDeleteMenu(false);
+    spawnMenu(false);
+    Money(false);
 
     window.addEventListener('message', function(event) {
         const item = event.data;
@@ -94,21 +79,36 @@ $(function() {
             if (item.status) {
                 $('#serverName').text(item.serverName);
                 $("body").css("background-image", "url(" + item.background + ")");
-                display(true)
+                display(true);
             } else {
-                display(false)
+                display(false);
             }
         }
         
         $('#playerAmount').text(item.characterAmount);
 
         if (item.type === "character") {
-            characterCreatorMenu(false)
-            createCharacter(item.firstName, item.lastName, item.dateOfBirth, item.gender, item.twtName, item.department, item.startingCash, item.startingBank, item.id)
+            characterCreatorMenu(false);
+            createCharacter(item.firstName, item.lastName, item.dateOfBirth, item.gender, item.twtName, item.department, item.startingCash, item.startingBank, item.id);
         }
 
         if (item.type === "setSpawns") {
-            createSpawnButtons(item.x, item.y, item.z, item.name)
+            $("#spawnMenuContainer").empty();
+            setTimeout(function(){
+                $("#spawnMenuContainer").append(`<button class="spawnButtons" data-x="${item.x}" data-y="${item.y}" data-z="${item.z}">${item.name}</button>`);
+                $(".spawnButtons").click(function() {
+                    $.post(`https://${GetParentResourceName()}/tpToLocation`, JSON.stringify({
+                        x: $(this).data("x"),
+                        y: $(this).data("y"),
+                        z: $(this).data("z")
+                    }));
+                    spawnMenu(false);
+                    setTimeout(function(){
+                        $("#spawnMenuContainer").empty();
+                    }, 550);
+                    return;
+                });
+            }, 10);
         }
 
         if (item.type === "givePerms") {
@@ -127,7 +127,7 @@ $(function() {
             $("#bank").text(item.bank);
         }
 
-        if (item.type === "onStart" && item.enableMoneySystem === true) {
+        if (item.type === "onStart" && item.enableMoneySystem) {
             $("#characterInfoContainerLeft").append('<label class="fourthRowText" for="startingcash">Cash</label><br><input id="startingCash" class="fourthRowInput" type="number" pattern="[0-9]+" placeholder="$2500" name="startingcash" required>');
             $("#characterInfoContainerRight").append('<label class="fourthRowText" for="startingbank">Bank</label><br><input id="startingBank" class="fourthRowInput" type="number" pattern="[0-9]+" placeholder="$8000" name="startingbank" style="width: 93%;" required>');
             $("#startingBank").attr({
@@ -144,8 +144,8 @@ $(function() {
     })
 
     function createCharacter(firstName, lastName, dateOfBirth, gender, twtName, department, startingCash, startingBank, id) {
-        $("#charactersSection").append('<button id="characterButton' + id + '" class="createdButton" style="text-transform: capitalize;">' + firstName + " " + lastName + " (" + department +')</button><button id="characterButtonEdit' + id + '" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete' + id + '" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>');
-        $("#characterButton" + id).click(function() {
+        $("#charactersSection").append(`<button id="characterButton${id}" class="createdButton">${firstName} ${lastName} (${department})</button><button id="characterButtonEdit${id}" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete${id}" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>`);
+        $(`#characterButton${id}`).click(function() {
             spawnMenu(true)
             $.post(`https://${GetParentResourceName()}/setMainCharacter`, JSON.stringify({
                 firstName: firstName,
@@ -158,25 +158,24 @@ $(function() {
                 startingBank: startingBank,
                 character: id
             }));
-            return
-        })
-        $("#characterButtonEdit" + id).click(function() {
+            return;
+        });
+        $(`#characterButtonEdit${id}`).click(function() {
             characterEditorMenu(true)
+            $("#newFirstName").val(firstName);
+            $("#newLastName").val(lastName);
+            $("#newDateOfBirth").val(dateOfBirth);
+            $("#newGender").val(gender);
+            $("#newTwtName").val(twtName);
+            $("#newDepartment").val(department);
             characterEdited = id
-            return
-        })
-        $("#characterButtonDelete" + id).click(function() {
+            return;
+        });
+        $(`#characterButtonDelete${id}`).click(function() {
             confirmDeleteMenu(true)
             characterDeleting = id
-            return
-        })
-    }
-
-    function createSpawnButtons(x, y, z, name) {
-        $("#spawnMenuContainer").empty();
-        setTimeout(function(){
-            $("#spawnMenuContainer").append(`<button class="spawnButtons" id="${x}, ${y}, ${z}, ${name}" onclick='tp("${x}", "${y}", "${z}", "${name}")' > ${name} </button>`);
-        }, 10);
+            return;
+        });
     }
 
     $("#characterCreator").submit(function() {
@@ -192,8 +191,8 @@ $(function() {
         }));
         characterCreatorMenu(false)
         $("#firstName, #lastName, #dateOfBirth, #twtName, #startingCash, #startingBank").val("")
-        return false
-    })
+        return false;
+    });
 
     $("#characterEditor").submit(function() {
         characterEditorMenu(false)
@@ -207,8 +206,8 @@ $(function() {
             id: characterEdited
         }));
         $("#characterButton" + characterEdited).text($("#newFirstName").val() + " " + $("#newLastName").val() + " (" + $("#newDepartment").val() + ")");
-        return false
-    })
+        return false;
+    });
 
     $("#deleteCharacterConfirm").click(function() {
         confirmDeleteMenu(false)
@@ -224,53 +223,53 @@ $(function() {
         $.post(`https://${GetParentResourceName()}/delCharacter`, JSON.stringify({
             character: characterDeleting
         }));
-        return
-    })
+        return;
+    });
 
     $("#newCharacterButton").click(function() {
         characterCreatorMenu(true)
-        return
-    })
+        return;
+    });
 
     $("#deleteCharacterCancel").click(function() {
         confirmDeleteMenu(false)
-        return
-    })
+        return;
+    });
     $("#cancelCharacterCreation").click(function() {
         characterCreatorMenu(false)
-        return
-    })
+        return;
+    });
     $("#cancelCharacterEditing").click(function() {
         characterEditorMenu(false)
-        return
-    })
+        return;
+    });
 
     $("#tpCancel").click(function() {
         spawnMenu(false)
         setTimeout(function(){
             $("#spawnMenuContainer").empty();
         }, 550);
-        return
-    })
+        return;
+    });
     $("#tpDoNot").click(function() {
         $.post(`https://${GetParentResourceName()}/tpDoNot`);
         spawnMenu(false)
         setTimeout(function(){
             $("#spawnMenuContainer").empty();
         }, 550);
-        return
-    })
+        return;
+    });
 
     $("#quitGameButton").click(function() {
         exitGameMenu(true)
-        return
-    })
+        return;
+    });
     $("#exitGameCancel").click(function() {
         exitGameMenu(false)
-        return
-    })
+        return;
+    });
     $("#exitGameConfirm").click(function() {
         $.post(`https://${GetParentResourceName()}/exitGame`);
-        return
-    })
+        return;
+    });
 });
