@@ -1,5 +1,5 @@
 config = {
-    maxJailTime = 10, -- Max time in seconds that someone can jail another player.
+    maxJailTime = 300, -- Max time in seconds that someone can jail another player.
     jailDistance = 90.0, -- How far can the player go from the Jail coordinates. If the player is further than the set amount they will be teleported back.
 
     jailCoords = {x = 1680.21, y = 2513.25, z = 44.56, h = 6.53},
@@ -7,9 +7,9 @@ config = {
 
     -- Where can players access it from.
     accessLocation = {
-        {x = -449.61, y = 6012.42, z = 31.72}, -- Paleto Bay Sheriff's Office
-        {x = 1853.08, y = 3690.2, z = 34.27}, -- Sandy Shores Sheriff's Office
-        {x = 459.84, y = -989.15, z = 24.91}, -- Mission Row PD
+        {x = -450.17, y = 6012.62, z = 31.71}, -- Paleto Bay Sheriff's Office
+        {x = 1853.57, y = 3690.74, z = 34.26}, -- Sandy Shores Sheriff's Office
+        {x = 460.53, y = -988.84, z = 24.91} -- Mission Row PD
     },
 
     -- Departments that can access the jail tablet.
@@ -20,5 +20,5 @@ config = {
     },
 
     -- How close does the player have to be to the coordiantes to be able to open the tablet.
-    accessDistance = 0.5,
+    accessDistance = 1.2,
 }
