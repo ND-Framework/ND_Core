@@ -2,7 +2,7 @@
 
 author "Andyyy#7666"
 description "ND Framework ATMs"
-version "1.1"
+version "2.0.0"
 
 fx_version "cerulean"
 game "gta5"
@@ -12,10 +12,8 @@ ui_page "source/ui/index.html"
 
 files {
 	"source/ui/index.html",
-	"source/ui/js/jquery-3.6.0.min.js",
-	"source/ui/js/listener.js",
-	"source/ui/img/mazebank.png",
-	"source/ui/style.css",
+	"source/ui/script.js",
+	"source/ui/style.css"
 }
 
 server_script "source/server.lua"

@@ -1,12 +1,7 @@
-------------------------------------------------------------------------
-------------------------------------------------------------------------
---			DO NOT EDIT IF YOU DON'T KNOW WHAT YOU'RE DOING			  --
---     							 									  --
---	   For support join my discord: https://discord.gg/Z9Mxu72zZ6	  --
-------------------------------------------------------------------------
-------------------------------------------------------------------------
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6
+
 local display = false
-local balance = nil
+local nearModel = false
 
 local atmModels = {
     "-870868698",  -- older atms
@@ -38,68 +33,109 @@ function getTime()
     return hours .. ":" .. minutes
 end
 
--- Alert on top left of screen
-function alert(msg) 
-    BeginTextCommandDisplayHelp("STRING")
-    AddTextComponentSubstringPlayerName(msg)
-    EndTextCommandDisplayHelp(0, 0, 1, -1)
-end
-
--- Check if player is near an atm
-function IsNearATM()
-	local playerCoords = GetEntityCoords(PlayerPedId(), 0)
-    for k, v in pairs(atmModels) do
-        ATM = GetCoordsAndRotationOfClosestObjectOfType(playerCoords.x, playerCoords.y, playerCoords.z, 0.7, tonumber(v), 0)
-        if ATM == 1 then
-            return true
-        end
-    end
-end
-
 -- Hide/Show ui
 function SetDisplay(bool)
+    local playerInfo = exports["ND_Core"]:getCharacterInfo()
     display = bool
     SetNuiFocus(bool, bool)
     SendNUIMessage({
         status = bool,
-		playerName = exports["ND_Core"]:getCharacterInfo(1) .. " " .. exports["ND_Core"]:getCharacterInfo(2),
-		balance = "Account Balance: $" .. exports["ND_Core"]:getCharacterInfo(8) .. ".00",
+		playerName = playerInfo.firstName .. " " .. playerInfo.lastName,
+		balance = "Account Balance: $" .. playerInfo.bank .. ".00",
         date = days[GetClockDayOfWeek() + 1],
         time = getTime()
     })
 end
 
+function drawText3D(coords, text)
+    local onScreen, _x, _y = World3dToScreen2d(coords.x, coords.y, coords.z + 1)
+    local pX, pY, pZ = table.unpack(GetGameplayCamCoords())
+    SetTextScale(0.4, 0.4)
+    SetTextFont(4)
+    SetTextProportional(1)
+    SetTextEntry("STRING")
+    SetTextCentre(true)
+    SetTextColour(255, 255, 255, 255)
+    SetTextOutline()
+    AddTextComponentString(text)
+    DrawText(_x, _y)
+end
+
+-- check if ped is close to an atm object.
+function inRange(ped)
+    playerCoords = GetEntityCoords(ped)
+    for _, atm in pairs(atmModels) do
+        object, outPosition, outRotation = GetCoordsAndRotationOfClosestObjectOfType(playerCoords.x, playerCoords.y, playerCoords.z, 0.7, tonumber(atm), 0)
+        if object == 1 then
+            return true
+        end
+    end
+end
+
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(500)
+        ped = PlayerPedId()
+        nearModel = inRange(ped)
+    end
+end)
+
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(0)
+        if not display and nearModel then
+            drawText3D(outPosition, "~w~Press ~r~E ~w~to use the ATM")
+            if IsControlJustPressed(0, 51) then
+                SetDisplay(true)
+                TriggerScreenblurFadeIn(1000)
+            end
+        end
+    end
+end)
+
+-- close the ui.
 RegisterNUICallback("close", function(data)
     PlaySoundFrontend(-1, "PIN_BUTTON", "ATM_SOUNDS", 1)
     SetDisplay(false)
+    TriggerScreenblurFadeOut(1000)
 end)
 
+-- makes a button sount for when the ui is clicked.
 RegisterNUICallback("sound", function(data)
     PlaySoundFrontend(-1, "PIN_BUTTON", "ATM_SOUNDS", 1)
 end)
 
-RegisterNUICallback("withdraw", function(data)
-    TriggerServerEvent("ND:withdraw", data.amount)
+-- deposit/withdraw
+RegisterNUICallback("useATM", function(data)
+    local action = string.gsub(data.action, " ", "")
+    if action == "WITHDRAW" then
+        if data.amount == "" then
+            Citizen.Wait(1000)
+            SendNUIMessage({
+                success = false
+            })
+            return
+        end
+        TriggerServerEvent("ND_ATM:withdraw", data.amount)
+    elseif action == "DEPOSIT" then
+        if data.amount == "" then
+            Citizen.Wait(1000)
+            SendNUIMessage({
+                success = false
+            })
+            return
+        end
+        TriggerServerEvent("ND_ATM:deposit", data.amount)
+    end
 end)
 
-RegisterNUICallback("deposit", function(data)
-    TriggerServerEvent("ND:deposit", data.amount)
-end)
-
--- Alert thread
-Citizen.CreateThread(function()
-	while true do
-		Citizen.Wait(0)
-		if not display and IsNearATM() then
-			alert("Press ~INPUT_CONTEXT~ to use the ATM")
-			if IsControlJustPressed(0, 51) then
-				SetDisplay(true)
-			end
-            if display then
-                TriggerScreenblurFadeIn(1000)
-            else
-                TriggerScreenblurFadeOut(1000)
-            end
-		end
-	end
+-- update the balance on the ui and confirm if the deposit/withdraw was successful.
+RegisterNetEvent("ND_ATM:update")
+AddEventHandler("ND_ATM:update", function(status)
+    Citizen.Wait(1000)
+    local playerInfo = exports["ND_Core"]:getCharacterInfo()
+    SendNUIMessage({
+        balance = "Account Balance: $" .. playerInfo.bank .. ".00",
+        success = status
+    })
 end)
