@@ -31,6 +31,10 @@ function isAuthorized(door)
     return false
 end
 
+AddEventHandler("playerSpawned", function()
+    TriggerServerEvent("ND_Doorlocks:getDoors")
+end)
+
 AddEventHandler("onResourceStart", function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
       return
@@ -79,5 +83,18 @@ AddEventHandler("ND_Doorlocks:syncDoor", function(doorID, state)
     for _, doors in pairs(doorList[doorID].doors) do
         local entity = GetClosestObjectOfType(doors.coords.x, doors.coords.y, doors.coords.z, 1.0, doors.hash, false, false, false)
         SetEntityHeading(entity, doors.heading)
+        FreezeEntityPosition(entity, state)
+    end
+end)
+
+RegisterNetEvent("ND_Doorlocks:returnDoors")
+AddEventHandler("ND_Doorlocks:returnDoors", function(updatedDoors)
+    for doorID, state in pairs(updatedDoors) do
+        doorList[doorID].locked = state
+        for _, doors in pairs(doorList[doorID].doors) do
+            local entity = GetClosestObjectOfType(doors.coords.x, doors.coords.y, doors.coords.z, 1.0, doors.hash, false, false, false)
+            SetEntityHeading(entity, doors.heading)
+            FreezeEntityPosition(entity, state)
+        end
     end
 end)
