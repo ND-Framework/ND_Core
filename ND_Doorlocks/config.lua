@@ -1,7 +1,7 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 doorList = {
-    -- Sandy Shores Sheriff office front door.
+    -- Sandy Shores Sheriff's Office front door.
     {
         textCoords = vector3(1855.1896, 3683.4507, 34.2675),
         authorizedJobs = {"BCSO", "LSPD", "BCSO"},
@@ -12,7 +12,7 @@ doorList = {
         }
     },
 
-    -- Paleto bay Sheriff office office front doors.
+    -- Paleto Bay Sheriff's Office front doors.
     {
         textCoords = vector3(-443.6129, 6016.0483, 31.7164),
         authorizedJobs = {"BCSO", "LSPD", "BCSO"},
