@@ -9,6 +9,11 @@ if resource ~= expectedName then
     print("Change the resource name to ^4" .. expectedName .. " ^0or else it won't work!")
 end
 
+-- add dots to version.
+function fixVersion(version)
+    return string.sub(version, 1, 1) .. "." .. string.sub(version, 2, 2) .. "." .. string.sub(version, 3, 3)
+end
+
 -- check if resource version is up to date
 PerformHttpRequest("https://raw.githubusercontent.com/Andyyy7666/ND_Framework/main/ND_Core/fxmanifest.lua", function(errorCode, resultData, resultHeaders)
     i, j = string.find(tostring(resultData), "version")
@@ -24,12 +29,12 @@ PerformHttpRequest("https://raw.githubusercontent.com/Andyyy7666/ND_Framework/ma
     if githubVersion and fileVersion then
         if githubVersion > fileVersion then
             print("^1[^4" .. expectedName .. "^1] WARNING^0")
-            print("^4" .. expectedName .. " ^0is outdated. Please update it from ^5https://github.com/Andyyy7666/ND_Framework ^0| Current Version: ^1" .. fileVersion .. " ^0| New Version: ^2" .. githubVersion .. " ^0|")
+            print("^4" .. expectedName .. " ^0is outdated. Please update it from ^5https://github.com/Andyyy7666/ND_Framework ^0| Current Version: ^1" .. fixVersion(fileVersion) .. " ^0| New Version: ^2" .. fixVersion(githubVersion) .. " ^0|")
         elseif githubVersion < fileVersion then
             print("^1[^4" .. expectedName .. "^1] WARNING^0")
-            print("^4" .. expectedName .. " ^0version number is higher than expected | Current Version: ^3" .. fileVersion .. " ^0| Expected Version: ^2" .. githubVersion .. " ^0|")
+            print("^4" .. expectedName .. " ^0version number is higher than expected | Current Version: ^3" .. fixVersion(fileVersion) .. " ^0| Expected Version: ^2" .. fixVersion(githubVersion) .. " ^0|")
         else
-            print("^4" .. expectedName .. " ^0is up to date | Current Version: ^2" .. fileVersion .. " ^0|")
+            print("^4" .. expectedName .. " ^0is up to date | Current Version: ^2" .. fixVersion(fileVersion) .. " ^0|")
         end
     else
         print("^1[^4" .. expectedName .. "^1] WARNING^0")
