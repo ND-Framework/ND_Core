@@ -1,5 +1,4 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
-local nearDoor = true
 
 function drawText3D(coords, text)
     local onScreen, _x, _y = World3dToScreen2d(coords.x, coords.y, coords.z + 0.5)
@@ -23,7 +22,6 @@ function getDoorText(locked)
 end
 
 function isAuthorized(door)
-    nearDoor = true
     for _, authorizedJob in pairs(door.authorizedJobs) do
         if job == authorizedJob then
             return true
@@ -32,13 +30,20 @@ function isAuthorized(door)
     return false
 end
 
+AddEventHandler("onResourceStart", function(resourceName)
+    if (GetCurrentResourceName() ~= resourceName) then
+      return
+    end
+    job = exports["ND_Core"]:getCharacterInfo().department
+end)
+
+AddEventHandler("characterChanged", function(selectedCharacter)
+    job = selectedCharacter.department
+end)
+
 Citizen.CreateThread(function()
     while true do
         pedCoords = GetEntityCoords(PlayerPedId())
-        if nearDoor then
-            job = exports["ND_Core"]:getCharacterInfo().department
-            nearDoor = false
-        end
         Citizen.Wait(1000)
     end
 end)
