@@ -1,21 +1,21 @@
 if config["/me"] then
-    TriggerEvent("chat:addSuggestion", "/me", "Send message in the third person (Proximity Chat).", {{ name="Action", help="Describe your action."}})
+    TriggerEvent("chat:addSuggestion", "/me", "Send message in the third person (Proximity).", {{ name="Action", help="Describe your action."}})
 end
 
 if config["/gme"] then
-    TriggerEvent("chat:addSuggestion", "/gme", "Send message in the third person (Global Chat).", {{ name="Action", help="Describe your action."}})
+    TriggerEvent("chat:addSuggestion", "/gme", "Send message in the third person (Global).", {{ name="Action", help="Describe your action."}})
 end
 
 if config["/ooc"] then
-    TriggerEvent("chat:addSuggestion", "/ooc", "Out Of Character chat Message (Global Chat).", {{name="Message", help="Put your questions or help request."}})
+    TriggerEvent("chat:addSuggestion", "/ooc", "Out of Character chat message (Global).", {{name="Message", help="Put your questions or help request."}})
 end
 
 if config["/twt"] then
-    TriggerEvent("chat:addSuggestion", "/twt", "Send a Twotter in game. (Global Chat)", {{name="Message", help="Twotter Message."}})
+    TriggerEvent("chat:addSuggestion", "/twt", "Send a Twotter in game. (Global)", {{name="Message", help="Twotter Message."}})
 end
 
 if config["/darkweb"].enabled then
-    TriggerEvent("chat:addSuggestion", "/darkweb", "Send a anonymous message in game (Global Chat).", {{ name="Message", help=""}})
+    TriggerEvent("chat:addSuggestion", "/darkweb", "Send a anonymous message in game (Global).", {{ name="Message", help=""}})
 end
 
 if config["/911"].enabled then
