@@ -1,4 +1,5 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
+local hasAccess = false
 
 function drawText3D(coords, text)
     local onScreen, _x, _y = World3dToScreen2d(coords.x, coords.y, coords.z + 0.5)
@@ -51,16 +52,21 @@ end)
 Citizen.CreateThread(function()
     while true do
         for doorID, door in pairs(doorList) do
-            if #(pedCoords - door.textCoords) < door.accessDistance and isAuthorized(door) then
-                drawText3D(door.textCoords, getDoorText(door.locked))
+            if #(pedCoords - door.textCoords) < door.accessDistance then
+                hasAccess = isAuthorized(door)
+                if hasAccess then
+                    drawText3D(door.textCoords, getDoorText(door.locked))
+                end
                 for _, doors in pairs(door.doors) do
                     local entity = GetClosestObjectOfType(doors.coords.x, doors.coords.y, doors.coords.z, 1.0, doors.hash, false, false, false)
                     FreezeEntityPosition(entity, door.locked)
                 end
             end
             if IsControlJustPressed(0, 51) then
-                door.locked = not door.locked
-                TriggerServerEvent("ND_Doorlocks:syncDoor", doorID, door.locked)
+                if hasAccess then
+                    door.locked = not door.locked
+                    TriggerServerEvent("ND_Doorlocks:syncDoor", doorID, door.locked)
+                end
             end
         end
         Citizen.Wait(0)
