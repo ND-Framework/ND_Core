@@ -209,8 +209,8 @@ RegisterNUICallback("tpDoNot", function()
     TriggerServerEvent("getMoney", selectedCharacter.id)
 end)
 
--- discord rich precense will show on a users profile.
-if config.enableRichPrecence then
+-- discord rich presence will show on a users profile.
+if config.enableRichPresence then
     Citizen.CreateThread(function()
         while true do
             SetDiscordAppId(config.appId)

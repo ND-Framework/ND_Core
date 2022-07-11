@@ -4,7 +4,7 @@ config = {
     serverName = "Andy's Development",
     characterLimit = 15,
     changeCharacterCommand = "changecharacter", -- this is the command to open the ui again and change your character.
-    customPauseMenu = true, -- this will create a custom pause menu. It will display your money, characters name. And server name in the pause menu.
+    customPauseMenu = true, -- this will create a custom pause menu. It will display your money, characters name and the server name in the pause menu.
 
     -- set your backgrounds, if you have more than 1 then it will randomly change everytime you open the ui.
     backgrounds = {
@@ -56,12 +56,12 @@ config = {
     enableMoneySystem = true,
     maxStartingCash = 2500,
     maxStartingBank = 8000,
-    payCommand = "pay", -- Command to transfer someone money from bank account.
-    giveCommand = "give", -- Command to give someone close money from wallet.
+    payCommand = "pay", -- Command to transfer money from your bank to another persons.
+    giveCommand = "give", -- Command to give someone near you cash.
     
-    -- Discord Rich precence
-    enableRichPrecence = true,
-    updateIntervall = 60, -- how many seconds delay until it updates status.
+    -- Discord Rich presence
+    enableRichPresence = true,
+    updateIntervall = 60, -- how many seconds of delay until it updates status.
     appId = 858146067018416128,
     largeLogo = "andyyy",
     smallLogo = "andyyy",
