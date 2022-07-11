@@ -92,7 +92,7 @@ function validateDepartment(player, department)
         local roles = getUserDiscordInfo(discordUserId).roles
 
         for _, roleId in pairs(departmentExists) do
-            if roles[roleId] or roleId == 0 then
+            if roles[roleId] or roleId == 0 or roleId == "0" then
                 return true
             end
         end
@@ -109,7 +109,7 @@ AddEventHandler("checkPerms", function()
 
     for dept, roleTable in pairs(config.departments) do
         for _, roleId in pairs(roleTable) do
-            if roles[roleId] or roleId == 0 then
+            if roles[roleId] or roleId == 0 or roleId == "0" then
                 table.insert(allowedRoles, dept)
             end
         end
