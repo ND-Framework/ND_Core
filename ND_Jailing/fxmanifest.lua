@@ -1,4 +1,4 @@
--- For support join my discord: https://discord.gg/Z9Mxu72zZ6
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6  
 
 author "Andyyy#7666"
 description "ND Framework Jailing"
