@@ -26,7 +26,7 @@ end
 
 -- check if the players department can receive shot spotter alerts.
 function isCop()
-    local job = NDCore.functions:getSelectedCharacter().job
+    local job = NDCore.Functions.GetSelectedCharacter().job
     for _, department in pairs(config.receiveAlerts) do
         if department == job then
             return true

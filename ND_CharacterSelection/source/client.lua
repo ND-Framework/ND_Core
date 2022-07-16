@@ -19,8 +19,8 @@ function SetDisplay(bool, typeName, bg)
         type = typeName,
         background = background,
         status = bool,
-        serverName = NDCore.config.serverName,
-        characterAmount = tablelength(NDCore.characters) .. "/" .. NDCore.config.characterLimit
+        serverName = NDCore.Config.serverName,
+        characterAmount = tablelength(NDCore.characters) .. "/" .. NDCore.Config.characterLimit
     })
     if config.characterSelectionAopDisplay then
         SendNUIMessage({
@@ -32,7 +32,7 @@ end
 
 function start(switch)
     TriggerServerEvent("ND_CharacterSelection:checkPerms")
-    TriggerServerEvent("ND:getCharacters")
+    TriggerServerEvent("ND:GetCharacters")
     if switch then
         local ped = PlayerPedId()
         SwitchOutPlayer(ped, 0, 1)
@@ -41,8 +41,8 @@ function start(switch)
     end
     SendNUIMessage({
         type = "onStart",
-        maxStartingBank = NDCore.config.startingBank,
-        maxStartingCash = NDCore.config.startingCash
+        maxStartingBank = NDCore.Config.startingBank,
+        maxStartingCash = NDCore.Config.startingCash
     })
     if config.characterSelectionAopDisplay then
         SendNUIMessage({
@@ -100,10 +100,10 @@ end)
 
 -- Selecting a player from the iu.
 RegisterNUICallback("setMainCharacter", function(data)
-    NDCore.functions:getCharacters(function(characters)
-        NDCore.selectedCharacter = characters[data.id]
+    NDCore.Functions.GetCharacters(function(characters)
+        NDCore.SelectedCharacter = characters[data.id]
     end)
-    for _, spawn in pairs(config.spawns[NDCore.selectedCharacter.job]) do
+    for _, spawn in pairs(config.spawns[NDCore.SelectedCharacter.job]) do
         SendNUIMessage({
             type = "setSpawns",
             x = spawn.x,
@@ -112,12 +112,12 @@ RegisterNUICallback("setMainCharacter", function(data)
             name = spawn.name
         })
     end
-    TriggerServerEvent("ND:setCharacterOnline", NDCore.selectedCharacter.id)
+    TriggerServerEvent("ND:setCharacterOnline", NDCore.SelectedCharacter.id)
 end)
 
 -- Creating a character from the ui.
 RegisterNUICallback("newCharacter", function(data)
-    if tablelength(NDCore.characters) < NDCore.config.characterLimit then
+    if tablelength(NDCore.characters) < NDCore.Config.characterLimit then
         TriggerServerEvent("ND_CharacterSelection:newCharacter", {
             firstName = data.firstName,
             lastName = data.lastName,

@@ -41,7 +41,7 @@ function drawText3D(coords, text)
 end
 
 function hasAccess()
-    local job = NDCore.functions:getSelectedCharacter().job
+    local job = NDCore.Functions.GetSelectedCharacter().job
     for _, department in pairs(config.accessDepartments) do
         if department == job then
             return true

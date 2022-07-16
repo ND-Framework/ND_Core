@@ -1,7 +1,7 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 NDCore = exports["ND_Core"]:GetCoreObject()
-local job = NDCore.functions:getSelectedCharacter().job
+local job = nil
 local hasAccess = false
 
 function drawText3D(coords, text)
