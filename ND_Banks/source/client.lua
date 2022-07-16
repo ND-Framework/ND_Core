@@ -1,5 +1,6 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
+NDCore = exports["ND_Core"]:GetCoreObject()
 local display = false
 local nearModel = false
 
@@ -38,13 +39,13 @@ end
 
 -- Hide/Show ui
 function SetDisplay(bool)
-    local playerInfo = exports["ND_Core"]:getCharacterInfo()
+    local selectedCharacter = NDCore.functions:getSelectedCharacter()
     display = bool
     SetNuiFocus(bool, bool)
     SendNUIMessage({
         status = bool,
-		playerName = playerInfo.firstName .. " " .. playerInfo.lastName,
-		balance = "Account Balance: $" .. playerInfo.bank .. ".00",
+		playerName = selectedCharacter.firstName .. " " .. selectedCharacter.lastName,
+		balance = "Account Balance: $" .. selectedCharacter.bank .. ".00",
         date = days[GetClockDayOfWeek() + 1],
         time = getTime()
     })
@@ -145,9 +146,9 @@ end)
 RegisterNetEvent("ND_Banks:update")
 AddEventHandler("ND_Banks:update", function(status)
     Citizen.Wait(1000)
-    local playerInfo = exports["ND_Core"]:getCharacterInfo()
+    local selectedCharacter = NDCore.functions:getSelectedCharacter()
     SendNUIMessage({
-        balance = "Account Balance: $" .. playerInfo.bank .. ".00",
+        balance = "Account Balance: $" .. selectedCharacter.bank .. ".00",
         success = status
     })
 end)

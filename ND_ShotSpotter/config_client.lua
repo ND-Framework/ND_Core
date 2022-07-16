@@ -1,21 +1,21 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 config = {
-    shotSpotterDelay = 10, -- How long until the police are notified about the shooting (in seconds).
+    shotSpotterDelay = 10, -- delay (in seconds) when cops will receive a notification after there has been a shooting.
     shotSpotterTimer = 120, -- How long should the shot spotter stay on the map.
-    shotSpotterCooldown = 30, -- How long until the shot spotter can be activated again.
+    shotSpotterCooldown = 30, -- Cooldown for the next time a player can trigger it again.
 
-    shotSpotterUsePostal = true, -- If you're using a postal script turn this to true.
-    postalResourceName = "nearest-postal", -- the resource name of the postal script, this is used for the export.
+    shotSpotterUsePostal = true, -- if you're using the nearest postal script turn this to true.
+    postalResourceName = "nearest-postal", -- the resource name of the nearest postal script, this is used for the export.
 
-    -- What departments should recieve the alerts.
+    -- This is the departments that will receive the shot spotter alerts.
     receiveAlerts = {
         "SAHP",
         "LSPD",
         "BCSO"
     },
 
-    -- What weapons will not trigger the shot spotter.
+    -- Weapon that won't be triggered by the shot spotter.
     weaponBlackList = {
         "weapon_flaregun",
         "weapon_stungun_mp",
@@ -35,7 +35,7 @@ config = {
         "weapon_fertilizercan"
     },
 
-    useRealisticShotSpotter = false, -- Enable this if you want the shot spotters to only be in the locations below. (default is in and around Los Santos)
+    useRealisticShotSpotter = false, -- this is if you want to enable the shot spotter only when the player is inside one of the zones below. The zones are in the city and a little around it.
     realisticShotSpotterLocations = {
         {x = 653.4214, y = -648.7440, z = 57.1897},
         {x = 1015.9837, y = -255.2573, z = 85.5857},
@@ -51,7 +51,7 @@ config = {
         {x = 716.6274, y = -1958.7434, z = 44.7564}
     },
 
-    testing = false -- If you're adding zones and want to test them easier, set this to true. Otherwise keep it false.
+    testing = false -- if you're adding zones above and want to enable the blips on the map to see where the zone is then turn this on, otherwise turn it off.
 }
 
 function notify(message)

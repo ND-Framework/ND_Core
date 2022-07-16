@@ -1,5 +1,6 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
+NDCore = exports["ND_Core"]:GetCoreObject()
 local display = false
 local nearModel = false
 
@@ -35,13 +36,13 @@ end
 
 -- Hide/Show ui
 function SetDisplay(bool)
-    local playerInfo = exports["ND_Core"]:getCharacterInfo()
+    local selectedCharacter = NDCore.functions:getSelectedCharacter()
     display = bool
     SetNuiFocus(bool, bool)
     SendNUIMessage({
         status = bool,
-		playerName = playerInfo.firstName .. " " .. playerInfo.lastName,
-		balance = "Account Balance: $" .. playerInfo.bank .. ".00",
+		playerName = selectedCharacter.firstName .. " " .. selectedCharacter.lastName,
+		balance = "Account Balance: $" .. selectedCharacter.bank .. ".00",
         date = days[GetClockDayOfWeek() + 1],
         time = getTime()
     })
@@ -116,7 +117,7 @@ RegisterNUICallback("useATM", function(data)
             })
             return
         end
-        TriggerServerEvent("ND_ATM:withdraw", data.amount)
+        TriggerServerEvent("ND_ATMs:withdraw", data.amount)
     elseif action == "DEPOSIT" then
         if data.amount == "" then
             Citizen.Wait(1000)
@@ -125,17 +126,17 @@ RegisterNUICallback("useATM", function(data)
             })
             return
         end
-        TriggerServerEvent("ND_ATM:deposit", data.amount)
+        TriggerServerEvent("ND_ATMs:deposit", data.amount)
     end
 end)
 
 -- update the balance on the ui and confirm if the deposit/withdraw was successful.
-RegisterNetEvent("ND_ATM:update")
-AddEventHandler("ND_ATM:update", function(status)
+RegisterNetEvent("ND_ATMs:update")
+AddEventHandler("ND_ATMs:update", function(status)
     Citizen.Wait(1000)
-    local playerInfo = exports["ND_Core"]:getCharacterInfo()
+    local selectedCharacter = NDCore.functions:getSelectedCharacter()
     SendNUIMessage({
-        balance = "Account Balance: $" .. playerInfo.bank .. ".00",
+        balance = "Account Balance: $" .. selectedCharacter.bank .. ".00",
         success = status
     })
 end)

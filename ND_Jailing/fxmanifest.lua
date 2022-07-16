@@ -2,7 +2,7 @@
 
 author "Andyyy#7666"
 description "ND Framework Jailing"
-version "2.0.0"
+version "2.1.0"
 
 fx_version "cerulean"
 game "gta5"
@@ -21,3 +21,5 @@ server_scripts {
     "config_server.lua",
     "source/server.lua"
 }
+
+dependency "ND_Core"

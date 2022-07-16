@@ -1,4 +1,8 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
+
+NDCore = exports["ND_Core"]:GetCoreObject()
+NDCore.functions:versionChecker("ND_Doorlocks", GetCurrentResourceName(), "https://github.com/Andyyy7666/ND_Framework", "https://raw.githubusercontent.com/Andyyy7666/ND_Framework/main/ND_Doorlocks/fxmanifest.lua")
+
 local updatedDoors = {}
 
 RegisterNetEvent("ND_Doorlocks:syncDoor")

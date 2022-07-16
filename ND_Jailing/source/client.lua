@@ -2,6 +2,7 @@ local display = false
 local nearJailingUi = false
 local jailTime = 0
 local ped
+NDCore = exports["ND_Core"]:GetCoreObject()
 
 function SetDisplay(bool)
     display = bool
@@ -40,9 +41,9 @@ function drawText3D(coords, text)
 end
 
 function hasAccess()
-    local selectedDepartment = exports["ND_Core"]:getCharacterInfo().department
+    local job = NDCore.functions:getSelectedCharacter().job
     for _, department in pairs(config.accessDepartments) do
-        if department == selectedDepartment then
+        if department == job then
             return true
         end
     end

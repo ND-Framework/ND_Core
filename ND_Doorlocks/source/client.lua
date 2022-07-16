@@ -1,4 +1,7 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
+
+NDCore = exports["ND_Core"]:GetCoreObject()
+local job = NDCore.functions:getSelectedCharacter().job
 local hasAccess = false
 
 function drawText3D(coords, text)
@@ -17,9 +20,17 @@ end
 
 function getDoorText(locked)
     if locked then
-        return "Locked [E]"
+        if hasAccess then
+            return "Locked [E]"
+        else
+            return "Locked"
+        end
     end
-    return "Unlocked [E]"
+    if hasAccess then
+        return "Unlocked [E]"
+    else
+        return ""
+    end
 end
 
 function isAuthorized(door)
@@ -31,19 +42,13 @@ function isAuthorized(door)
     return false
 end
 
+RegisterNetEvent("ND:setCharacter")
+AddEventHandler("ND:setCharacter", function(character)
+    job = character.job
+end)
+
 AddEventHandler("playerSpawned", function()
     TriggerServerEvent("ND_Doorlocks:getDoors")
-end)
-
-AddEventHandler("onResourceStart", function(resourceName)
-    if (GetCurrentResourceName() ~= resourceName) then
-      return
-    end
-    job = exports["ND_Core"]:getCharacterInfo().department
-end)
-
-AddEventHandler("characterChanged", function(selectedCharacter)
-    job = selectedCharacter.department
 end)
 
 Citizen.CreateThread(function()
@@ -58,9 +63,7 @@ Citizen.CreateThread(function()
         for doorID, door in pairs(doorList) do
             if #(pedCoords - door.textCoords) < door.accessDistance then
                 hasAccess = isAuthorized(door)
-                if hasAccess then
-                    drawText3D(door.textCoords, getDoorText(door.locked))
-                end
+                drawText3D(door.textCoords, getDoorText(door.locked))
                 for _, doors in pairs(door.doors) do
                     local entity = GetClosestObjectOfType(doors.coords.x, doors.coords.y, doors.coords.z, 1.0, doors.hash, false, false, false)
                     FreezeEntityPosition(entity, door.locked)

@@ -1,3 +1,6 @@
+NDCore = exports["ND_Core"]:GetCoreObject()
+NDCore.functions:versionChecker("ND_Jailing", GetCurrentResourceName(), "https://github.com/Andyyy7666/ND_Framework", "https://raw.githubusercontent.com/Andyyy7666/ND_Framework/main/ND_Jailing/fxmanifest.lua")
+
 local jailedPlayers = {}
 
 -- Get player any identifier, available types: steam, license, xbl, ip, discord, live.

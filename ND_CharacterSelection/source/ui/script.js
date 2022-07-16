@@ -148,15 +148,7 @@ $(function() {
         $(`#characterButton${id}`).click(function() {
             spawnMenu(true)
             $.post(`https://${GetParentResourceName()}/setMainCharacter`, JSON.stringify({
-                firstName: firstName,
-                lastName: lastName,
-                dateOfBirth: dateOfBirth,
-                gender: gender,
-                twtName: twtName,
-                department: department,
-                startingCash: startingCash,
-                startingBank: startingBank,
-                character: id
+                id: id
             }));
             return;
         });

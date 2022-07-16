@@ -1,5 +1,6 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
+NDCore = exports["ND_Core"]:GetCoreObject()
 local alreadyShot = false
 local setRoute = false
 local route = false
@@ -25,9 +26,9 @@ end
 
 -- check if the players department can receive shot spotter alerts.
 function isCop()
-    local selectedDepartment = exports["ND_Core"]:getCharacterInfo().department
+    local job = NDCore.functions:getSelectedCharacter().job
     for _, department in pairs(config.receiveAlerts) do
-        if department == selectedDepartment then
+        if department == job then
             return true
         end
     end
