@@ -2,7 +2,7 @@
 
 author "Andyyy#7666"
 description "ND Framework Jailing"
-version "2.1.0"
+version "2.2.0"
 
 fx_version "cerulean"
 game "gta5"

@@ -35,12 +35,12 @@ end
 RegisterNetEvent("ND_Jailing:jailPlayer")
 AddEventHandler("ND_Jailing:jailPlayer", function(id, time, fine, reason)
     local player = source
-    local players = exports["ND_Core"]:getCharacterTable()
-    local dept = players[player].dept
+    local players = NDCore.functions:getPlayers()
+    local dept = players[player].job
     for _, department in pairs(config.accessDepartments) do
         if department == dept then
             jailedPlayers[GetPlayerIdentifierFromType("license", id)] = time
-            exports["ND_Core"]:deductMoney(fine, id, "bank")
+            NDCore.functions:deductMoney(fine, id, "bank")
             TriggerClientEvent("ND_Jailing:jailPlayer", id, time)
             sendToDiscord("Jail Logs", "**" .. GetPlayerName(player) .. "** Jailed **" .. GetPlayerName(id) .. "** for **" .. time .. " seconds** with the reason: **" .. reason .. "**.", 1595381)
             TriggerClientEvent('chat:addMessage', -1, {
