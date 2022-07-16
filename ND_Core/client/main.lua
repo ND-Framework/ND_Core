@@ -1,22 +1,22 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 NDCore = {}
-NDCore.selectedCharacter = nil
+NDCore.SelectedCharacter = nil
 NDCore.characters = {}
-NDCore.functions = {}
-NDCore.config = config
+NDCore.Functions = {}
+NDCore.Config = config
 
 function GetCoreObject()
     return NDCore
 end
 
-function NDCore.functions:getSelectedCharacter(cb)
-    if not cb then return NDCore.selectedCharacter end
-    cb(NDCore.selectedCharacter)
+function NDCore.Functions.GetSelectedCharacter(cb)
+    if not cb then return NDCore.SelectedCharacter end
+    cb(NDCore.SelectedCharacter)
 end
 
-function NDCore.functions:getCharacters(cb)
-    if not cb then return NDCore.selectedCharacter end
+function NDCore.Functions.GetCharacters(cb)
+    if not cb then return NDCore.SelectedCharacter end
     cb(NDCore.characters)
 end
 
@@ -25,12 +25,12 @@ if config.enableRichPrecence then
     Citizen.CreateThread(function()
         SetDiscordAppId(config.appId)
         while true do
-            if NDCore.selectedCharacter then
-                SetRichPresence(" Playing : " .. config.serverName .. " as " .. NDCore.selectedCharacter.firstName .. " " .. NDCore.selectedCharacter.lastName)
+            if NDCore.SelectedCharacter then
+                SetRichPresence(" Playing : " .. config.serverName .. " as " .. NDCore.SelectedCharacter.firstName .. " " .. NDCore.SelectedCharacter.lastName)
                 SetDiscordRichPresenceAsset(config.largeLogo)
                 SetDiscordRichPresenceAssetText("Playing: " .. config.serverName)
                 SetDiscordRichPresenceAssetSmall(config.smallLogo)
-                SetDiscordRichPresenceAssetSmallText("Playing as: " .. NDCore.selectedCharacter.firstName .. " " .. NDCore.selectedCharacter.lastName)
+                SetDiscordRichPresenceAssetSmallText("Playing as: " .. NDCore.SelectedCharacter.firstName .. " " .. NDCore.SelectedCharacter.lastName)
                 SetDiscordRichPresenceAction(0, config.firstButtonName, config.firstButtonLink)
                 SetDiscordRichPresenceAction(1, config.secondButtonName, config.secondButtonLink)
             end
@@ -44,13 +44,13 @@ if config.customPauseMenu then
     Citizen.CreateThread(function()
         while true do
             Citizen.Wait(0)
-            if NDCore.selectedCharacter then
+            if NDCore.SelectedCharacter then
                 if IsPauseMenuActive() then
                     BeginScaleformMovieMethodOnFrontendHeader("SET_HEADING_DETAILS")
                     AddTextEntry("FE_THDR_GTAO", config.serverName) 
-                    ScaleformMovieMethodAddParamPlayerNameString(NDCore.selectedCharacter.firstName .. " " .. NDCore.selectedCharacter.lastName)
-                    PushScaleformMovieFunctionParameterString("Cash: $" .. tostring(NDCore.selectedCharacter.cash))
-                    PushScaleformMovieFunctionParameterString("Bank: $" .. tostring(NDCore.selectedCharacter.bank))
+                    ScaleformMovieMethodAddParamPlayerNameString(NDCore.SelectedCharacter.firstName .. " " .. NDCore.SelectedCharacter.lastName)
+                    PushScaleformMovieFunctionParameterString("Cash: $" .. tostring(NDCore.SelectedCharacter.cash))
+                    PushScaleformMovieFunctionParameterString("Bank: $" .. tostring(NDCore.SelectedCharacter.bank))
                     EndScaleformMovieMethod()
                 end
             end
@@ -66,13 +66,13 @@ end)
 -- updates the money on the client.
 RegisterNetEvent("ND:updateMoney")
 AddEventHandler("ND:updateMoney", function(cash, bank)
-    NDCore.selectedCharacter.cash = cash
-    NDCore.selectedCharacter.bank = bank
+    NDCore.SelectedCharacter.cash = cash
+    NDCore.SelectedCharacter.bank = bank
 end)
 
 RegisterNetEvent("ND:setCharacter")
 AddEventHandler("ND:setCharacter", function(character)
-    NDCore.selectedCharacter = character
+    NDCore.SelectedCharacter = character
 end)
 
 -- Enables pvp if it's selected in the config.

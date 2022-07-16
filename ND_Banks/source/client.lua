@@ -39,7 +39,7 @@ end
 
 -- Hide/Show ui
 function SetDisplay(bool)
-    local selectedCharacter = NDCore.functions:getSelectedCharacter()
+    local selectedCharacter = NDCore.Functions.GetSelectedCharacter()
     display = bool
     SetNuiFocus(bool, bool)
     SendNUIMessage({
@@ -146,7 +146,7 @@ end)
 RegisterNetEvent("ND_Banks:update")
 AddEventHandler("ND_Banks:update", function(status)
     Citizen.Wait(1000)
-    local selectedCharacter = NDCore.functions:getSelectedCharacter()
+    local selectedCharacter = NDCore.Functions.GetSelectedCharacter()
     SendNUIMessage({
         balance = "Account Balance: $" .. selectedCharacter.bank .. ".00",
         success = status

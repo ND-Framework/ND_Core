@@ -1,3 +1,5 @@
+NDCore = exports["ND_Core"]:GetCoreObject()
+
 if config["/me"] then
     TriggerEvent("chat:addSuggestion", "/me", "Send message in the third person (Proximity).", {{ name="Action", help="Describe your action."}})
 end
@@ -21,9 +23,12 @@ end
 if config["/911"].enabled then
     RegisterNetEvent("ND_Chat:911")
     AddEventHandler("ND_Chat:911", function(coords, callDescription)
-        local selectedCharacter = exports["ND_Core"]:getCharacterInfo()
+        local selectedCharacter
+        NDCore.Functions.GetSelectedCharacter(function(character)
+            selectedCharacter = character
+        end)
         for _, department in pairs(config["/911"].callTo) do
-            if selectedCharacter.department == department then
+            if selectedCharacter.job == department then
                 local location = GetStreetNameFromHashKey(GetStreetNameAtCoord(coords.x, coords.y, coords.z))
                 TriggerEvent("chat:addMessage", {
                     color = {255, 0, 0},

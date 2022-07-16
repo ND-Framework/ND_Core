@@ -1,13 +1,13 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 -- Callback to update each selected character on the server.
-function NDCore.functions:getPlayers(players)
-    if not cb then return NDCore.players end
-    cb(NDCore.players)
+function NDCore.Functions.GetPlayers(players)
+    if not cb then return NDCore.Players end
+    cb(NDCore.Players)
 end
 
 -- Used to retrive the players discord server nickname, discord name and tag, and the roles.
-function NDCore.functions:getUserDiscordInfo(discordUserId)
+function NDCore.Functions.GetUserDiscordInfo(discordUserId)
     local data
     PerformHttpRequest("https://discordapp.com/api/guilds/" .. server_config.guildId .. "/members/" .. discordUserId, function(errorCode, resultData, resultHeaders)
 		if errorCode ~= 200 then
@@ -32,7 +32,7 @@ function NDCore.functions:getUserDiscordInfo(discordUserId)
 end
 
 -- Get player any identifier, available types: steam, license, xbl, ip, discord, live.
-function NDCore.functions:GetPlayerIdentifierFromType(type, player)
+function NDCore.Functions.GetPlayerIdentifierFromType(type, player)
     local identifierCount = GetNumPlayerIdentifiers(player)
     for count = 0, identifierCount do
         local identifier = GetPlayerIdentifier(player, count)
@@ -44,9 +44,9 @@ function NDCore.functions:GetPlayerIdentifierFromType(type, player)
 end
 
 -- This will return the server id and ND player data of a nearby player.
-function NDCore.functions:getNearbyPedToPlayer(player)
+function NDCore.Functions.GetNearbyPedToPlayer(player)
     local pedCoords = GetEntityCoords(GetPlayerPed(player))
-    for targetId, targetInfo in pairs(NDCore.players) do
+    for targetId, targetInfo in pairs(NDCore.Players) do
         local targetCoords = GetEntityCoords(GetPlayerPed(targetId))
         if #(pedCoords - targetCoords) < 2.0 and targetId ~= player then
             return targetId, targetInfo
@@ -55,21 +55,21 @@ function NDCore.functions:getNearbyPedToPlayer(player)
 end
 
 -- update the players money on the client kinda like a refresh.
-function NDCore.functions:updateMoney(player)
+function NDCore.Functions.UpdateMoney(player)
     local player = tonumber(player)
-    MySQL.query("SELECT cash, bank FROM characters WHERE character_id = ?", {NDCore.players[player].id}, function(result)
+    MySQL.query("SELECT cash, bank FROM characters WHERE character_id = ?", {NDCore.Players[player].id}, function(result)
         if result then
             local cash = result[1].cash
             local bank = result[1].bank
-            NDCore.players[player].cash = cash
-            NDCore.players[player].bank = bank
+            NDCore.Players[player].cash = cash
+            NDCore.Players[player].bank = bank
             TriggerClientEvent("ND:updateMoney", player, cash, bank)
         end
     end)
 end
 
 -- Transfer money from one players bank account to another.
-function NDCore.functions:transferBank(amount, player, target)
+function NDCore.Functions.TransferBank(amount, player, target)
     local amount = tonumber(amount)
     local player = tonumber(player)
     local target = tonumber(target)
@@ -91,27 +91,27 @@ function NDCore.functions:transferBank(amount, player, target)
             args = {"Error", "You can't send that amount."}
         })
         return false
-    elseif NDCore.players[player].bank < amount then
+    elseif NDCore.Players[player].bank < amount then
         TriggerClientEvent("chat:addMessage", player, {
             color = {255, 0, 0},
             args = {"Error", "You don't have enough money."}
         })
         return false
     else
-        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.players[player].id})
-        NDCore.functions:updateMoney(player)
-        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.players[target].id})
-        NDCore.functions:updateMoney(target)
+        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+        NDCore.Functions.UpdateMoney(player)
+        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.Players[target].id})
+        NDCore.Functions.UpdateMoney(target)
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
-            args = {"Success", "You paid " .. NDCore.players[target].firstName .. " " .. NDCore.players[target].lastName .. " $" .. amount .. "."}
+            args = {"Success", "You paid " .. NDCore.Players[target].firstName .. " " .. NDCore.Players[target].lastName .. " $" .. amount .. "."}
         })
         return true
     end
 end
 
 -- Give cash from one players wallet to another.
-function NDCore.functions:giveCash(amount, player, target)
+function NDCore.Functions.GiveCash(amount, player, target)
     local amount = tonumber(amount)
     local player = tonumber(player)
     local target = tonumber(target)
@@ -133,30 +133,30 @@ function NDCore.functions:giveCash(amount, player, target)
             args = {"Error", "You can't give that amount."}
         })
         return false
-    elseif NDCore.players[player].cash < amount then
+    elseif NDCore.Players[player].cash < amount then
         TriggerClientEvent("chat:addMessage", player, {
             color = {255, 0, 0},
             args = {"Error", "You don't have enough money."}
         })
         return false
     else
-        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.players[player].id})
-        NDCore.functions:updateMoney(player)
-        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.players[target].id})
-        NDCore.functions:updateMoney(target)
+        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+        NDCore.Functions.UpdateMoney(player)
+        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.Players[target].id})
+        NDCore.Functions.UpdateMoney(target)
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
-            args = {"Success", "You gave " .. NDCore.players[target].firstName .. " " .. NDCore.players[target].lastName .. " $" .. amount .. "."}
+            args = {"Success", "You gave " .. NDCore.Players[target].firstName .. " " .. NDCore.Players[target].lastName .. " $" .. amount .. "."}
         })
         return true
     end
 end
 
 -- Give money from a players wallet to a nearby player.
-function NDCore.functions:giveCashToNearbyPlayer(player, amount)
-    local targetId = NDCore.functions:getNearbyPedToPlayer(player)
+function NDCore.Functions.GiveCashToNearbyPlayer(player, amount)
+    local targetId = NDCore.Functions.GetNearbyPedToPlayer(player)
     if targetId then
-        NDCore.functions:giveCash(amount, player, targetId)
+        NDCore.Functions.GiveCash(amount, player, targetId)
         return true
     end
     TriggerClientEvent("chat:addMessage", player, {
@@ -167,59 +167,59 @@ function NDCore.functions:giveCashToNearbyPlayer(player, amount)
 end
 
 -- withdraws money from a players bank account to their wallet/cash.
-function NDCore.functions:withdrawMoney(amount, player)
+function NDCore.Functions.WithdrawMoney(amount, player)
     local amount = tonumber(amount)
     local player = tonumber(player)
     if amount <= 0 then return false end
-    if NDCore.players[player].bank < amount then return false end
-    MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.players[player].id})
-    MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.players[player].id})
-    NDCore.functions:updateMoney(player)
+    if NDCore.Players[player].bank < amount then return false end
+    MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+    MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+    NDCore.Functions.UpdateMoney(player)
     return true
 end
 
 -- deposits money from a players wallet/cash to their bank account.
-function NDCore.functions:depositMoney(amount, player)
+function NDCore.Functions.DepositMoney(amount, player)
     local amount = tonumber(amount)
     local player = tonumber(player)
     if amount <= 0 then return false end
-    if NDCore.players[player].cash < amount then return false end
-    MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.players[player].id})
-    MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.players[player].id})
-    NDCore.functions:updateMoney(player)
+    if NDCore.Players[player].cash < amount then return false end
+    MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+    MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+    NDCore.Functions.UpdateMoney(player)
     return true
 end
 
 -- Deducts money from the player, "bank" or "cash" needs to be specified.
-function NDCore.functions:deductMoney(amount, player, from)
+function NDCore.Functions.DeductMoney(amount, player, from)
     local amount = tonumber(amount)
     local player = tonumber(player)
     if from == "bank" then
-        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.players[player].id})
+        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
     elseif from == "cash" then
-        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.players[player].id})
+        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
     end
-    NDCore.functions:updateMoney(player)
+    NDCore.Functions.UpdateMoney(player)
 end
 
 -- Adds money from the player, "bank" or "cash" needs to be specified.
-function NDCore.functions:addMoney(amount, player, to)
+function NDCore.Functions.AddMoney(amount, player, to)
     local amount = tonumber(amount)
     local player = tonumber(player)
     if to == "bank" then
-        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.players[player].id})
+        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
     elseif to == "cash" then
-        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.players[player].id})
+        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
     end
-    NDCore.functions:updateMoney(player)
+    NDCore.Functions.UpdateMoney(player)
 end
 
--- Adds the players character to the NDCore.players table, this table consists of every players selected character.
-function NDCore.functions:setActiveCharacter(player, characterId)
+-- Adds the players character to the NDCore.Players table, this table consists of every players selected character.
+function NDCore.Functions.SetActiveCharacter(player, characterId)
     local result = MySQL.query.await("SELECT * FROM characters WHERE character_id = ?", {characterId})
     if result then
         local i = result[1]
-        NDCore.players[player] = {
+        NDCore.Players[player] = {
             id = characterId,
             firstName = i.first_name,
             lastName = i.last_name,
@@ -231,13 +231,13 @@ function NDCore.functions:setActiveCharacter(player, characterId)
             bank = i.bank
         }
     end
-    TriggerClientEvent("ND:setCharacter", player, NDCore.players[player])
+    TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
 end
 
 -- This returns all the characters the player has.
-function NDCore.functions:getPlayerCharacters(player)
+function NDCore.Functions.GetPlayerCharacters(player)
     local characters = {}
-    local result = MySQL.query.await("SELECT * FROM characters WHERE license = ?", {NDCore.functions:GetPlayerIdentifierFromType("license", player)})
+    local result = MySQL.query.await("SELECT * FROM characters WHERE license = ?", {NDCore.Functions.GetPlayerIdentifierFromType("license", player)})
     for i = 1, #result do
         local temp = result[i]
         characters[temp.character_id] = {id = temp.character_id, firstName = temp.first_name, lastName = temp.last_name, dob = temp.dob, gender = temp.gender, twt = temp.twt, job = temp.job, cash = temp.cash, bank = temp.bank}
@@ -246,8 +246,8 @@ function NDCore.functions:getPlayerCharacters(player)
 end
 
 -- Creates a new character for the player and returns all their characters to the client.
-function NDCore.functions:createCharacter(player, firstName, lastName, dob, gender, twt, job, cash, bank)
-    local license = NDCore.functions:GetPlayerIdentifierFromType("license", player)
+function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gender, twt, job, cash, bank)
+    local license = NDCore.Functions.GetPlayerIdentifierFromType("license", player)
     if not cash or not bank or tonumber(cash) > config.startingCash or tonumber(bank) > config.startingBank then
         cash = config.startingCash
         bank = config.startingBank
@@ -255,21 +255,21 @@ function NDCore.functions:createCharacter(player, firstName, lastName, dob, gend
     local result = MySQL.query.await("SELECT character_id FROM characters WHERE license = ?", {license})
     if result and config.characterLimit > #result then
         MySQL.query.await("INSERT INTO characters (license, first_name, last_name, dob, gender, twt, job, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, firstName, lastName, dob, gender, twt, job, cash, bank})
-        TriggerClientEvent("ND:returnCharacters", player, NDCore.functions:getPlayerCharacters(player))
+        TriggerClientEvent("ND:returnCharacters", player, NDCore.Functions.GetPlayerCharacters(player))
     end
 end
 
 -- Update/edit a character by character id.
-function NDCore.functions:updateCharacterData(characterId, firstName, lastName, dob, gender, twt, job)
+function NDCore.Functions.UpdateCharacterData(characterId, firstName, lastName, dob, gender, twt, job)
     MySQL.query("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, job = ? WHERE character_id = ?", {firstName, lastName, dob, gender, twt, job, characterId})
 end
 
 -- Delete a character by character id.
-function NDCore.functions:deleteCharacter(characterId)
+function NDCore.Functions.DeleteCharacter(characterId)
     MySQL.query("DELETE FROM characters WHERE character_id = ?", {characterId})
 end
 
-function NDCore.functions:versionChecker(expectedResourceName, resourceName, downloadLink, rawGithubLink)
+function NDCore.Functions.VersionChecker(expectedResourceName, resourceName, downloadLink, rawGithubLink)
     if expectedResourceName ~= resourceName then
         print("^1[^4" .. expectedResourceName .. "^1] WARNING^0")
         print("Change the resource name to ^4" .. expectedResourceName .. " ^0or else it won't work properly!")
@@ -306,4 +306,4 @@ function NDCore.functions:versionChecker(expectedResourceName, resourceName, dow
         end
     end)
 end
-NDCore.functions:versionChecker("ND_Core", GetCurrentResourceName(), "https://github.com/Andyyy7666/ND_Framework", "https://raw.githubusercontent.com/Andyyy7666/ND_Framework/main/ND_Core/fxmanifest.lua")
+NDCore.Functions.VersionChecker("ND_Core", GetCurrentResourceName(), "https://github.com/Andyyy7666/ND_Framework", "https://raw.githubusercontent.com/Andyyy7666/ND_Framework/main/ND_Core/fxmanifest.lua")
