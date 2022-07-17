@@ -12,8 +12,9 @@ config = {
     
     -- If you'd like to whitelist certain roles on discord then set this to true and add role ids.
     enableDiscordWhitelist = false,
+    notWhitelistedMessage = "You're not allowlisted in this server please join our discord to apply for a allowlist: https://discord.gg/Z9Mxu72zZ6",
     whitelistRoles = {
-        "0"
+        "872921520719142932"
     },
 
     -- Discord Rich presence
