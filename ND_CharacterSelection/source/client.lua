@@ -100,10 +100,8 @@ end)
 
 -- Selecting a player from the iu.
 RegisterNUICallback("setMainCharacter", function(data)
-    NDCore.Functions.GetCharacters(function(characters)
-        NDCore.SelectedCharacter = characters[data.id]
-    end)
-    for _, spawn in pairs(config.spawns[NDCore.SelectedCharacter.job]) do
+    local characters = NDCore.Functions.GetCharacters()
+    for _, spawn in pairs(config.spawns[characters[data.id].job]) do
         SendNUIMessage({
             type = "setSpawns",
             x = spawn.x,
@@ -112,7 +110,7 @@ RegisterNUICallback("setMainCharacter", function(data)
             name = spawn.name
         })
     end
-    TriggerServerEvent("ND:setCharacterOnline", NDCore.SelectedCharacter.id)
+    TriggerServerEvent("ND:setCharacterOnline", data.id)
 end)
 
 -- Creating a character from the ui.
