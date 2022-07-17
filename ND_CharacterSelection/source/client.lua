@@ -20,7 +20,7 @@ function SetDisplay(bool, typeName, bg)
         background = background,
         status = bool,
         serverName = NDCore.Config.serverName,
-        characterAmount = tablelength(NDCore.characters) .. "/" .. NDCore.Config.characterLimit
+        characterAmount = tablelength(NDCore.Characters) .. "/" .. NDCore.Config.characterLimit
     })
     if config.characterSelectionAopDisplay then
         SendNUIMessage({
@@ -115,7 +115,7 @@ end)
 
 -- Creating a character from the ui.
 RegisterNUICallback("newCharacter", function(data)
-    if tablelength(NDCore.characters) < NDCore.Config.characterLimit then
+    if tablelength(NDCore.Characters) < NDCore.Config.characterLimit then
         TriggerServerEvent("ND_CharacterSelection:newCharacter", {
             firstName = data.firstName,
             lastName = data.lastName,
