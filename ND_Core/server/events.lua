@@ -1,5 +1,34 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
+-- Check if discord is connected, and if whitelist is enabled then it will only allow you to join if you have the roles.
+AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
+    local player = source
+    local discordIdentifier = NDCore.Functions.GetPlayerIdentifierFromType("discord", player)
+
+    deferrals.defer()
+    Wait(0)
+    deferrals.update("Connecting to discord.")
+    Wait(0)
+
+    if not discordIdentifier then
+        deferrals.done("Your discord isn't connected to FiveM, make sure discord is open and restart FiveM.")
+    else
+        if config.enableDiscordWhitelist then
+            local discordUserId = string.gsub(discordIdentifier, "discord:", "")
+            local roles = NDCore.Functions.GetUserDiscordInfo(discordUserId).roles
+            for _, whitelistRole in pairs(config.whitelistRoles) do
+                if roles[whitelistRole] or whitelistRole == 0 or whitelistRole == "0" then
+                    deferrals.done()
+                    break
+                end
+            end
+            deferrals.done(config.notWhitelistedMessage)
+        else
+            deferrals.done()
+        end
+    end
+end)
+
 -- Creating database tables
 AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
