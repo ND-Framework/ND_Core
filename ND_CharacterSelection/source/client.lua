@@ -67,12 +67,10 @@ end)
 -- This is used to add department drop down on the ui.
 RegisterNetEvent("ND_CharacterSelection:permsChecked")
 AddEventHandler("ND_CharacterSelection:permsChecked", function(allowedRoles)
-    for _, dept in pairs(allowedRoles) do
-        SendNUIMessage({
-            type = "givePerms",
-            deptRole = dept
-        })
-    end
+    SendNUIMessage({
+        type = "givePerms",
+        deptRoles = json.encode(allowedRoles)
+    })
 end)
 
 -- Gets all the characters and displays them on the ui.
