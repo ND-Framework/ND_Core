@@ -2,7 +2,7 @@
 
 NDCore = {}
 NDCore.SelectedCharacter = nil
-NDCore.characters = {}
+NDCore.Characters = {}
 NDCore.Functions = {}
 NDCore.Config = config
 
@@ -16,8 +16,8 @@ function NDCore.Functions.GetSelectedCharacter(cb)
 end
 
 function NDCore.Functions.GetCharacters(cb)
-    if not cb then return NDCore.SelectedCharacter end
-    cb(NDCore.characters)
+    if not cb then return NDCore.Characters end
+    cb(NDCore.Characters)
 end
 
 -- discord rich precense will show on a users profile.
@@ -60,7 +60,7 @@ end
 
 RegisterNetEvent("ND:returnCharacters")
 AddEventHandler("ND:returnCharacters", function(characters)
-    NDCore.characters = characters
+    NDCore.Characters = characters
 end)
 
 -- updates the money on the client.
