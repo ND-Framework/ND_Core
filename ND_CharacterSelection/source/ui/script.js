@@ -112,9 +112,11 @@ $(function() {
         }
 
         if (item.type === "givePerms") {
-            $('.departments').append($('<option>', {
-                text: item.deptRole
-            }));
+            JSON.parse(item.deptRoles).forEach((dept) => {
+                $('.departments').append($('<option>', {
+                    text: dept
+                }));
+            });
         }
 
         if (item.type === "aop") {
