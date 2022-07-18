@@ -23,9 +23,9 @@ end
 -- discord rich precense will show on a users profile.
 if config.enableRichPrecence then
     Citizen.CreateThread(function()
-        SetDiscordAppId(config.appId)
         while true do
             if NDCore.SelectedCharacter then
+                SetDiscordAppId(config.appId)
                 SetRichPresence(" Playing : " .. config.serverName .. " as " .. NDCore.SelectedCharacter.firstName .. " " .. NDCore.SelectedCharacter.lastName)
                 SetDiscordRichPresenceAsset(config.largeLogo)
                 SetDiscordRichPresenceAssetText("Playing: " .. config.serverName)
