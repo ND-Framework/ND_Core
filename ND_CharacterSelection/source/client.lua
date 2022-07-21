@@ -10,18 +10,24 @@ function tablelength(table)
     return count
 end
 
-function SetDisplay(bool, typeName, bg)
+function SetDisplay(bool, typeName, bg, characters)
+    local characterAmount = characters
+    if not characterAmount then
+        characterAmount = NDCore.Functions.GetCharacters()
+    end
     if not bg then
         background = config.backgrounds[math.random(1, #config.backgrounds)]
     end
+    print(tablelength(characterAmount))
     SetNuiFocus(bool, bool)
     SendNUIMessage({
         type = typeName,
         background = background,
         status = bool,
         serverName = NDCore.Config.serverName,
-        characterAmount = tablelength(NDCore.Characters) .. "/" .. NDCore.Config.characterLimit
+        characterAmount = tablelength(characterAmount) .. "/" .. NDCore.Config.characterLimit
     })
+    Wait(500)
     if config.characterSelectionAopDisplay then
         SendNUIMessage({
             type = "aop",
@@ -31,19 +37,14 @@ function SetDisplay(bool, typeName, bg)
 end
 
 function start(switch)
-    TriggerServerEvent("ND_CharacterSelection:checkPerms")
     TriggerServerEvent("ND:GetCharacters")
+    TriggerServerEvent("ND_CharacterSelection:checkPerms")
     if switch then
         local ped = PlayerPedId()
         SwitchOutPlayer(ped, 0, 1)
         FreezeEntityPosition(ped, true)
         SetEntityVisible(ped, false, 0)
     end
-    SendNUIMessage({
-        type = "onStart",
-        maxStartingBank = NDCore.Config.startingBank,
-        maxStartingCash = NDCore.Config.startingCash
-    })
     if config.characterSelectionAopDisplay then
         SendNUIMessage({
             type = "aop",
@@ -77,23 +78,10 @@ end)
 RegisterNetEvent("ND:returnCharacters")
 AddEventHandler("ND:returnCharacters", function(characters)
     SendNUIMessage({
-        type = "refresh"
+        type = "refresh",
+        characters = json.encode(characters)
     })
-    for _, character in pairs(characters) do
-        SendNUIMessage({
-            type = "character",
-            id = character.id,
-            firstName = character.firstName,
-            lastName = character.lastName,
-            dateOfBirth = character.dob,
-            gender = character.gender,
-            twtName = character.twt,
-            department = character.job,
-            startingCash = character.cash,
-            startingBank = character.bank
-        })
-    end
-    SetDisplay(true, "ui", background)
+    SetDisplay(true, "ui", background, characters)
 end)
 
 -- Selecting a player from the iu.
