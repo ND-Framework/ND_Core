@@ -257,16 +257,19 @@ function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gend
         MySQL.query.await("INSERT INTO characters (license, first_name, last_name, dob, gender, twt, job, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, firstName, lastName, dob, gender, twt, job, cash, bank})
         TriggerClientEvent("ND:returnCharacters", player, NDCore.Functions.GetPlayerCharacters(player))
     end
+    return result
 end
 
 -- Update/edit a character by character id.
 function NDCore.Functions.UpdateCharacterData(characterId, firstName, lastName, dob, gender, twt, job)
-    MySQL.query("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, job = ? WHERE character_id = ?", {firstName, lastName, dob, gender, twt, job, characterId})
+    local result = MySQL.query.await("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, job = ? WHERE character_id = ?", {firstName, lastName, dob, gender, twt, job, characterId})
+    return result
 end
 
 -- Delete a character by character id.
 function NDCore.Functions.DeleteCharacter(characterId)
-    MySQL.query("DELETE FROM characters WHERE character_id = ?", {characterId})
+    local result = MySQL.query.await("DELETE FROM characters WHERE character_id = ?", {characterId})
+    return result
 end
 
 function NDCore.Functions.VersionChecker(expectedResourceName, resourceName, downloadLink, rawGithubLink)
