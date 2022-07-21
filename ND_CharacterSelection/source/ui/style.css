@@ -1,8 +1,12 @@
 body {
+    display: none;
     background-size: 105%;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-position: center;
+}
+#exitGameMenu, #characterCreator, #characterEditor, #deleteCharacterMenu, #spawnLocation {
+    display: none;
 }
 
 /* Main page */
@@ -274,14 +278,4 @@ body {
     padding: 0.15% 1.1%;
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 10vw;
-}
-
-#cash {
-    top: 5.5vh;
-    right: 1.5vw;
-}
-
-#bank {
-    top: 9vh;
-    right: 1.5vw;
 }
