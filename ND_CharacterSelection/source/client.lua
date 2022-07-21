@@ -18,7 +18,6 @@ function SetDisplay(bool, typeName, bg, characters)
     if not bg then
         background = config.backgrounds[math.random(1, #config.backgrounds)]
     end
-    print(tablelength(characterAmount))
     SetNuiFocus(bool, bool)
     SendNUIMessage({
         type = typeName,
