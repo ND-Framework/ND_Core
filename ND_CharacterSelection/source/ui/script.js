@@ -1,14 +1,8 @@
 $(function() {
-    let displayOn = true
-
-    // Hide/show ui function
     function display(bool) {
         if (bool) {
-            displayOn = true;
             $("body").show();
-            Money(false)
         } else {
-            displayOn = false;
             $("body").hide();
         }
     }
@@ -52,32 +46,12 @@ $(function() {
         }
         $("#spawnLocation").fadeOut("slow");
     }
-    function Money(bool) {
-        if (bool) {
-            $("#money").show();
-            $("body").css("background-image", "none");
-            $("body").show();
-            if (displayOn === false) {
-                $("#overlay").hide();
-            }
-        } else {
-            $("#money").hide();
-            $("#overlay").show();
-        }
-    }
-    display(false);
-    characterCreatorMenu(false);
-    characterEditorMenu(false);
-    exitGameMenu(false);
-    confirmDeleteMenu(false);
-    spawnMenu(false);
-    Money(false);
 
-    window.addEventListener('message', function(event) {
+    window.addEventListener("message", function(event) {
         const item = event.data;
         if (item.type === "ui") {
             if (item.status) {
-                $('#serverName').text(item.serverName);
+                $("#serverName").text(item.serverName);
                 $("body").css("background-image", "url(" + item.background + ")");
                 display(true);
             } else {
@@ -85,12 +59,7 @@ $(function() {
             }
         }
         
-        $('#playerAmount').text(item.characterAmount);
-
-        if (item.type === "character") {
-            characterCreatorMenu(false);
-            createCharacter(item.firstName, item.lastName, item.dateOfBirth, item.gender, item.twtName, item.department, item.startingCash, item.startingBank, item.id);
-        }
+        $("#playerAmount").text(item.characterAmount);
 
         if (item.type === "setSpawns") {
             $("#spawnMenuContainer").empty();
@@ -113,7 +82,7 @@ $(function() {
 
         if (item.type === "givePerms") {
             JSON.parse(item.deptRoles).forEach((dept) => {
-                $('.departments').append($('<option>', {
+                $(".departments").append($("<option>", {
                     text: dept
                 }));
             });
@@ -123,25 +92,13 @@ $(function() {
             $("#aop").text(item.aop);
         }
 
-        if (item.type === "Money") {
-            Money(true)
-            $("#cash").text(item.cash);
-            $("#bank").text(item.bank);
-        }
-
-        if (item.type === "onStart" && item.enableMoneySystem) {
-            $("#characterInfoContainerLeft").append('<label class="fourthRowText" for="startingcash">Cash</label><br><input id="startingCash" class="fourthRowInput" type="number" pattern="[0-9]+" placeholder="$2500" name="startingcash" required>');
-            $("#characterInfoContainerRight").append('<label class="fourthRowText" for="startingbank">Bank</label><br><input id="startingBank" class="fourthRowInput" type="number" pattern="[0-9]+" placeholder="$8000" name="startingbank" style="width: 93%;" required>');
-            $("#startingBank").attr({
-                "max": item.maxStartingBank,
-            });
-            $("#startingCash").attr({
-                "max": item.maxStartingCash,
-            });
-        }
-
         if (item.type === "refresh") {
             $("#charactersSection").empty();
+            characterCreatorMenu(false);
+            let characters = JSON.parse(item.characters)
+            Object.keys(characters).forEach((id) => {
+                createCharacter(characters[id].firstName, characters[id].lastName, characters[id].dob, characters[id].gender, characters[id].twt, characters[id].job, characters[id].cash, characters[id].bank, characters[id].id);
+            });
         }
     })
 
@@ -199,7 +156,6 @@ $(function() {
             department: $("#newDepartment").val(),
             id: characterEdited
         }));
-        $("#characterButton" + characterEdited).text($("#newFirstName").val() + " " + $("#newLastName").val() + " (" + $("#newDepartment").val() + ")");
         return false;
     });
 
