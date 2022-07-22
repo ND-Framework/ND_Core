@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <style>
+        @font-face {
+            font-family: "digital-counter-7";
+            src: url("digital-counter-7.ttf");
+        }
+        body {
+            overflow: hidden;
+        }
+        .pumpDisplay {
+            display: none;
+            position: absolute;
+            margin: auto;
+            right: 0;
+            left: 0;
+            bottom: 2%;
+            height: 15%;
+            width: auto;
+            user-select: none;
+        }
+        .displayBackground {
+            position: absolute;
+            margin: auto;
+            right: 0;
+            left: 0;
+            width: auto;
+            height: 100%;
+        }
+        .fuelCurrency {
+            position: absolute;
+            margin: auto;
+            left: 45%;
+            top: 20%;
+            text-align: center;
+
+            font-family: "Lucida Console", "Courier New", monospace;
+            font-size: 4vh;
+            color: #ffffff;
+        }
+        .fuelCost {
+            position: absolute;
+            margin: auto;
+            right: 45.2%;
+            top: 18%;
+            text-align: center;
+
+            font-family: "digital-counter-7", sans-serif;
+            font-size: 4vh;
+            color: #060608;
+        }
+        .fuelPrecentage {
+            position: absolute;
+            margin: auto;
+            left: 45%;
+            top: 50%;
+            text-align: center;
+
+            font-family: "Lucida Console", "Courier New", monospace;
+            font-size: 4vh;
+            color: #ffffff;
+        }
+        .fuelTank {
+            position: absolute;
+            margin: auto;
+            right: 45.2%;
+            top: 48%;
+            text-align: center;
+
+            font-family: "digital-counter-7", sans-serif;
+            font-size: 4vh;
+            color: #060608;
+        }
+        @keyframes warn {
+            0%   {color: red;}
+            50%  {color: #ffffff;}
+            100% {color: red;}
+        }
+        .fuelCurrency.flashRed {
+            transition: 1s;
+            animation-name: warn;
+            animation-duration: 4s;
+        }
+    </style>
+    <div class="pumpDisplay">
+        <img class="displayBackground" src="https://i.imgur.com/wkMX6FG.png">
+        <p class="fuelCurrency">$</p><p class="fuelCost">0.00</p>
+        <p class="fuelPrecentage">%</p><p class="fuelTank">0.00</p>
+    </div>
+    <script>
+        window.addEventListener("message", function(event) {
+            const item = event.data;
+            if (item.type === "status") {
+                if (item.status) {
+                    $(".pumpDisplay").fadeIn("fast");
+                } else {
+                    $(".pumpDisplay").fadeOut("slow");
+                };
+            };
+            if (item.type === "update") {
+                $(".fuelCost").text(item.fuelCost);
+                $(".fuelTank").text(item.fuelTank);
+            };
+            if (item.type === "warn") {
+                $(".fuelCurrency").toggleClass("flashRed");
+            }
+        })
+    </script>
+</body>
+</html>
