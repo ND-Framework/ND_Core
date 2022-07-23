@@ -76,9 +76,13 @@ end)
 -- Gets all the characters and displays them on the ui.
 RegisterNetEvent("ND:returnCharacters")
 AddEventHandler("ND:returnCharacters", function(characters)
+    local playerCharacters = {}
+    for id, characterInfo in pairs(characters) do
+        playerCharacters[tostring(id)] = characterInfo
+    end
     SendNUIMessage({
         type = "refresh",
-        characters = json.encode(characters)
+        characters = json.encode(playerCharacters)
     })
     SetDisplay(true, "ui", background, characters)
 end)
