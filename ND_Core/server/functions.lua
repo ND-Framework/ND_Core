@@ -26,7 +26,7 @@ function NDCore.Functions.GetUserDiscordInfo(discordUserId)
         }
     end, "GET", "", {["Content-Type"] = "application/json", ["Authorization"] = "Bot " .. server_config.discordServerToken})
     while not data do
-        Citizen.Wait(0)
+        Wait(0)
     end
     return data
 end
@@ -228,7 +228,8 @@ function NDCore.Functions.SetActiveCharacter(player, characterId)
             twt = i.twt,
             job = i.job,
             cash = i.cash,
-            bank = i.bank
+            bank = i.bank,
+            phoneNumber = i.phone_number
         }
     end
     TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
