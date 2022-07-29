@@ -221,6 +221,7 @@ CreateThread(function()
         pedCoords = GetEntityCoords(ped)
         pump, pumpHandle = nearPump(pedCoords)
         veh = GetVehiclePedIsIn(ped, true)
+        inveh = GetVehiclePedIsIn(ped, false)
         Wait(500)
     end
 end)
@@ -319,7 +320,7 @@ CreateThread(function()
     local wait = 500
     while true do
         Wait(wait)
-        if pump then
+        if pump and inveh == 0 then
             wait = 0
             if not holdingNozzle and not nozzleInVehicle and not nozzleDropped then
                 local jerryCanText = ""

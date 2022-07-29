@@ -10,7 +10,7 @@ end
 function NDCore.Functions.GetUserDiscordInfo(discordUserId)
     local data
     PerformHttpRequest("https://discordapp.com/api/guilds/" .. server_config.guildId .. "/members/" .. discordUserId, function(errorCode, resultData, resultHeaders)
-		if errorCode ~= 200 then
+        if errorCode ~= 200 then
             print("Error: " .. errorCode .. ", discord token might be missing.")
             return
         end
