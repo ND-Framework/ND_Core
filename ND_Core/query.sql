@@ -9,5 +9,6 @@ CREATE TABLE `characters` (
 	`job` VARCHAR(50) NULL DEFAULT NULL,
 	`cash` INT(10) NULL DEFAULT '0',
 	`bank` INT(10) NULL DEFAULT '0',
+        `phone_number` VARCHAR(20) DEFAULT NULL,
 	PRIMARY KEY (`character_id`) USING BTREE
 );
