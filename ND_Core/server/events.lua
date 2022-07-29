@@ -41,7 +41,7 @@ end)
 -- Getting all the characters the player has and returning them to the client.
 RegisterNetEvent("ND:GetCharacters", function()
     local player = source
-    print(NDCore.Functions.GetPlayerCharacters(player)[1])
+    Wait(100)
     TriggerClientEvent("ND:returnCharacters", player, NDCore.Functions.GetPlayerCharacters(player))
 end)
 
