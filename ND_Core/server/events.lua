@@ -30,12 +30,12 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
 end)
 
 -- Creating database tables
-AddEventHandler('onResourceStart', function(resourceName)
+AddEventHandler("onResourceStart", function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
         return
     end
-    MySQL.query("CREATE TABLE IF NOT EXISTS characters ( `character_id` INT(10) NOT NULL AUTO_INCREMENT, `license` VARCHAR(200) NOT NULL DEFAULT '0', `first_name` VARCHAR(50) NULL DEFAULT NULL, `last_name` VARCHAR(50) NULL DEFAULT NULL, `dob` VARCHAR(50) NULL DEFAULT NULL, `gender` VARCHAR(50) NULL DEFAULT NULL, `twt` VARCHAR(50) NULL DEFAULT NULL, `job` VARCHAR(50) NULL DEFAULT NULL, `cash` INT(10) NULL DEFAULT '0', `bank` INT(10) NULL DEFAULT '0', PRIMARY KEY (`character_id`) USING BTREE);")
-    print('^4ND_Core ^0Database structure validated!')
+    MySQL.query("CREATE TABLE IF NOT EXISTS characters ( `character_id` INT(10) NOT NULL AUTO_INCREMENT, `license` VARCHAR(200) NOT NULL DEFAULT '0', `first_name` VARCHAR(50) NULL DEFAULT NULL, `last_name` VARCHAR(50) NULL DEFAULT NULL, `dob` VARCHAR(50) NULL DEFAULT NULL, `gender` VARCHAR(50) NULL DEFAULT NULL, `twt` VARCHAR(50) NULL DEFAULT NULL, `job` VARCHAR(50) NULL DEFAULT NULL, `cash` INT(10) NULL DEFAULT '0', `bank` INT(10) NULL DEFAULT '0', `phone_number` VARCHAR(20) DEFAULT NULL, PRIMARY KEY (`character_id`) USING BTREE);")
+    print("^4ND_Core ^0Database structure validated!")
 end)
 
 -- Getting all the characters the player has and returning them to the client.
