@@ -3,8 +3,9 @@
 
 <p align='center'><b><a href="https://ndframework.gitbook.io/nd-framework/">Documentation</a></b>
 
-# Description:
-This is a framework, with a money system and extra features.
+# Dependencies:
+[fivem-appearance](https://github.com/pedr0fontoura/fivem-appearance/releases/download/v1.3.1/fivem-appearance.rar)
+[oxmysql](https://github.com/overextended/oxmysql/releases/download/v2.4.0/oxmysql.zip)
 
 # Addons:
 You can find most free addons in the ND_Framework repository and you can find more paid ones on [tebex](https://andyyy.tebex.io/category/fivem-scripts?currency=USD).
