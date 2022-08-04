@@ -1,6 +1,32 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 NDCore = exports["ND_Core"]:GetCoreObject()
+local changeAppearence = false
+
+function startChangeAppearence()
+    local config = {
+        ped = true,
+        headBlend = true,
+        faceFeatures = true,
+        headOverlays = true,
+        components = true,
+        props = true,
+        tattoos = false
+    }
+    exports["fivem-appearance"]:startPlayerCustomization(function(appearance)
+        if (appearance) then
+            local ped = PlayerPedId()
+            local clothing = {
+                tattoos = exports["fivem-appearance"]:getPedTattoos(ped),
+                appearance = exports["fivem-appearance"]:getPedAppearance(ped)
+            }
+            Wait(4000)
+            TriggerServerEvent("ND:updateClothes", clothing)
+        else
+            print("Canceled")
+        end
+    end, config)
+end
 
 function tablelength(table)
     local count = 0
@@ -87,6 +113,19 @@ AddEventHandler("ND:returnCharacters", function(characters)
     SetDisplay(true, "ui", background, characters)
 end)
 
+-- Set the player to creating the ped if they haven't already.
+RegisterNetEvent("ND:setCharacter")
+AddEventHandler("ND:setCharacter", function(character)
+    if next(character.clothing) == nil then
+        changeAppearence = true
+    else
+        changeAppearence = false
+        local ped = PlayerPedId()
+        exports["fivem-appearance"]:setPedTattoos(ped, character.clothing.tattoos)
+        exports["fivem-appearance"]:setPedAppearance(ped, character.clothing.appearance)
+    end
+end)
+
 -- Selecting a player from the iu.
 RegisterNUICallback("setMainCharacter", function(data)
     local characters = NDCore.Functions.GetCharacters()
@@ -99,6 +138,7 @@ RegisterNUICallback("setMainCharacter", function(data)
             name = spawn.name
         })
     end
+    Wait(1000)
     TriggerServerEvent("ND:setCharacterOnline", data.id)
 end)
 
@@ -153,6 +193,9 @@ RegisterNUICallback("tpToLocation", function(data)
     Citizen.Wait(500)
     FreezeEntityPosition(ped, false)
     SetEntityVisible(ped, true, 0)
+    if changeAppearence then
+        startChangeAppearence()
+    end
 end)
 
 -- Choosing the do not tp button.
@@ -164,6 +207,9 @@ RegisterNUICallback("tpDoNot", function()
     Citizen.Wait(500)
     SetEntityVisible(ped, true, 0)
     FreezeEntityPosition(ped, false)
+    if changeAppearence then
+        startChangeAppearence()
+    end
 end)
 
 -- Change character command
