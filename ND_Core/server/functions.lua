@@ -10,7 +10,7 @@ end
 function NDCore.Functions.GetUserDiscordInfo(discordUserId)
     local data
     PerformHttpRequest("https://discordapp.com/api/guilds/" .. server_config.guildId .. "/members/" .. discordUserId, function(errorCode, resultData, resultHeaders)
-        if errorCode ~= 200 then
+		if errorCode ~= 200 then
             print("Error: " .. errorCode .. ", discord token might be missing.")
             return
         end
@@ -26,7 +26,7 @@ function NDCore.Functions.GetUserDiscordInfo(discordUserId)
         }
     end, "GET", "", {["Content-Type"] = "application/json", ["Authorization"] = "Bot " .. server_config.discordServerToken})
     while not data do
-        Wait(0)
+        Citizen.Wait(0)
     end
     return data
 end
@@ -229,7 +229,10 @@ function NDCore.Functions.SetActiveCharacter(player, characterId)
             job = i.job,
             cash = i.cash,
             bank = i.bank,
-            phoneNumber = i.phone_number
+            phoneNumber = i.phone_number,
+            groups = json.decode(i.groups),
+            lastLocation = json.decode(i.last_location),
+            clothing = json.decode(i.clothing)
         }
     end
     TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
@@ -241,7 +244,7 @@ function NDCore.Functions.GetPlayerCharacters(player)
     local result = MySQL.query.await("SELECT * FROM characters WHERE license = ?", {NDCore.Functions.GetPlayerIdentifierFromType("license", player)})
     for i = 1, #result do
         local temp = result[i]
-        characters[temp.character_id] = {id = temp.character_id, firstName = temp.first_name, lastName = temp.last_name, dob = temp.dob, gender = temp.gender, twt = temp.twt, job = temp.job, cash = temp.cash, bank = temp.bank}
+        characters[temp.character_id] = {id = temp.character_id, firstName = temp.first_name, lastName = temp.last_name, dob = temp.dob, gender = temp.gender, twt = temp.twt, job = temp.job, cash = temp.cash, bank = temp.bank, phoneNumber = temp.phone_number, groups = json.decode(temp.groups), lastLocation = json.decode(temp.last_location), clothing = json.decode(temp.clothing)}
     end
     return characters
 end
@@ -261,7 +264,7 @@ function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gend
     return result
 end
 
--- Update/edit a character by character id.
+-- Update/edit a character info by character id.
 function NDCore.Functions.UpdateCharacterData(characterId, firstName, lastName, dob, gender, twt, job)
     local result = MySQL.query.await("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, job = ? WHERE character_id = ?", {firstName, lastName, dob, gender, twt, job, characterId})
     return result
@@ -270,6 +273,36 @@ end
 -- Delete a character by character id.
 function NDCore.Functions.DeleteCharacter(characterId)
     local result = MySQL.query.await("DELETE FROM characters WHERE character_id = ?", {characterId})
+    return result
+end
+
+-- Update the all the characters groups in the database.
+function NDCore.Functions.UpdateAllGroups(characterId, groups)
+    local result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {groups, characterId})
+    return result
+end
+
+-- Set a group to a character in the database.
+function NDCore.Functions.SetGroup(characterId, group)
+    local groups = {}
+    local result = MySQL.query.await("SELECT groups FROM characters WHERE character_id = ?", {characterId})
+    if result then
+        groups = json.decode(result[1].groups)
+        table.insert(groups, group)
+    end
+    result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), characterId})
+    return result
+end
+
+-- Update the characters last location into the database.
+function NDCore.Functions.UpdateLastLocation(characterId, location)
+    local result = MySQL.query.await("UPDATE characters SET last_location = ? WHERE character_id = ?", {json.encode(location), characterId})
+    return result
+end
+
+-- Update the characters clothing into the database.
+function NDCore.Functions.UpdateClothes(characterId, clothing)
+    local result = MySQL.query.await("UPDATE characters SET clothing = ? WHERE character_id = ?", {json.encode(clothing), characterId})
     return result
 end
 
