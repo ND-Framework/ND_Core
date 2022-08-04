@@ -5,6 +5,7 @@
 
 # Dependencies:
 [fivem-appearance](https://github.com/pedr0fontoura/fivem-appearance/releases/download/v1.3.1/fivem-appearance.rar)
+  
 [oxmysql](https://github.com/overextended/oxmysql/releases/download/v2.4.0/oxmysql.zip)
 
 # Addons:
