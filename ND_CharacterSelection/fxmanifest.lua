@@ -19,4 +19,7 @@ shared_script "config.lua"
 server_script "source/server.lua"
 client_script "source/client.lua"
 
-dependency "ND_Core"
+dependencies {
+	"ND_Core",
+	"fivem-appearance"
+}
