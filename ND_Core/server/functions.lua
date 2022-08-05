@@ -6,13 +6,21 @@ function NDCore.Functions.GetPlayers(players)
     cb(NDCore.Players)
 end
 
+
+local discordErrors = {
+    [400] = "improper http request",
+    [401] = "Discord bot token might be missing or incorrect",
+    [404] = "user might not be in server.",
+    [429] = "Discord bot rate limited.",
+
+}
 -- Used to retrive the players discord server nickname, discord name and tag, and the roles.
 function NDCore.Functions.GetUserDiscordInfo(discordUserId)
     local data
-    PerformHttpRequest("https://discordapp.com/api/guilds/" .. server_config.guildId .. "/members/" .. discordUserId, function(errorCode, resultData, resultHeaders)
-		if errorCode ~= 200 then
-            print("Error: " .. errorCode .. ", discord token might be missing.")
-            return
+    local request = PerformHttpRequest("https://discordapp.com/api/guilds/" .. server_config.guildId .. "/members/" .. discordUserId, function(errorCode, resultData, resultHeaders)
+        if errorCode ~= 200 then
+            print("Error: " .. errorCode .. " " .. discordErrors[errorCode])
+            return false
         end
         local result = json.decode(resultData)
         local roles = {}
@@ -24,11 +32,13 @@ function NDCore.Functions.GetUserDiscordInfo(discordUserId)
             discordTag = tostring(result.user.username) .. "#" .. tostring(result.user.discriminator),
             roles = roles
         }
+        return true
     end, "GET", "", {["Content-Type"] = "application/json", ["Authorization"] = "Bot " .. server_config.discordServerToken})
-    while not data do
-        Citizen.Wait(0)
+    if request then
+        return data
+    else
+        return false
     end
-    return data
 end
 
 -- Get player any identifier, available types: steam, license, xbl, ip, discord, live.
