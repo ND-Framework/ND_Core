@@ -21,5 +21,5 @@ client_script "source/client.lua"
 
 dependencies {
 	"ND_Core",
-	"fivem-appearance"
+	-- "fivem-appearance" [TODO] to be implemented properly later
 }
