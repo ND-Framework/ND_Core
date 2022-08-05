@@ -52,13 +52,10 @@ AddEventHandler("ND_CharacterSelection:checkPerms", function()
     local player = source
     local discordUserId = NDCore.Functions.GetPlayerIdentifierFromType("discord", player):gsub("discord:", "")
     local allowedRoles = {}
-    print("test")
     local discordInfo = NDCore.Functions.GetUserDiscordInfo(discordUserId)
-    print(discordInfo)
     -- Check if the players discord roles will grant them permission to the department.
     for dept, roleTable in pairs(config.departments) do
         for _, roleId in pairs(roleTable) do
-            print(roleId)
             if roleId == 0 or roleId == "0" or (discordInfo and discordInfo.roles[roleId]) then
                 table.insert(allowedRoles, dept)
             end
