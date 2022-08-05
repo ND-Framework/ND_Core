@@ -2,7 +2,7 @@
 
 author "Andyyy#7666, N1K0#0001"
 description "ND Character Selection (DOJ Based)"
-version "2.2.0"
+version "2.2.1"
 
 fx_version "cerulean"
 game "gta5"

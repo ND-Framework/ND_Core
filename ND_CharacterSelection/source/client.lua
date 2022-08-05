@@ -13,6 +13,7 @@ function startChangeAppearence()
         props = true,
         tattoos = false
     }
+
     exports["fivem-appearance"]:startPlayerCustomization(function(appearance)
         if (appearance) then
             local ped = PlayerPedId()
@@ -113,18 +114,19 @@ AddEventHandler("ND:returnCharacters", function(characters)
     SetDisplay(true, "ui", background, characters)
 end)
 
+-- [TODO] to be implemented properly later
 -- Set the player to creating the ped if they haven't already.
-RegisterNetEvent("ND:setCharacter")
-AddEventHandler("ND:setCharacter", function(character)
-    if next(character.clothing) == nil then
-        changeAppearence = true
-    else
-        changeAppearence = false
-        local ped = PlayerPedId()
-        exports["fivem-appearance"]:setPedTattoos(ped, character.clothing.tattoos)
-        exports["fivem-appearance"]:setPedAppearance(ped, character.clothing.appearance)
-    end
-end)
+-- RegisterNetEvent("ND:setCharacter")
+-- AddEventHandler("ND:setCharacter", function(character)
+--     if next(character.clothing) == nil then
+--         changeAppearence = true
+--     else
+--         changeAppearence = false
+--         local ped = PlayerPedId()
+--         exports["fivem-appearance"]:setPedTattoos(ped, character.clothing.tattoos)
+--         exports["fivem-appearance"]:setPedAppearance(ped, character.clothing.appearance)
+--     end
+-- end)
 
 -- Selecting a player from the iu.
 RegisterNUICallback("setMainCharacter", function(data)
