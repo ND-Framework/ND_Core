@@ -66,15 +66,15 @@ started = false
 
 function start(switch)
     TriggerServerEvent("ND:GetCharacters")
+    if not started then
+        TriggerServerEvent("ND_CharacterSelection:checkPerms")
+        started = true
+    end
     if switch then
         local ped = PlayerPedId()
         SwitchOutPlayer(ped, 0, 1)
         FreezeEntityPosition(ped, true)
         SetEntityVisible(ped, false, 0)
-        if not started then
-            TriggerServerEvent("ND_CharacterSelection:checkPerms")
-            started = true
-        end
     end
     if config.characterSelectionAopDisplay then
         SendNUIMessage({
