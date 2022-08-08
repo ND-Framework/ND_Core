@@ -2,6 +2,7 @@
 
 NDCore = exports["ND_Core"]:GetCoreObject()
 local changeAppearence = false
+local started = false
 
 function startChangeAppearence()
     local config = {
@@ -15,17 +16,19 @@ function startChangeAppearence()
     }
 
     exports["fivem-appearance"]:startPlayerCustomization(function(appearance)
-        if (appearance) then
+        if appearance then
             local ped = PlayerPedId()
             local clothing = {
+                model = GetEntityModel(ped),
                 tattoos = exports["fivem-appearance"]:getPedTattoos(ped),
                 appearance = exports["fivem-appearance"]:getPedAppearance(ped)
             }
             Wait(4000)
             TriggerServerEvent("ND:updateClothes", clothing)
         else
-            print("Canceled")
+            start(true)
         end
+        changeAppearence = false
     end, config)
 end
 
@@ -62,8 +65,6 @@ function SetDisplay(bool, typeName, bg, characters)
     end
 end
 
-started = false
-
 function start(switch)
     TriggerServerEvent("ND:GetCharacters")
     if not started then
@@ -90,7 +91,7 @@ AddEventHandler("onResourceStart", function(resourceName)
     end
     Citizen.Wait(2000)
     start(false)
-end)  
+end)
 
 AddEventHandler("playerSpawned", function()
     start(true)
@@ -119,19 +120,21 @@ AddEventHandler("ND:returnCharacters", function(characters)
     SetDisplay(true, "ui", background, characters)
 end)
 
--- [TODO] to be implemented properly later
 -- Set the player to creating the ped if they haven't already.
--- RegisterNetEvent("ND:setCharacter")
--- AddEventHandler("ND:setCharacter", function(character)
---     if next(character.clothing) == nil then
---         changeAppearence = true
---     else
---         changeAppearence = false
---         local ped = PlayerPedId()
---         exports["fivem-appearance"]:setPedTattoos(ped, character.clothing.tattoos)
---         exports["fivem-appearance"]:setPedAppearance(ped, character.clothing.appearance)
---     end
--- end)
+RegisterNetEvent("ND:setCharacter")
+AddEventHandler("ND:setCharacter", function(character)
+    if config.enableAppearance then
+        if next(character.clothing) == nil then
+            changeAppearence = true
+        else
+            changeAppearence = false
+            exports["fivem-appearance"]:setPlayerModel(character.clothing.model)
+            local ped = PlayerPedId()
+            exports["fivem-appearance"]:setPedTattoos(ped, character.clothing.tattoos)
+            exports["fivem-appearance"]:setPedAppearance(ped, character.clothing.appearance)
+        end
+    end
+end)
 
 -- Selecting a player from the iu.
 RegisterNUICallback("setMainCharacter", function(data)
@@ -142,7 +145,8 @@ RegisterNUICallback("setMainCharacter", function(data)
             x = spawn.x,
             y = spawn.y,
             z = spawn.z,
-            name = spawn.name
+            name = spawn.name,
+            id = characters[data.id].id
         })
     end
     Wait(1000)
@@ -200,21 +204,27 @@ RegisterNUICallback("tpToLocation", function(data)
     Citizen.Wait(500)
     FreezeEntityPosition(ped, false)
     SetEntityVisible(ped, true, 0)
-    if changeAppearence then
+    if config.enableAppearance and changeAppearence then
         startChangeAppearence()
     end
 end)
 
 -- Choosing the do not tp button.
-RegisterNUICallback("tpDoNot", function()
+RegisterNUICallback("tpDoNot", function(data)
     local ped = PlayerPedId()
+    local character = NDCore.Functions.GetCharacters()[data.id]
+    FreezeEntityPosition(ped, false)
+    if next(character.lastLocation) ~= nil then
+        SetEntityCoords(ped, character.lastLocation.x, character.lastLocation.y, character.lastLocation.z, false, false, false, false)
+    end
+    FreezeEntityPosition(ped, true)
     SwitchInPlayer(ped)
     Citizen.Wait(500)
     SetDisplay(false, "ui")
     Citizen.Wait(500)
-    SetEntityVisible(ped, true, 0)
     FreezeEntityPosition(ped, false)
-    if changeAppearence then
+    SetEntityVisible(ped, true, 0)
+    if config.enableAppearance and changeAppearence then
         startChangeAppearence()
     end
 end)

@@ -77,7 +77,11 @@ end)
 -- Remove player from NDCore.Players table when they leave.
 AddEventHandler("playerDropped", function()
     local player = source
-    NDCore.Players[player] = nil
+    local character = NDCore.Players[player]
+    if character then
+        NDCore.Functions.UpdateLastLocation(character.id, character.lastLocation)
+    end
+    character = nil
 end)
 
 -- Update the characters clothes.
