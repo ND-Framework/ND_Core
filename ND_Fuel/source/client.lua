@@ -236,9 +236,9 @@ CreateThread(function()
                 local areaOfMap = GetHashOfMapAreaAtCoords(pedCoords())
                 for _, area in pairs(areaOfMap) do
                     if area == "-289320599" then
-                        locationMultiplier = config.areaFuelPrices[area]
+                        locationMultiplier = config.fuelMultipliers[area]
                     elseif area == "2072609373" then
-                        locationMultiplier = config.areaFuelPrices[area]
+                        locationMultiplier = config.fuelMultipliers[area]
                     else return end
                 end
                 Wait(100)

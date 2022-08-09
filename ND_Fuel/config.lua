@@ -8,7 +8,7 @@ config = {
     nonAreaBasedFuelPrices = true, -- if you want fuel prices' to NOT be based on the players location on the map, set this to true. -- ONLY ONE CAN BE TRUE, NOT BOTH!
 
     -- Multipliers for both 'regions' of the map, DON'T edit the first value! Only edit the decimal values.
-    fuelPrices = {
+    fuelMultipliers = {
         [-289320599] = 2.0, -- Los Santos/City
         [2072609373] = 0.5, -- Countryside/Northern part of map
     },
