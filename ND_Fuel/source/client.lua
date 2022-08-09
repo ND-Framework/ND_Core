@@ -232,6 +232,7 @@ CreateThread(function()
         Wait(2000)
         if vehicleFueling then
             local classMultiplier = config.vehicleClasses[GetVehicleClass(vehicleFueling)]
+            local locationMultiplier = 0.0
             if config.areaBasedFuelPrices and config.nonAreaBasedFuelPrices == false then
                 local areaOfMap = GetHashOfMapAreaAtCoords(pedCoords())
                 if areaOfMap == "-289320599" then
