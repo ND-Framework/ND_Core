@@ -4,6 +4,15 @@ config = {
     jerryCanrefillCost = 50, -- The price of the jerrycans refill, this will be calculated and adjusted to how much is left in it.
     fuelCostMultiplier = 1.0, -- 2.0 will double the price of fuel and 1.5 will increase it by half.
 
+    areaBasedFuelPrices = false, -- if you want fuel price's to be based on the players area on the map, set this to true. -- ONLY ONE CAN BE TRUE, NOT BOTH!
+    nonAreaBasedFuelPrices = true, -- if you want fuel prices' to NOT be based on the players area on the map, set this to true. -- ONLY ONE CAN BE TRUE, NOT BOTH!
+
+    -- multipliers for area's of the map, DON'T edit the first value! only edit the decimal values.
+    fuelPrices = {
+        [-289320599] = 2.0, -- Los Santos/City
+        [2072609373] = 0.5, -- Countryside/Northern part of map
+    },
+
     -- Class multipliers. If you want SUVs to use less fuel, you can change it to anything under 1.0, and vise versa.
     vehicleClasses = {
         [0] = 0.7, -- Compacts

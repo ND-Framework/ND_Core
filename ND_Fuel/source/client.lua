@@ -232,6 +232,17 @@ CreateThread(function()
         Wait(2000)
         if vehicleFueling then
             local classMultiplier = config.vehicleClasses[GetVehicleClass(vehicleFueling)]
+            if config.areaBasedFuelPrices and config.nonAreaBasedFuelPrices == false then
+                local areaOfMap = GetHashOfMapAreaAtCoords(pedCoords())
+                for _, area in pairs(areaOfMap) do
+                    if area == "-289320599" then
+                        locationMultiplier = config.areaFuelPrices[area]
+                    elseif area == "2072609373" then
+                        locationMultiplier = config.areaFuelPrices[area]
+                    else return end
+                end
+                Wait(100)
+            end
             if usingCan then
                 while usingCan do
                     local fuel = GetFuel(vehicleFueling)
@@ -253,7 +264,11 @@ CreateThread(function()
                         break
                     end
                     fuel = GetFuel(vehicleFueling)
-                    cost = cost + ((2.0 / classMultiplier) * config.fuelCostMultiplier) - math.random(0, 100) / 100
+                    if config.areaBasedFuelPrices and config.nonAreaBasedFuelPrices == false then
+                        cost = cost + ((2.0 / classMultiplier) * locationMultiplier) - math.random(0, 100) / 100
+                    elseif config.areaBasedFuelPrices == false and config.nonAreaBasedFuelPrices then
+                        cost = cost + ((2.0 / classMultiplier) * config.fuelCostMultiplier) - math.random(0, 100) / 100
+                    else return end
                     if not config.standalone then
                         if NDCore.Functions.GetSelectedCharacter().bank < cost then
                             SendNUIMessage({
@@ -300,7 +315,7 @@ CreateThread(function()
                     fuelTank = "0.0"
                 })
                 if not config.standalone then
-                    if NDCore.Functions.GetSelectedCharacter().bank < cost then 
+                    if NDCore.Functions.GetSelectedCharacter().bank < cost then
                         SendNUIMessage({
                             type = "warn"
                         })
@@ -454,7 +469,7 @@ CreateThread(function()
                 local vehClass = GetVehicleClass(veh)
                 local zPos = nozzleBasedOnClass[vehClass + 1]
                 local isBike = false
-                
+
                 if vehClass == 8 and vehClass ~= 13 and not config.electricVehicles[GetHashKey(veh)] then
                     tankBone = GetEntityBoneIndexByName(veh, "petroltank")
                     if tankBone == -1 then
@@ -489,7 +504,7 @@ CreateThread(function()
                             Wait(300)
                             ClearPedTasks(ped)
                         end
-                    end 
+                    end
                 end
             end
         else
@@ -510,7 +525,7 @@ CreateThread(function()
                 local vehClass = GetVehicleClass(veh)
                 local zPos = nozzleBasedOnClass[vehClass + 1]
                 local can = GetAmmoInPedWeapon(ped, 883325847)
-                
+
                 if vehClass == 8 and vehClass ~= 13 and not config.electricVehicles[GetHashKey(veh)] then
                     tankBone = GetEntityBoneIndexByName(veh, "petroltank")
                     if tankBone == -1 then
