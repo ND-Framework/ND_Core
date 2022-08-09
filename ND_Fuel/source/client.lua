@@ -234,13 +234,11 @@ CreateThread(function()
             local classMultiplier = config.vehicleClasses[GetVehicleClass(vehicleFueling)]
             if config.areaBasedFuelPrices and config.nonAreaBasedFuelPrices == false then
                 local areaOfMap = GetHashOfMapAreaAtCoords(pedCoords())
-                for _, area in pairs(areaOfMap) do
-                    if area == "-289320599" then
-                        locationMultiplier = config.fuelMultipliers[area]
-                    elseif area == "2072609373" then
-                        locationMultiplier = config.fuelMultipliers[area]
-                    else return end
-                end
+                if areaOfMap == "-289320599" then
+                    locationMultiplier = config.fuelMultipliers[areaOfMap]
+                elseif areaOfMap == "2072609373" then
+                    locationMultiplier = config.fuelMultipliers[areaOfMap]
+                else return end
                 Wait(100)
             end
             if usingCan then
