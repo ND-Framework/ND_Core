@@ -14,10 +14,10 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
         deferrals.done("Your discord isn't connected to FiveM, make sure discord is open and restart FiveM.")
     else
         if config.enableDiscordWhitelist then
-            local discordUserId = string.gsub(discordIdentifier, "discord:", "")
-            local roles = NDCore.Functions.GetUserDiscordInfo(discordUserId).roles
+            local discordUserId = discordIdentifier:gsub("discord:", "")
+            local discordInfo = NDCore.Functions.GetUserDiscordInfo(discordUserId)
             for _, whitelistRole in pairs(config.whitelistRoles) do
-                if roles[whitelistRole] or whitelistRole == 0 or whitelistRole == "0" then
+                if whitelistRole == 0 or whitelistRole == "0" (discordInfo and discordInfo.roles[whitelistRole]) then
                     deferrals.done()
                     break
                 end
