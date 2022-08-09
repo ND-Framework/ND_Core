@@ -17,7 +17,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
             local discordUserId = discordIdentifier:gsub("discord:", "")
             local discordInfo = NDCore.Functions.GetUserDiscordInfo(discordUserId)
             for _, whitelistRole in pairs(config.whitelistRoles) do
-                if whitelistRole == 0 or whitelistRole == "0" (discordInfo and discordInfo.roles[whitelistRole]) then
+                if whitelistRole == 0 or whitelistRole == "0" or (discordInfo and discordInfo.roles[whitelistRole]) then
                     deferrals.done()
                     break
                 end
