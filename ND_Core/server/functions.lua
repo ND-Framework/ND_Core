@@ -6,7 +6,6 @@ function NDCore.Functions.GetPlayers(players)
     cb(NDCore.Players)
 end
 
-
 local discordErrors = {
     [400] = "improper http request",
     [401] = "Discord bot token might be missing or incorrect",
