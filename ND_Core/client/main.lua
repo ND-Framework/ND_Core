@@ -70,9 +70,16 @@ AddEventHandler("ND:updateMoney", function(cash, bank)
     NDCore.SelectedCharacter.bank = bank
 end)
 
+-- Sets main character.
 RegisterNetEvent("ND:setCharacter")
 AddEventHandler("ND:setCharacter", function(character)
     NDCore.SelectedCharacter = character
+end)
+
+-- Updates last lcoation.
+RegisterNetEvent("ND:updateLastLocation")
+AddEventHandler("ND:updateLastLocation", function(location)
+    NDCore.SelectedCharacter.lastLocation = location
 end)
 
 -- Enables pvp if it's selected in the config.
