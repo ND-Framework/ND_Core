@@ -217,6 +217,7 @@ RegisterNUICallback("tpDoNot", function(data)
     if next(character.lastLocation) ~= nil then
         SetEntityCoords(ped, character.lastLocation.x, character.lastLocation.y, character.lastLocation.z, false, false, false, false)
     end
+    Citizen.Wait(500)
     FreezeEntityPosition(ped, true)
     SwitchInPlayer(ped)
     Citizen.Wait(500)
