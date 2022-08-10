@@ -4,6 +4,7 @@ config = {
     changeCharacterCommand = "changecharacter", -- this is the command to open the ui again and change your character.
     enableAppearance = true, -- you need to install fivem-appearance
     characterSelectionAopDisplay = false,
+    chatMessageOnSpawn = true, -- if you would like a chat-message displaying your selected character's data on spawn.
     aop = function ()
         return "AOP: " .. exports["SimpleHUD"]:getAOP() -- exports["ModernHUD"]:getAOP()
     end,
