@@ -139,7 +139,6 @@ end)
 -- Selecting a player from the ui.
 RegisterNUICallback("setMainCharacter", function(data)
     local characters = NDCore.Functions.GetCharacters()
-    local character = NDCore.Functions.GetSelectedCharacter()
     for _, spawn in pairs(config.spawns[characters[data.id].job]) do
         SendNUIMessage({
             type = "setSpawns",
@@ -150,11 +149,16 @@ RegisterNUICallback("setMainCharacter", function(data)
             id = characters[data.id].id
         })
     end
+    for id, info in pairs(characters) do
+        print(info.firstName)
+        print(info.lastName)
+        print(info.job)
+        if config.chatMessageOnSpawn then
+            TriggerEvent("chat:addMessage", {template = '<div style="padding: 0.5vw; text-align: center; margin: 0.5vw; background-color: rgb(144,238,144); border-radius: 3px;"><b>{0}</b></div>', args = {"You are now playing as " .. info.firstName .. " " .. info.lastName .. " (" .. info.job .. ")"}})
+        end
+    end
     Wait(1000)
     TriggerServerEvent("ND:setCharacterOnline", data.id)
-    if config.chatMessageOnSpawn then
-	    TriggerEvent("chat:addMessage", {template = '<div style="padding: 0.5vw; text-align: center; margin: 0.5vw; background-color: rgb(144,238,144); border-radius: 3px;"><b>{0}</b></div>', args = {"You are now playing as " .. character.firstName .. " " .. character.lastName .. " (" .. character.job .. ")"}})
-    end
 end)
 
 -- Creating a character from the ui.
