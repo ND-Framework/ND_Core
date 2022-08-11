@@ -32,6 +32,21 @@ function startChangeAppearence()
     end, config)
 end
 
+-- Set the player to creating the ped if they haven't already.
+function setCharacterClothes(character)
+    if config.enableAppearance then
+        if not character.clothing or next(character.clothing) == nil then
+            changeAppearence = true
+        else
+            changeAppearence = false
+            exports["fivem-appearance"]:setPlayerModel(character.clothing.model)
+            local ped = PlayerPedId()
+            exports["fivem-appearance"]:setPedTattoos(ped, character.clothing.tattoos)
+            exports["fivem-appearance"]:setPedAppearance(ped, character.clothing.appearance)
+        end
+    end
+end
+
 function tablelength(table)
     local count = 0
     for _ in pairs(table) do
@@ -89,7 +104,7 @@ AddEventHandler("onResourceStart", function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
       return
     end
-    Citizen.Wait(2000)
+    Wait(2000)
     start(false)
 end)
 
@@ -120,23 +135,7 @@ AddEventHandler("ND:returnCharacters", function(characters)
     SetDisplay(true, "ui", background, characters)
 end)
 
--- Set the player to creating the ped if they haven't already.
-RegisterNetEvent("ND:setCharacter")
-AddEventHandler("ND:setCharacter", function(character)
-    if config.enableAppearance then
-        if next(character.clothing) == nil then
-            changeAppearence = true
-        else
-            changeAppearence = false
-            exports["fivem-appearance"]:setPlayerModel(character.clothing.model)
-            local ped = PlayerPedId()
-            exports["fivem-appearance"]:setPedTattoos(ped, character.clothing.tattoos)
-            exports["fivem-appearance"]:setPedAppearance(ped, character.clothing.appearance)
-        end
-    end
-end)
-
--- Selecting a player from the ui.
+-- Selecting a player from the iu.
 RegisterNUICallback("setMainCharacter", function(data)
     local characters = NDCore.Functions.GetCharacters()
     for _, spawn in pairs(config.spawns[characters[data.id].job]) do
@@ -202,15 +201,15 @@ end)
 -- Teleporting using ui.
 RegisterNUICallback("tpToLocation", function(data)
     local ped = PlayerPedId()
-    FreezeEntityPosition(ped, false)
     SetEntityCoords(ped, tonumber(data.x), tonumber(data.y), tonumber(data.z), false, false, false, false)
     FreezeEntityPosition(ped, true)
     SwitchInPlayer(ped)
-    Citizen.Wait(500)
+    Wait(500)
     SetDisplay(false, "ui")
-    Citizen.Wait(500)
+    Wait(500)
     FreezeEntityPosition(ped, false)
     SetEntityVisible(ped, true, 0)
+    setCharacterClothes(NDCore.Functions.GetSelectedCharacter())
     if config.enableAppearance and changeAppearence then
         startChangeAppearence()
     end
@@ -220,18 +219,18 @@ end)
 RegisterNUICallback("tpDoNot", function(data)
     local ped = PlayerPedId()
     local character = NDCore.Functions.GetCharacters()[data.id]
-    FreezeEntityPosition(ped, false)
-    if next(character.lastLocation) ~= nil then
+    if character.lastLocation and next(character.lastLocation) ~= nil then
         SetEntityCoords(ped, character.lastLocation.x, character.lastLocation.y, character.lastLocation.z, false, false, false, false)
+        FreezeEntityPosition(ped, true)
     end
-    Citizen.Wait(500)
-    FreezeEntityPosition(ped, true)
     SwitchInPlayer(ped)
-    Citizen.Wait(500)
+    Wait(500)
     SetDisplay(false, "ui")
-    Citizen.Wait(500)
-    FreezeEntityPosition(ped, false)
+    Wait(500)
     SetEntityVisible(ped, true, 0)
+    FreezeEntityPosition(ped, false)
+    Wait(100)
+    setCharacterClothes(NDCore.Functions.GetSelectedCharacter())
     if config.enableAppearance and changeAppearence then
         startChangeAppearence()
     end
@@ -240,7 +239,7 @@ end)
 -- Change character command
 RegisterCommand(config.changeCharacterCommand, function()
     SwitchOutPlayer(PlayerPedId(), 0, 1)
-    Citizen.Wait(2000)
+    Wait(2000)
     FreezeEntityPosition(ped, true)
     SetEntityVisible(ped, false, 0)
 	SetDisplay(true, "ui")

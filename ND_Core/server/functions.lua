@@ -116,6 +116,10 @@ function NDCore.Functions.TransferBank(amount, player, target)
             color = {0, 255, 0},
             args = {"Success", "You paid " .. NDCore.Players[target].firstName .. " " .. NDCore.Players[target].lastName .. " $" .. amount .. "."}
         })
+        TriggerClientEvent("chat:addMessage", target, {
+            color = {0, 255, 0},
+            args = {"Success", NDCore.Players[player].firstName .. " " .. NDCore.Players[target].lastName .. " sent you $" .. amount .. "."}
+        })
         return true
     end
 end
@@ -156,7 +160,11 @@ function NDCore.Functions.GiveCash(amount, player, target)
         NDCore.Functions.UpdateMoney(target)
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
-            args = {"Success", "You gave " .. NDCore.Players[target].firstName .. " " .. NDCore.Players[target].lastName .. " $" .. amount .. "."}
+            args = {"Success", "You gave $" .. amount .. "."}
+        })
+        TriggerClientEvent("chat:addMessage", target, {
+            color = {0, 255, 0},
+            args = {"Success", " Received $" .. amount .. "."}
         })
         return true
     end
