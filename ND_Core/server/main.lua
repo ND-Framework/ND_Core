@@ -17,6 +17,7 @@ CreateThread(function()
             if DoesEntityExist(ped) then
                 local lastLocation = GetEntityCoords(ped)
                 playerInfo.lastLocation = {x = lastLocation.x, y = lastLocation.y, z = lastLocation.z}
+                TriggerClientEvent("ND:updateLastLocation", player, playerInfo.lastLocation)
             end
         end
     end
