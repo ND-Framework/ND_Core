@@ -75,7 +75,7 @@ function SetDisplay(bool, typeName, bg, characters)
     if config.characterSelectionAopDisplay then
         SendNUIMessage({
             type = "aop",
-            aop = config.aop()
+            aop = exports[config.aop]:getAOP()
         })
     end
 end
