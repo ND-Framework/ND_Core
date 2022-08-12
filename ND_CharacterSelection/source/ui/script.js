@@ -100,7 +100,7 @@ $(function() {
         }
 
         if (item.type === "aop") {
-            $("#aop").text(item.aop);
+            $("#aop").text(`AOP: ${item.aop}`);
         }
 
         if (item.type === "refresh") {
