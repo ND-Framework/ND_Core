@@ -14,7 +14,7 @@ local banks = {
         ["name"] = "Fleeca Bank"
     },
     {
-        ["coords"] = vector3(-2962.53, 482.25, 15.69),
+        ["coords"] = vector3(-2962.53, 482.25, 15.69), -- great ocean hwy fleeca bank
         ["name"] = "Fleeca Bank"
     },
     {
@@ -22,11 +22,15 @@ local banks = {
         ["name"] = "Blaine County Savings Bank"
     },
     {
-        ["coords"] = vector3(-351.56, -49.70, 49.02),
+        ["coords"] = vector3(-351.56, -49.70, 49.02), -- burton hawick fleeca bank
         ["name"] = "Fleeca Bank"
     },
     {
-        ["coords"] = vector3(313.66, -278.90, 54.16),
+        ["coords"] = vector3(313.66, -278.90, 54.16), -- alta hawick fleeca bank
+        ["name"] = "Fleeca Bank"
+    },
+    {
+        ["coords"] = vector3(-1213.08, -330.93, 37.77), -- rockford hills fleeca bank
         ["name"] = "Fleeca Bank"
     }
 }
