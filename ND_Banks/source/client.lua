@@ -5,34 +5,30 @@ local display = false
 local nearModel = false
 
 local banks = {
-    [1] = { -- harmony fleeca bank
-	   ["coords"] = vector3(1175.77, 2706.89, 38.09),
-	   ["name"] = "Fleeca Bank"
+    {
+        ["coords"] = vector3(1175.77, 2706.89, 38.09), -- harmony fleeca bank
+        ["name"] = "Fleeca Bank"
     },
-    [2] = { -- legion square fleeca bank
-	    ["coords"] = vector3(149.23, -1040.57, 29.36),
-	    ["name"] = "Fleeca Bank"
+    {
+        ["coords"] = vector3(149.23, -1040.57, 29.36), -- legion square fleeca bank
+        ["name"] = "Fleeca Bank"
     },
-    [3] = {
+    {
         ["coords"] = vector3(-2962.53, 482.25, 15.69),
         ["name"] = "Fleeca Bank"
     },
-    [4] = { -- paleto bay bank
-        ["coords"] = vector3(-112.02, 6469.13, 31.62),
+    {
+        ["coords"] = vector3(-112.02, 6469.13, 31.62), -- paleto bay bank
         ["name"] = "Blaine County Savings Bank"
     },
-    [5] = {
+    {
         ["coords"] = vector3(-351.56, -49.70, 49.02),
         ["name"] = "Fleeca Bank"
     },
-    [6] = {
-        ["coords"] = vector3(-351.56, -49.70, 49.02),
-        ["name"] = "Fleeca Bank"
-    },
-    [7] = {
+    {
         ["coords"] = vector3(313.66, -278.90, 54.16),
         ["name"] = "Fleeca Bank"
-    },
+    }
 }
 
 local days = {
@@ -65,8 +61,8 @@ function SetDisplay(bool)
     SetNuiFocus(bool, bool)
     SendNUIMessage({
         status = bool,
-		playerName = selectedCharacter.firstName .. " " .. selectedCharacter.lastName,
-		balance = "Account Balance: $" .. selectedCharacter.bank .. ".00",
+        playerName = selectedCharacter.firstName .. " " .. selectedCharacter.lastName,
+        balance = "Account Balance: $" .. selectedCharacter.bank .. ".00",
         date = days[GetClockDayOfWeek() + 1],
         time = getTime()
     })
@@ -119,16 +115,16 @@ Citizen.CreateThread(function()
 end)
 
 CreateThread(function()
-	for _, blips in ipairs(banks) do
-		local blip = AddBlipForCoord(blips.coords)
-		SetBlipSprite(blip, 431)
-		SetBlipColour(blip, 2)
-		SetBlipScale(blip, 1.0)
-		SetBlipAsShortRange(blip, true)
-		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(blips.name)
-		EndTextCommandSetBlipName(blip)
-	end
+    for _, blips in ipairs(banks) do
+        local blip = AddBlipForCoord(blips.coords)
+        SetBlipSprite(blip, 431)
+        SetBlipColour(blip, 2)
+        SetBlipScale(blip, 1.0)
+        SetBlipAsShortRange(blip, true)
+        BeginTextCommandSetBlipName("STRING")
+        AddTextComponentString(blips.name)
+        EndTextCommandSetBlipName(blip)
+    end
 end)
 
 -- close the ui.
