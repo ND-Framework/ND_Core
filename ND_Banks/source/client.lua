@@ -5,13 +5,34 @@ local display = false
 local nearModel = false
 
 local banks = {
-    vector3(1175.77, 2706.89, 38.09),
-    vector3(149.23, -1040.57, 29.36),
-    vector3(-2962.53, 482.25, 15.69),
-    vector3(-112.02, 6469.13, 31.62),
-    vector3(-351.56, -49.70, 49.02),
-    vector3(313.66, -278.90, 54.16),
-    vector3(-1213.08, -330.93, 37.77)
+    [1] = { -- harmony fleeca bank
+	   ["coords"] = vector3(1175.77, 2706.89, 38.09),
+	   ["name"] = "Fleeca Bank"
+    },
+    [2] = { -- legion square fleeca bank
+	    ["coords"] = vector3(149.23, -1040.57, 29.36),
+	    ["name"] = "Fleeca Bank"
+    },
+    [3] = {
+        ["coords"] = vector3(-2962.53, 482.25, 15.69),
+        ["name"] = "Fleeca Bank"
+    },
+    [4] = { -- paleto bay bank
+        ["coords"] = vector3(-112.02, 6469.13, 31.62),
+        ["name"] = "Blaine County Savings Bank"
+    },
+    [5] = {
+        ["coords"] = vector3(-351.56, -49.70, 49.02),
+        ["name"] = "Fleeca Bank"
+    },
+    [6] = {
+        ["coords"] = vector3(-351.56, -49.70, 49.02),
+        ["name"] = "Fleeca Bank"
+    },
+    [7] = {
+        ["coords"] = vector3(313.66, -278.90, 54.16),
+        ["name"] = "Fleeca Bank"
+    },
 }
 
 local days = {
@@ -52,7 +73,7 @@ function SetDisplay(bool)
 end
 
 function drawText3D(coords, text)
-    local onScreen, _x, _y = World3dToScreen2d(coords.x, coords.y, coords.z + 0.3)
+    local onScreen, _x, _y = GetScreenCoordFromWorldCoord(coords.x, coords.y, coords.z + 0.3)
     local pX, pY, pZ = table.unpack(GetGameplayCamCoords())
     SetTextScale(0.4, 0.4)
     SetTextFont(4)
@@ -69,8 +90,8 @@ end
 function inRange(ped)
     playerCoords = GetEntityCoords(ped)
     for _, bank in pairs(banks) do
-        if (#(playerCoords - bank)) < 1.5 then
-            return bank
+        if (#(playerCoords - bank.coords)) < 1.5 then
+            return bank.coords
         end
     end
     return false
@@ -95,6 +116,19 @@ Citizen.CreateThread(function()
             end
         end
     end
+end)
+
+CreateThread(function()
+	for _, blips in ipairs(banks) do
+		local blip = AddBlipForCoord(blips.coords)
+		SetBlipSprite(blip, 431)
+		SetBlipColour(blip, 2)
+		SetBlipScale(blip, 1.0)
+		SetBlipAsShortRange(blip, true)
+		BeginTextCommandSetBlipName("STRING")
+		AddTextComponentString(blips.name)
+		EndTextCommandSetBlipName(blip)
+	end
 end)
 
 -- close the ui.
