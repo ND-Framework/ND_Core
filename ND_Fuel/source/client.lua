@@ -170,11 +170,11 @@ function grabExistingNozzle()
 end
 
 -- attach nozzle to vehicle.
-function putNozzleInVehicle(vehicle, ptankBone, isBike, dontClear)
+function putNozzleInVehicle(vehicle, ptankBone, isBike, dontClear, newTankPosition)
     if isBike then
-        AttachEntityToEntity(nozzle, vehicle, ptankBone, 0.0, -0.2, 0.2, -80.0, 0.0, 0.0, true, true, false, false, 1, true)
+        AttachEntityToEntity(nozzle, vehicle, ptankBone, 0.0 + newTankPosition.x, -0.2 + newTankPosition.y, 0.2 + newTankPosition.z, -80.0, 0.0, 0.0, true, true, false, false, 1, true)
     else
-        AttachEntityToEntity(nozzle, vehicle, ptankBone, -0.23, 0.0, 0.6, -125.0, -90.0, -90.0, true, true, false, false, 1, true)
+        AttachEntityToEntity(nozzle, vehicle, ptankBone, -0.18 + newTankPosition.x, 0.0 + newTankPosition.y, 0.75 + newTankPosition.z, -125.0, -90.0, -90.0, true, true, false, false, 1, true)
     end
     if not dontClear and IsEntityPlayingAnim(ped, "timetable@gardener@filling_can", "gar_ig_5_filling_can", 3) then
         ClearPedTasks(ped)
@@ -221,7 +221,6 @@ CreateThread(function()
         pedCoords = GetEntityCoords(ped)
         pump, pumpHandle = nearPump(pedCoords)
         veh = GetVehiclePedIsIn(ped, true)
-        inveh = GetVehiclePedIsIn(ped, false)
         Wait(500)
     end
 end)
@@ -266,7 +265,6 @@ CreateThread(function()
                     if fuel < 97 then
                         SetFuel(vehicleFueling, fuel + ((2.0 / classMultiplier) - math.random(0, 100) / 100))
                     else
-                        cost = 0
                         fuel = 100.0
                         SetFuel(vehicleFueling, fuel)
                         vehicleFueling = false
@@ -280,6 +278,7 @@ CreateThread(function()
                 end
                 if not config.standalone and cost ~= 0 then
                     TriggerServerEvent("ND_Fuel:pay", cost)
+                    cost = 0
                 end
             end
         end
@@ -320,7 +319,7 @@ CreateThread(function()
     local wait = 500
     while true do
         Wait(wait)
-        if pump and inveh == 0 then
+        if pump then
             wait = 0
             if not holdingNozzle and not nozzleInVehicle and not nozzleDropped then
                 local jerryCanText = ""
@@ -454,33 +453,58 @@ CreateThread(function()
                 local vehClass = GetVehicleClass(veh)
                 local zPos = nozzleBasedOnClass[vehClass + 1]
                 local isBike = false
+                local nozzleModifiedPosition = {
+                    x = 0.0,
+                    y = 0.0,
+                    z = 0.0
+                }
+                local textModifiedPosition = {
+                    x = 0.0,
+                    y = 0.0,
+                    z = 0.0
+                }
                 
                 if vehClass == 8 and vehClass ~= 13 and not config.electricVehicles[GetHashKey(veh)] then
-                    tankBone = GetEntityBoneIndexByName(veh, "petroltank")
+                    tankBone = GetEntityBoneIndexByName(veh, "petrolcap")
+                    if tankBone == -1 then
+                        tankBone = GetEntityBoneIndexByName(veh, "petroltank")
+                    end
                     if tankBone == -1 then
                         tankBone = GetEntityBoneIndexByName(veh, "engine")
                     end
                     isBike = true
                 elseif vehClass ~= 13 and not config.electricVehicles[GetHashKey(veh)] then
-                    tankBone = GetEntityBoneIndexByName(veh, "petroltank_l")
+                    tankBone = GetEntityBoneIndexByName(veh, "petrolcap")
+                    if tankBone == -1 then
+                        tankBone = GetEntityBoneIndexByName(veh, "petroltank_l")
+                    end
                     if tankBone == -1 then
                         tankBone = GetEntityBoneIndexByName(veh, "hub_lr")
+                    end
+                    if tankBone == -1 then
+                        tankBone = GetEntityBoneIndexByName(veh, "handle_dside_r")
+                        nozzleModifiedPosition.x = 0.1
+                        nozzleModifiedPosition.y = -0.5
+                        nozzleModifiedPosition.z = -0.6
+                        textModifiedPosition.x = 0.55
+                        textModifiedPosition.y = 0.1
+                        textModifiedPosition.z = -0.2
                     end
                 end
                 tankPosition = GetWorldPositionOfEntityBone(veh, tankBone)
                 if tankPosition and #(pedCoords - tankPosition) < 1.2 then
                     if not nozzleInVehicle and holdingNozzle then
-                        DrawText3D(tankPosition.x, tankPosition.y, tankPosition.z + zPos, "Attach Nozzle [E]")
+                        DrawText3D(tankPosition.x + textModifiedPosition.x, tankPosition.y + textModifiedPosition.y, tankPosition.z + zPos + textModifiedPosition.z, "Attach Nozzle [E]")
                         if IsControlJustPressed(0, 51) then
                             LoadAnimDict("timetable@gardener@filling_can")
                             TaskPlayAnim(ped, "timetable@gardener@filling_can", "gar_ig_5_filling_can", 2.0, 8.0, -1, 50, 0, 0, 0, 0)
                             Wait(300)
-                            putNozzleInVehicle(veh, tankBone, isBike, true)
+                            putNozzleInVehicle(veh, tankBone, isBike, true, nozzleModifiedPosition)
                             Wait(300)
                             ClearPedTasks(ped)
                         end
                     elseif nozzleInVehicle then
-                        DrawText3D(tankPosition.x, tankPosition.y, tankPosition.z + zPos, "Grab Nozzle [E]")
+                        DrawText3D(tankPosition.x + textModifiedPosition.x, tankPosition.y + textModifiedPosition.y, tankPosition.z + zPos + textModifiedPosition.z, "Grab Nozzle [E]")
                         if IsControlJustPressed(0, 51) then
                             LoadAnimDict("timetable@gardener@filling_can")
                             TaskPlayAnim(ped, "timetable@gardener@filling_can", "gar_ig_5_filling_can", 2.0, 8.0, -1, 50, 0, 0, 0, 0)
