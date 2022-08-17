@@ -51,6 +51,24 @@ if config["/twt"] then
     end, false)
 end
 
+if config["pay"] then
+    RegisterCommand("pay", function(source, args, rawCommand)
+        local player = source
+        local target = tonumber(args[1])
+        local amount = tonumber(args[2])
+        NDCore.Functions.TransferBank(amount, player, target)
+    end, false)
+end
+
+if config["give"] then
+    RegisterCommand(Settings.Give.Command, function(source, args, rawCommand)
+        local player = source
+        local amount = tonumber(args[2])
+        NDCore.Functions.GiveCashToNearbyPlayer(player, amount)
+    end, false)
+end
+
+
 function hasDarkWebPermission(player, players, args)
     for _, department in pairs(config["/darkweb"].canNotSee) do
         if players[player].job == department then 
