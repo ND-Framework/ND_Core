@@ -61,7 +61,7 @@ if config["pay"] then
 end
 
 if config["give"] then
-    RegisterCommand(Settings.Give.Command, function(source, args, rawCommand)
+    RegisterCommand("give", function(source, args, rawCommand)
         local player = source
         local amount = tonumber(args[2])
         NDCore.Functions.GiveCashToNearbyPlayer(player, amount)
