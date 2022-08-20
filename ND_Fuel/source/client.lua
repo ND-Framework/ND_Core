@@ -132,7 +132,7 @@ function grabNozzleFromPump()
     while not RopeAreTexturesLoaded() do
         Wait(0)
     end
-	RopeLoadTextures()
+    RopeLoadTextures()
     while not pump do
         Wait(0)
     end
@@ -141,6 +141,7 @@ function grabNozzleFromPump()
         Wait(0)
     end
     ActivatePhysics(rope)
+    Wait(50)
     local nozzlePos = GetEntityCoords(nozzle)
     nozzlePos = GetOffsetFromEntityInWorldCoords(nozzle, 0.0, -0.033, -0.195)
     AttachEntitiesToRope(rope, pumpHandle, nozzle, pump.x, pump.y, pump.z + 1.45, nozzlePos.x, nozzlePos.y, nozzlePos.z, 5.0, false, false, nil, nil)
