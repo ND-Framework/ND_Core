@@ -4,7 +4,10 @@ config = {
     changeCharacterCommand = "changecharacter", -- this is the command to open the ui again and change your character.
     enableAppearance = true, -- you need to install fivem-appearance
     characterSelectionAopDisplay = true,
-    aopResourceName = "SimpleHUD", -- ModernHUD, SimpleHUD. If you're using a custom AOP system, put the resource name here and make sure it has the export getAOP
+    aopExport = function()
+        return exports["SimpleHUD"]:getAOP() -- exports["ModernHUD"]:getAOP()
+    end,
+    
     -- set your backgrounds, if you have more than 1 then it will randomly change everytime you open the ui.
     backgrounds = {
         "https://i.imgur.com/E51ckFx.png", -- Credits: Fuzzman270#0270
