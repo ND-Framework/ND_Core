@@ -73,11 +73,9 @@ function SetDisplay(bool, typeName, bg, characters)
     })
     Wait(500)
     if config.characterSelectionAopDisplay then
-        local AreaOfPlay = exports[config.aopResourceName]:getAOP()
-        --print(AreaOfPlay)
         SendNUIMessage({
             type = "aop",
-            aop = AreaOfPlay
+            aop = config.aopExport()
         })
     end
 end
