@@ -118,7 +118,7 @@ function NDCore.Functions.TransferBank(amount, player, target)
         })
         TriggerClientEvent("chat:addMessage", target, {
             color = {0, 255, 0},
-            args = {"Success", NDCore.Players[player].firstName .. " " .. NDCore.Players[target].lastName .. " sent you $" .. amount .. "."}
+            args = {"Success", NDCore.Players[player].firstName .. " " .. NDCore.Players[player].lastName .. " sent you $" .. amount .. "."}
         })
         return true
     end
