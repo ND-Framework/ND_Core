@@ -93,10 +93,9 @@ function start(switch)
         SetEntityVisible(ped, false, 0)
     end
     if config.characterSelectionAopDisplay then
-        local AreaOfPlay = exports[config.aopResourceName]:getAOP()
         SendNUIMessage({
             type = "aop",
-            aop = AreaOfPlay
+            aop = config.aopExport()
         })
     end
 end
