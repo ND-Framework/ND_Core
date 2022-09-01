@@ -64,3 +64,19 @@ AddEventHandler("ND_CharacterSelection:checkPerms", function()
     end
     TriggerClientEvent("ND_CharacterSelection:permsChecked", player, allowedRoles)
 end)
+
+if config.departmentPaychecks then
+    CreateThread(function()
+        while true do
+            Wait(config.paycheckInterval * 60000)
+            for player, playerInfo in pairs(NDCore.Functions.GetPlayers()) do
+                local salary = config.departmentSalaries[playerInfo.job]
+                NDCore.Functions.AddMoney(salary, player, "bank")
+                TriggerClientEvent("chat:addMessage", player, {
+                    color = {0, 255, 0},
+                    args = {"Salary", "Received $" .. salary .. "."}
+                })
+            end
+        end
+    end)
+end

@@ -7,20 +7,30 @@ config = {
     aopExport = function()
         return exports["SimpleHUD"]:getAOP() -- exports["ModernHUD"]:getAOP()
     end,
-    
+
     -- set your backgrounds, if you have more than 1 then it will randomly change everytime you open the ui.
     backgrounds = {
-        "https://i.imgur.com/E51ckFx.png", -- Credits: Fuzzman270#0270
-        "https://i.imgur.com/SeZD7TP.png", -- Credits: Fuzzman270#0270
-        "https://i.imgur.com/ZWKfYD9.png" -- Credits: 2XRondo#6374
+        "https://i.imgur.com/E51ckFx.png",  -- Credits: Fuzzman270#0270
+        "https://i.imgur.com/SeZD7TP.png",  -- Credits: Fuzzman270#0270
+        "https://i.imgur.com/ZWKfYD9.png"   -- Credits: 2XRondo#6374
     },
 
-    departments = {
+    departments = {                         -- these are the required discord role ids to be able to access these departments (enable developer mode in discord's advanced settings and right click the role)
         ["CIV"] = {"0"},
         ["SAHP"] = {"0"},
         ["LSPD"] = {"0"},
         ["BCSO"] = {"872921520719142932"},
         ["LSFD"] = {"872921520719142932"}
+    },
+
+    departmentPaychecks = false,            -- if you would like salaries to be paid out to the departments, set this to true
+    paycheckInterval = 24,                  -- this is how often (in minutes) paychecks are to be paid out if departmentPaychecks is set to true
+    departmentSalaries = {                  -- the amount given to the character per interval of time set via paycheckInterval
+        ["CIV"] = 300,
+        ["SAHP"] = 700,
+        ["LSPD"] = 600,
+        ["BCSO"] = 500,
+        ["LSFD"] = 650
     },
 
     -- set up the spawn buttons for each department.
