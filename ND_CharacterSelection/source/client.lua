@@ -113,8 +113,7 @@ AddEventHandler("playerSpawned", function()
 end)
 
 -- This is used to add department drop down on the ui.
-RegisterNetEvent("ND_CharacterSelection:permsChecked")
-AddEventHandler("ND_CharacterSelection:permsChecked", function(allowedRoles)
+RegisterNetEvent("ND_CharacterSelection:permsChecked", function(allowedRoles)
     SendNUIMessage({
         type = "givePerms",
         deptRoles = json.encode(allowedRoles)
@@ -122,8 +121,7 @@ AddEventHandler("ND_CharacterSelection:permsChecked", function(allowedRoles)
 end)
 
 -- Gets all the characters and displays them on the ui.
-RegisterNetEvent("ND:returnCharacters")
-AddEventHandler("ND:returnCharacters", function(characters)
+RegisterNetEvent("ND:returnCharacters", function(characters)
     local playerCharacters = {}
     for id, characterInfo in pairs(characters) do
         playerCharacters[tostring(id)] = characterInfo

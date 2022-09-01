@@ -131,8 +131,7 @@ RegisterNUICallback("useATM", function(data)
 end)
 
 -- update the balance on the ui and confirm if the deposit/withdraw was successful.
-RegisterNetEvent("ND_ATMs:update")
-AddEventHandler("ND_ATMs:update", function(status)
+RegisterNetEvent("ND_ATMs:update", function(status)
     Citizen.Wait(1000)
     local selectedCharacter = NDCore.Functions.GetSelectedCharacter()
     SendNUIMessage({

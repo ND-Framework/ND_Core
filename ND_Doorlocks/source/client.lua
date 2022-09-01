@@ -42,8 +42,7 @@ function isAuthorized(door)
     return false
 end
 
-RegisterNetEvent("ND:setCharacter")
-AddEventHandler("ND:setCharacter", function(character)
+RegisterNetEvent("ND:setCharacter", function(character)
     job = character.job
 end)
 
@@ -80,8 +79,7 @@ Citizen.CreateThread(function()
     end
 end)
 
-RegisterNetEvent("ND_Doorlocks:syncDoor")
-AddEventHandler("ND_Doorlocks:syncDoor", function(doorID, state)
+RegisterNetEvent("ND_Doorlocks:syncDoor", function(doorID, state)
     doorList[doorID].locked = state
     for _, doors in pairs(doorList[doorID].doors) do
         local entity = GetClosestObjectOfType(doors.coords.x, doors.coords.y, doors.coords.z, 1.0, doors.hash, false, false, false)
@@ -90,8 +88,7 @@ AddEventHandler("ND_Doorlocks:syncDoor", function(doorID, state)
     end
 end)
 
-RegisterNetEvent("ND_Doorlocks:returnDoors")
-AddEventHandler("ND_Doorlocks:returnDoors", function(updatedDoors)
+RegisterNetEvent("ND_Doorlocks:returnDoors", function(updatedDoors)
     for doorID, state in pairs(updatedDoors) do
         doorList[doorID].locked = state
         for _, doors in pairs(doorList[doorID].doors) do

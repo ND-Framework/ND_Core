@@ -32,8 +32,7 @@ function sendToDiscord(name, message, color)
 end
 
 -- Jail player discord log, trigger the even on the players client and send a message to everyone.
-RegisterNetEvent("ND_Jailing:jailPlayer")
-AddEventHandler("ND_Jailing:jailPlayer", function(id, time, fine, reason)
+RegisterNetEvent("ND_Jailing:jailPlayer", function(id, time, fine, reason)
     local player = source
     local players = NDCore.Functions.GetPlayers()
     local dept = players[player].job
@@ -53,8 +52,7 @@ AddEventHandler("ND_Jailing:jailPlayer", function(id, time, fine, reason)
     end
 end)
 
-RegisterNetEvent("ND_Jailing:updateJailing")
-AddEventHandler("ND_Jailing:updateJailing", function(time)
+RegisterNetEvent("ND_Jailing:updateJailing", function(time)
     local player = source
     if time == 0 then
         jailedPlayers[GetPlayerIdentifierFromType("license", player)] = nil
@@ -64,8 +62,7 @@ AddEventHandler("ND_Jailing:updateJailing", function(time)
 end)
 
 -- Gets all players on the server and adds them to a table.
-RegisterNetEvent("ND_Jailing:getPlayers")
-AddEventHandler("ND_Jailing:getPlayers", function()
+RegisterNetEvent("ND_Jailing:getPlayers", function()
     local players = {}
     for _, id in pairs(GetPlayers()) do
         players[id] = "(" .. id .. ") " .. GetPlayerName(id)
@@ -73,8 +70,7 @@ AddEventHandler("ND_Jailing:getPlayers", function()
     TriggerClientEvent("ND_Jailing:returnPlayers", source, players)
 end)
 
-RegisterNetEvent("ND_Jailing:getJailTime")
-AddEventHandler("ND_Jailing:getJailTime", function()
+RegisterNetEvent("ND_Jailing:getJailTime", function()
     local player = source
     local time = jailedPlayers[GetPlayerIdentifierFromType("license", player)]
     if time then

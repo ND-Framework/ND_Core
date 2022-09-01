@@ -58,27 +58,23 @@ if config.customPauseMenu then
     end)
 end
 
-RegisterNetEvent("ND:returnCharacters")
-AddEventHandler("ND:returnCharacters", function(characters)
+RegisterNetEvent("ND:returnCharacters", function(characters)
     NDCore.Characters = characters
 end)
 
 -- updates the money on the client.
-RegisterNetEvent("ND:updateMoney")
-AddEventHandler("ND:updateMoney", function(cash, bank)
+RegisterNetEvent("ND:updateMoney", function(cash, bank)
     NDCore.SelectedCharacter.cash = cash
     NDCore.SelectedCharacter.bank = bank
 end)
 
 -- Sets main character.
-RegisterNetEvent("ND:setCharacter")
-AddEventHandler("ND:setCharacter", function(character)
+RegisterNetEvent("ND:setCharacter", function(character)
     NDCore.SelectedCharacter = character
 end)
 
 -- Updates last lcoation.
-RegisterNetEvent("ND:updateLastLocation")
-AddEventHandler("ND:updateLastLocation", function(location)
+RegisterNetEvent("ND:updateLastLocation", function(location)
     NDCore.SelectedCharacter.lastLocation = location
 end)
 

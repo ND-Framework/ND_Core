@@ -90,8 +90,7 @@ Citizen.CreateThread(function()
     end
 end)
 
-RegisterNetEvent("ND_ShotSpotter:Report")
-AddEventHandler("ND_ShotSpotter:Report", function(street, pedCoords, postal)
+RegisterNetEvent("ND_ShotSpotter:Report", function(street, pedCoords, postal)
     -- if the player isn't a cop then they won't receive the alert.
     if not isCop() then
         return
@@ -130,8 +129,7 @@ AddEventHandler("ND_ShotSpotter:Report", function(street, pedCoords, postal)
 end)
 
 -- set route to latest shot spotter location.
-RegisterNetEvent("ND_shotSpotter:setRoute")
-AddEventHandler("ND_shotSpotter:setRoute", function()
+RegisterNetEvent("ND_shotSpotter:setRoute", function()
     while setRoute do
         Citizen.Wait(0)
         if IsControlJustPressed(0, 113) then

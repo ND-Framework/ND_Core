@@ -121,8 +121,7 @@ Citizen.CreateThread(function()
 end)
 
 -- Return list of all players on the server and open ui.
-RegisterNetEvent("ND_Jailing:returnPlayers")
-AddEventHandler("ND_Jailing:returnPlayers", function(players)
+RegisterNetEvent("ND_Jailing:returnPlayers", function(players)
     for _, player in pairs(players) do
         SendNUIMessage({
             type = "players",
@@ -159,8 +158,7 @@ function jail(time)
     TriggerServerEvent("ND_Jailing:updateJailing", jailTime)
 end
 
-RegisterNetEvent("ND_Jailing:timeLeft")
-AddEventHandler("ND_Jailing:timeLeft", function()
+RegisterNetEvent("ND_Jailing:timeLeft", function()
     while jailTime > 0 do
         Citizen.Wait(0)
         text("Time until release: " .. tostring(jailTime), 0.5, 0.9, 0.5)
@@ -168,13 +166,11 @@ AddEventHandler("ND_Jailing:timeLeft", function()
 end)
 
 -- Jail a player and loop to keep them in jail every second.
-RegisterNetEvent("ND_Jailing:jailPlayer")
-AddEventHandler("ND_Jailing:jailPlayer", function(time)
+RegisterNetEvent("ND_Jailing:jailPlayer", function(time)
     jail(time)
 end)
 
-RegisterNetEvent("ND_Jailing:unjailPlayer")
-AddEventHandler("ND_Jailing:unjailPlayer", function(time)
+RegisterNetEvent("ND_Jailing:unjailPlayer", function(time)
     jailTime = 0
 end)
 

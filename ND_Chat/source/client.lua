@@ -21,8 +21,7 @@ if config["/darkweb"].enabled then
 end
 
 if config["/911"].enabled then
-    RegisterNetEvent("ND_Chat:911")
-    AddEventHandler("ND_Chat:911", function(coords, callDescription)
+    RegisterNetEvent("ND_Chat:911", function(coords, callDescription)
         local selectedCharacter
         NDCore.Functions.GetSelectedCharacter(function(character)
             selectedCharacter = character

@@ -19,8 +19,7 @@ function validateDepartment(player, department)
 end
 
 -- Creating a new character.
-RegisterNetEvent("ND_CharacterSelection:newCharacter")
-AddEventHandler("ND_CharacterSelection:newCharacter", function(newCharacter)
+RegisterNetEvent("ND_CharacterSelection:newCharacter", function(newCharacter)
     local player = source
 
     -- validate that the person has permission to use the department.
@@ -32,8 +31,7 @@ AddEventHandler("ND_CharacterSelection:newCharacter", function(newCharacter)
 end)
 
 -- Update the character info when edited.
-RegisterNetEvent("ND_CharacterSelection:editCharacter")
-AddEventHandler("ND_CharacterSelection:editCharacter", function(newCharacter)
+RegisterNetEvent("ND_CharacterSelection:editCharacter", function(newCharacter)
     local player = source
 
     -- validate that the person has permission to use the department.
@@ -47,8 +45,7 @@ AddEventHandler("ND_CharacterSelection:editCharacter", function(newCharacter)
     TriggerClientEvent("ND:returnCharacters", player, NDCore.Functions.GetPlayerCharacters(player))
 end)
 
-RegisterNetEvent("ND_CharacterSelection:checkPerms")
-AddEventHandler("ND_CharacterSelection:checkPerms", function()
+RegisterNetEvent("ND_CharacterSelection:checkPerms", function()
     local player = source
     local discordUserId = NDCore.Functions.GetPlayerIdentifierFromType("discord", player):gsub("discord:", "")
     local allowedRoles = {}
