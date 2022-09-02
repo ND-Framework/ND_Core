@@ -598,6 +598,9 @@ CreateThread(function()
         local pedVeh = GetVehiclePedIsIn(ped)
         if pedVeh ~= 0 then
             local vehClass = GetVehicleClass(pedVeh)
+            if not DecorExistOn(pedVeh, FUEL_DECOR) then
+                SetFuel(pedVeh, math.random(200, 800) / 10)
+            end
             local fuel = GetFuel(pedVeh)
             if fuel < 5.0 and GetIsVehicleEngineRunning(pedVeh) then
                 DisableControlAction(0, 71)
@@ -613,4 +616,9 @@ CreateThread(function()
     for _, pumps in pairs(config.addPumps) do
         CreateObject(GetHashKey(pumps.hash), pumps.x, pumps.y, pumps.z - 1.0, true, true, true)
     end
+end)
+
+-- Register the fuel decor
+CreateThread(function()
+    DecorRegister(FUEL_DECOR, 1)
 end)
