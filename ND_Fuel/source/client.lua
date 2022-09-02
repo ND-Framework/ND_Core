@@ -416,7 +416,7 @@ CreateThread(function()
                 end
             end
 
-            local veh = vehicleInFront(ped, pedCoords)
+            local veh = vehicleInFront()
 
             -- Animations for manually fueling and effect for sparying fuel.
             if holdingNozzle and nozzle then
@@ -530,16 +530,24 @@ CreateThread(function()
         Wait(wait)
         if GetSelectedPedWeapon(ped) == 883325847 and not holdingNozzle and not nozzleInVehicle then
             wait = 0
-            local veh = vehicleInFront(ped, pedCoords)
+            local veh = vehicleInFront()
             if veh then
                 local vehClass = GetVehicleClass(veh)
                 local zPos = nozzleBasedOnClass[vehClass + 1]
                 local can = GetAmmoInPedWeapon(ped, 883325847)
+                local distance = 1.2
                 
                 if vehClass == 8 and vehClass ~= 13 and not config.electricVehicles[GetHashKey(veh)] then
                     tankBone = GetEntityBoneIndexByName(veh, "petroltank")
                     if tankBone == -1 then
                         tankBone = GetEntityBoneIndexByName(veh, "engine")
+                    end
+                elseif vehClass == 14 and not config.electricVehicles[GetHashKey(veh)] then
+                    tankBone = GetEntityBoneIndexByName(veh, "engine")
+                    if tankBone == -1 then
+                        tankBone = GetEntityBoneIndexByName(veh, "bodyshell")
+                    else
+                        distance = 2.0
                     end
                 elseif vehClass ~= 13 and not config.electricVehicles[GetHashKey(veh)] then
                     tankBone = GetEntityBoneIndexByName(veh, "petroltank_l")
@@ -548,7 +556,7 @@ CreateThread(function()
                     end
                 end
                 tankPosition = GetWorldPositionOfEntityBone(veh, tankBone)
-                if tankPosition and #(pedCoords - tankPosition) < 1.2 then
+                if tankPosition and #(pedCoords - tankPosition) < distance then
                     local fuel = GetFuel(veh)
                     DrawText3D(tankPosition.x, tankPosition.y, tankPosition.z + zPos, math.floor(fuel) .. "% refuel [E]")
                     local ammo = GetAmmoInPedWeapon(ped, 883325847)
