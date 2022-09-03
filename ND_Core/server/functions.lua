@@ -67,7 +67,7 @@ end
 -- update the players money on the client kinda like a refresh.
 function NDCore.Functions.UpdateMoney(player)
     local player = tonumber(player)
-    MySQL.query("SELECT cash, bank FROM characters WHERE character_id = ?", {NDCore.Players[player].id}, function(result)
+    MySQL.query("SELECT cash, bank FROM characters WHERE character_id = ? LIMIT 1", {NDCore.Players[player].id}, function(result)
         if result then
             local cash = result[1].cash
             local bank = result[1].bank
@@ -108,9 +108,9 @@ function NDCore.Functions.TransferBank(amount, player, target)
         })
         return false
     else
-        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
         NDCore.Functions.UpdateMoney(player)
-        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.Players[target].id})
+        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[target].id})
         NDCore.Functions.UpdateMoney(target)
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
@@ -154,9 +154,9 @@ function NDCore.Functions.GiveCash(amount, player, target)
         })
         return false
     else
-        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
         NDCore.Functions.UpdateMoney(player)
-        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.Players[target].id})
+        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[target].id})
         NDCore.Functions.UpdateMoney(target)
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
@@ -190,8 +190,8 @@ function NDCore.Functions.WithdrawMoney(amount, player)
     local player = tonumber(player)
     if amount <= 0 then return false end
     if NDCore.Players[player].bank < amount then return false end
-    MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
-    MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+    MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
+    MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     NDCore.Functions.UpdateMoney(player)
     return true
 end
@@ -202,8 +202,8 @@ function NDCore.Functions.DepositMoney(amount, player)
     local player = tonumber(player)
     if amount <= 0 then return false end
     if NDCore.Players[player].cash < amount then return false end
-    MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
-    MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+    MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
+    MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     NDCore.Functions.UpdateMoney(player)
     return true
 end
@@ -213,9 +213,9 @@ function NDCore.Functions.DeductMoney(amount, player, from)
     local amount = tonumber(amount)
     local player = tonumber(player)
     if from == "bank" then
-        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     elseif from == "cash" then
-        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     end
     NDCore.Functions.UpdateMoney(player)
 end
@@ -225,16 +225,16 @@ function NDCore.Functions.AddMoney(amount, player, to)
     local amount = tonumber(amount)
     local player = tonumber(player)
     if to == "bank" then
-        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     elseif to == "cash" then
-        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
+        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     end
     NDCore.Functions.UpdateMoney(player)
 end
 
 -- Adds the players character to the NDCore.Players table, this table consists of every players selected character.
 function NDCore.Functions.SetActiveCharacter(player, characterId)
-    local result = MySQL.query.await("SELECT * FROM characters WHERE character_id = ?", {characterId})
+    local result = MySQL.query.await("SELECT * FROM characters WHERE character_id = ? LIMIT 1", {characterId})
     if result then
         local i = result[1]
         NDCore.Players[player] = {
@@ -259,7 +259,7 @@ end
 -- This returns all the characters the player has.
 function NDCore.Functions.GetPlayerCharacters(player)
     local characters = {}
-    local result = MySQL.query.await("SELECT * FROM characters WHERE license = ?", {NDCore.Functions.GetPlayerIdentifierFromType("license", player)})
+    local result = MySQL.query.await("SELECT * FROM characters WHERE license = ? LIMIT", {NDCore.Functions.GetPlayerIdentifierFromType("license", player)})
     for i = 1, #result do
         local temp = result[i]
         characters[temp.character_id] = {id = temp.character_id, firstName = temp.first_name, lastName = temp.last_name, dob = temp.dob, gender = temp.gender, twt = temp.twt, job = temp.job, cash = temp.cash, bank = temp.bank, phoneNumber = temp.phone_number, groups = json.decode(temp.groups), lastLocation = json.decode(temp.last_location), clothing = json.decode(temp.clothing)}
@@ -284,43 +284,43 @@ end
 
 -- Update/edit a character info by character id.
 function NDCore.Functions.UpdateCharacterData(characterId, firstName, lastName, dob, gender, twt, job)
-    local result = MySQL.query.await("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, job = ? WHERE character_id = ?", {firstName, lastName, dob, gender, twt, job, characterId})
+    local result = MySQL.query.await("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, job = ? WHERE character_id = ? LIMIT 1", {firstName, lastName, dob, gender, twt, job, characterId})
     return result
 end
 
 -- Delete a character by character id.
 function NDCore.Functions.DeleteCharacter(characterId)
-    local result = MySQL.query.await("DELETE FROM characters WHERE character_id = ?", {characterId})
+    local result = MySQL.query.await("DELETE FROM characters WHERE character_id = ? LIMIT 1", {characterId})
     return result
 end
 
 -- Update the all the characters groups in the database.
 function NDCore.Functions.UpdateAllGroups(characterId, groups)
-    local result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {groups, characterId})
+    local result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ? LIMIT 1", {groups, characterId})
     return result
 end
 
 -- Set a group to a character in the database.
 function NDCore.Functions.SetGroup(characterId, group)
     local groups = {}
-    local result = MySQL.query.await("SELECT groups FROM characters WHERE character_id = ?", {characterId})
+    local result = MySQL.query.await("SELECT groups FROM characters WHERE character_id = ? LIMIT 1", {characterId})
     if result then
         groups = json.decode(result[1].groups)
         table.insert(groups, group)
     end
-    result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), characterId})
+    result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ? LIMIT 1", {json.encode(groups), characterId})
     return result
 end
 
 -- Update the characters last location into the database.
 function NDCore.Functions.UpdateLastLocation(characterId, location)
-    local result = MySQL.query.await("UPDATE characters SET last_location = ? WHERE character_id = ?", {json.encode(location), characterId})
+    local result = MySQL.query.await("UPDATE characters SET last_location = ? WHERE character_id = ? LIMIT 1", {json.encode(location), characterId})
     return result
 end
 
 -- Update the characters clothing into the database.
 function NDCore.Functions.UpdateClothes(characterId, clothing)
-    local result = MySQL.query.await("UPDATE characters SET clothing = ? WHERE character_id = ?", {json.encode(clothing), characterId})
+    local result = MySQL.query.await("UPDATE characters SET clothing = ? WHERE character_id = ? LIMIT 1", {json.encode(clothing), characterId})
     return result
 end
 
