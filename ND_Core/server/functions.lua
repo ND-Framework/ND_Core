@@ -238,6 +238,7 @@ function NDCore.Functions.SetActiveCharacter(player, characterId)
     if result then
         local i = result[1]
         NDCore.Players[player] = {
+            source = player,
             id = characterId,
             firstName = i.first_name,
             lastName = i.last_name,
@@ -295,20 +296,32 @@ function NDCore.Functions.DeleteCharacter(characterId)
 end
 
 -- Update the all the characters groups in the database.
-function NDCore.Functions.UpdateAllGroups(characterId, groups)
-    local result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ? LIMIT 1", {groups, characterId})
+function NDCore.Functions.UpdateGroups(player, groups)
+    local result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), NDCore.Players[player].id})
     return result
 end
 
 -- Set a group to a character in the database.
-function NDCore.Functions.SetGroup(characterId, group)
+function NDCore.Functions.SetGroup(player, group, groupData)
     local groups = {}
-    local result = MySQL.query.await("SELECT groups FROM characters WHERE character_id = ? LIMIT 1", {characterId})
+    local result = MySQL.query.await("SELECT groups FROM characters WHERE character_id = ?", {NDCore.Players[player].id})
     if result then
         groups = json.decode(result[1].groups)
-        table.insert(groups, group)
+        groups[group] = groupData
     end
-    result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ? LIMIT 1", {json.encode(groups), characterId})
+    result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), NDCore.Players[player].id})
+    return result
+end
+
+-- Remove the group form a character in the database.
+function NDCore.Functions.RemoveGroup(player, group)
+    local groups = {}
+    local result = MySQL.query.await("SELECT groups FROM characters WHERE character_id = ?", {NDCore.Players[player].id})
+    if result then
+        groups = json.decode(result[1].groups)
+        groups[group] = nil
+    end
+    result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), NDCore.Players[player].id})
     return result
 end
 
