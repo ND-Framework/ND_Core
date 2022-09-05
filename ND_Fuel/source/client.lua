@@ -9,6 +9,7 @@ local usedPump
 local pumpCoords
 local wastingFuel = false
 local usingCan = false
+local nearTank = false
 
 -- Nozzle Z position based on vehicle class.
 local nozzleBasedOnClass = {
@@ -357,7 +358,7 @@ CreateThread(function()
                         end
                     end
                 end
-            elseif holdingNozzle and pumpHandle == usedPump then
+            elseif holdingNozzle and not nearTank and pumpHandle == usedPump then
                 DrawText3D(pump.x, pump.y, pump.z + 1.2, "Return Nozzle [E]")
                 if IsControlJustPressed(0, 51) then
                     LoadAnimDict("anim@am_hold_up@male")
@@ -495,6 +496,7 @@ CreateThread(function()
                 tankPosition = GetWorldPositionOfEntityBone(veh, tankBone)
                 if tankPosition and #(pedCoords - tankPosition) < 1.2 then
                     if not nozzleInVehicle and holdingNozzle then
+                        nearTank = true
                         DrawText3D(tankPosition.x + textModifiedPosition.x, tankPosition.y + textModifiedPosition.y, tankPosition.z + zPos + textModifiedPosition.z, "Attach Nozzle [E]")
                         if IsControlJustPressed(0, 51) then
                             LoadAnimDict("timetable@gardener@filling_can")
@@ -516,6 +518,8 @@ CreateThread(function()
                         end
                     end 
                 end
+            else
+                nearTank = false
             end
         else
             wait = 500
