@@ -229,7 +229,8 @@ end)
 
 -- Change character command
 RegisterCommand(config.changeCharacterCommand, function()
-    SwitchOutPlayer(PlayerPedId(), 0, 1)
+    local ped = PlayerPedId()
+    SwitchOutPlayer(ped, 0, 1)
     Wait(2000)
     FreezeEntityPosition(ped, true)
     SetEntityVisible(ped, false, 0)
