@@ -302,25 +302,17 @@ function NDCore.Functions.UpdateGroups(player, groups)
 end
 
 -- Set a group to a character in the database.
-function NDCore.Functions.SetGroup(player, group, groupData)
-    local groups = {}
-    local result = MySQL.query.await("SELECT groups FROM characters WHERE character_id = ?", {NDCore.Players[player].id})
-    if result then
-        groups = json.decode(result[1].groups)
-        groups[group] = groupData
-    end
+function NDCore.Functions.SetGroup(player, group, groupName, groupLevel)
+    local groups = NDCore.Players[player].groups
+    groups[group] = {name = groupName, lvl = groupLevel}
     result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), NDCore.Players[player].id})
     return result
 end
 
 -- Remove the group form a character in the database.
 function NDCore.Functions.RemoveGroup(player, group)
-    local groups = {}
-    local result = MySQL.query.await("SELECT groups FROM characters WHERE character_id = ?", {NDCore.Players[player].id})
-    if result then
-        groups = json.decode(result[1].groups)
-        groups[group] = nil
-    end
+    local groups = NDCore.Players[player].groups
+    groups[group] = nil
     result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), NDCore.Players[player].id})
     return result
 end
