@@ -1,5 +1,10 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
+-- return the players selected character.
+function NDCore.Functions.GetPlayer(player)
+    return NDCore.Players[player]
+end
+
 -- Callback to update each selected character on the server.
 function NDCore.Functions.GetPlayers(players)
     if not cb then return NDCore.Players end
