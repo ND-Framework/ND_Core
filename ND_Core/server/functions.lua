@@ -335,6 +335,15 @@ function NDCore.Functions.UpdateClothes(characterId, clothing)
     return result
 end
 
+-- Updates the player's data
+function NDCore.Functions.SetPlayerData(player, key, value)
+    if not key then return end
+    NDCore.Players[player][key] = value
+    if key == "cash" or key == "bank" then
+        TriggerClientEvent("ND:updateMoney", player, NDCore.Players[player].cash, NDCore.Players[player].bank)
+    end
+end
+
 function NDCore.Functions.VersionChecker(expectedResourceName, resourceName, downloadLink, rawGithubLink)
     if expectedResourceName ~= resourceName then
         print("^1[^4" .. expectedResourceName .. "^1] WARNING^0")
