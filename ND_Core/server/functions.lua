@@ -260,6 +260,7 @@ function NDCore.Functions.SetActiveCharacter(player, characterId)
             inventory = json.decode(i.intentory)
         }
     end
+    TriggerEvent("ND:characterLoaded", NDCore.Players[player])
     TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
 end
 
