@@ -251,7 +251,8 @@ function NDCore.Functions.SetActiveCharacter(player, characterId)
             phoneNumber = i.phone_number,
             groups = json.decode(i.groups),
             lastLocation = json.decode(i.last_location),
-            clothing = json.decode(i.clothing)
+            clothing = json.decode(i.clothing),
+            inventory = json.decode(i.intentory)
         }
     end
     TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
