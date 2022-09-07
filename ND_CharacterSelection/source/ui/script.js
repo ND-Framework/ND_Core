@@ -114,7 +114,11 @@ $(function() {
     })
 
     function createCharacter(firstName, lastName, dateOfBirth, gender, twtName, department, startingCash, startingBank, id) {
-        $("#charactersSection").append(`<button id="characterButton${id}" class="createdButton">${firstName} ${lastName} (${department})</button><button id="characterButtonEdit${id}" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete${id}" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>`);
+        if ((firstName.length + lastName.length + department.length) > 24) {
+            $("#charactersSection").append(`<button id="characterButton${id}" class="createdButton animated"><span>${firstName} ${lastName} (${department})</span></button><button id="characterButtonEdit${id}" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete${id}" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>`);
+        } else {
+            $("#charactersSection").append(`<button id="characterButton${id}" class="createdButton"><span>${firstName} ${lastName} (${department})</span></button><button id="characterButtonEdit${id}" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete${id}" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>`);
+        }
         $(`#characterButton${id}`).click(function() {
             spawnMenu(true)
             $.post(`https://${GetParentResourceName()}/setMainCharacter`, JSON.stringify({
