@@ -65,7 +65,9 @@ $(function() {
             $("#spawnMenuContainer").empty();
             setTimeout(function(){
                 $("#tpDoNot").data("id", item.id);
-                $("#spawnMenuContainer").append(`<button class="spawnButtons" data-x="${item.x}" data-y="${item.y}" data-z="${item.z}">${item.name}</button>`);
+                JSON.parse(item.spawns).forEach((location) => {
+                    $("#spawnMenuContainer").append(`<button class="spawnButtons" data-x="${location.x}" data-y="${location.y}" data-z="${location.z}">${location.name}</button>`);
+                });
                 $(".spawnButtons").click(function() {
                     $.post(`https://${GetParentResourceName()}/tpToLocation`, JSON.stringify({
                         x: $(this).data("x"),
