@@ -33,9 +33,9 @@ config = {
         ["LSFD"] = 650
     },
 
-    -- set up the spawn buttons for each department.
+    -- DEFAULT is the spawns that every character with any job will have but you can also add a job and spawns for them.
     spawns = {
-        ["CIV"] = {
+        ["DEFAULT"] = {
             {x = -102.78, y = 6336.28, z = 31.49, name = "Dream View Motel (Paleto Bay)"},
             {x = 343.53, y = 2636.94, z = 43.94, name = "Eastern Motel (Sandy Shores)"},
             {x = 196.96, y = -934.54, z = 29.69, name = "Legion Square"},
