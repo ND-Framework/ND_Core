@@ -275,7 +275,7 @@ end
 -- This returns all the characters the player has.
 function NDCore.Functions.GetPlayerCharacters(player)
     local characters = {}
-    local result = MySQL.query.await("SELECT * FROM characters WHERE license = ? LIMIT", {NDCore.Functions.GetPlayerIdentifierFromType("license", player)})
+    local result = MySQL.query.await("SELECT * FROM characters WHERE license = ?", {NDCore.Functions.GetPlayerIdentifierFromType("license", player)})
     for i = 1, #result do
         local temp = result[i]
         characters[temp.character_id] = {id = temp.character_id, firstName = temp.first_name, lastName = temp.last_name, dob = temp.dob, gender = temp.gender, twt = temp.twt, job = temp.job, cash = temp.cash, bank = temp.bank, phoneNumber = temp.phone_number, groups = json.decode(temp.groups), lastLocation = json.decode(temp.last_location), clothing = json.decode(temp.clothing)}
