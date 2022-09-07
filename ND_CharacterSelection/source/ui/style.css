@@ -279,3 +279,22 @@ body {
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 10vw;
 }
+
+.animated {
+    overflow: hidden;
+}
+.animated > * {
+    display: inline-block;
+    position: relative;
+    animation: 3s linear 0s infinite alternate move;
+}
+@keyframes move {
+    0%, 25% {
+        transform: translateX(0%);
+        left: 0%;
+    }
+    75%, 100% {
+        transform: translateX(-100%);
+        left: 100%;
+    }
+}
