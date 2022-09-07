@@ -3,6 +3,7 @@
 NDCore = exports["ND_Core"]:GetCoreObject()
 local changeAppearence = false
 local started = false
+local firstSpawn = true
 
 function startChangeAppearence()
     local config = {
@@ -204,14 +205,28 @@ RegisterNUICallback("tpToLocation", function(data)
     if config.enableAppearance and changeAppearence then
         startChangeAppearence()
     end
+    if firstSpawn then
+        firstSpawn = false
+        SendNUIMessage({
+            type = "firstSpawn"
+        })
+    end
 end)
 
 -- Choosing the do not tp button.
 RegisterNUICallback("tpDoNot", function(data)
     local ped = PlayerPedId()
-    local character = NDCore.Functions.GetCharacters()[data.id]
-    if character.lastLocation and next(character.lastLocation) ~= nil then
-        SetEntityCoords(ped, character.lastLocation.x, character.lastLocation.y, character.lastLocation.z, false, false, false, false)
+    if firstSpawn then
+        local character = NDCore.Functions.GetCharacters()[data.id]
+        if character.lastLocation and next(character.lastLocation) ~= nil then
+            SetEntityCoords(ped, character.lastLocation.x, character.lastLocation.y, character.lastLocation.z, false, false, false, false)
+            FreezeEntityPosition(ped, true)
+        end
+        firstSpawn = false
+        SendNUIMessage({
+            type = "firstSpawn"
+        })
+    else
         FreezeEntityPosition(ped, true)
     end
     SwitchInPlayer(ped)
