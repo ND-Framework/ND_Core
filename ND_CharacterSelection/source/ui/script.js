@@ -93,6 +93,10 @@ $(function() {
             }, 10);
         }
 
+        if (item.type === "firstSpawn") {
+            $("#tpDoNot").text("Do not teleport")
+        }
+
         if (item.type === "givePerms") {
             JSON.parse(item.deptRoles).forEach((dept) => {
                 $(".departments").append($("<option>", {
