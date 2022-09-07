@@ -137,16 +137,22 @@ end)
 -- Selecting a player from the iu.
 RegisterNUICallback("setMainCharacter", function(data)
     local characters = NDCore.Functions.GetCharacters()
-    for _, spawn in pairs(config.spawns[characters[data.id].job]) do
-        SendNUIMessage({
-            type = "setSpawns",
-            x = spawn.x,
-            y = spawn.y,
-            z = spawn.z,
-            name = spawn.name,
-            id = characters[data.id].id
-        })
+    local defaultSpawns = config.spawns["DEFAULT"]
+    local jobSpawns = config.spawns[characters[data.id].job]
+    local spawns = {}
+    for _, spawn in pairs(defaultSpawns) do
+        spawns[#spawns + 1] = spawn
     end
+    if jobSpawns then
+        for _, newSpawn in pairs(jobSpawns) do
+            spawns[#spawns + 1] = newSpawn
+        end
+    end
+    SendNUIMessage({
+        type = "setSpawns",
+        spawns = json.encode(spawns),
+        id = characters[data.id].id
+    })
     Wait(1000)
     TriggerServerEvent("ND:setCharacterOnline", data.id)
 end)
