@@ -247,6 +247,9 @@ end
 
 -- Adds the players character to the NDCore.Players table, this table consists of every players selected character.
 function NDCore.Functions.SetActiveCharacter(player, characterId)
+    if NDCore.Players[player] then
+        NDCore.Functions.SaveInventory(player)
+    end
     local result = MySQL.query.await("SELECT * FROM characters WHERE character_id = ? LIMIT 1", {characterId})
     if result then
         local i = result[1]
@@ -350,7 +353,15 @@ function NDCore.Functions.SetPlayerData(player, key, value)
     NDCore.Players[player][key] = value
     if key == "cash" or key == "bank" then
         TriggerClientEvent("ND:updateMoney", player, NDCore.Players[player].cash, NDCore.Players[player].bank)
+        return
     end
+    TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
+end
+
+-- Saves player inventory to the database.
+function NDCore.Functions.SaveInventory(player)
+    local inventory = NDCore.Players[player].inventory
+    MySQL.query("UPDATE `characters` SET inventory = ? WHERE character_id = ?", {json.encode(inventory), NDCore.Players[player].id})
 end
 
 function NDCore.Functions.VersionChecker(expectedResourceName, resourceName, downloadLink, rawGithubLink)
