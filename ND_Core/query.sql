@@ -13,6 +13,6 @@ CREATE TABLE `characters` (
     `groups` LONGTEXT NULL DEFAULT '[]',
     `last_location` LONGTEXT NULL DEFAULT '[]',
     `clothing` LONGTEXT NULL DEFAULT '[]',
-	`inventory` LONGTEXT NULL DEFAULT '[]',
+    `inventory` LONGTEXT NULL DEFAULT '[]',
     PRIMARY KEY (`character_id`) USING BTREE
 );
