@@ -350,9 +350,16 @@ end
 -- Updates the player's data
 function NDCore.Functions.SetPlayerData(player, key, value)
     if not key then return end
-    NDCore.Players[player][key] = value
-    if key == "cash" or key == "bank" then
-        TriggerClientEvent("ND:updateMoney", player, NDCore.Players[player].cash, NDCore.Players[player].bank)
+    local character = NDCore.Players[player]
+    character[key] = value
+    if key == "cash" then
+        MySQL.query.await("UPDATE characters SET cash = ? WHERE character_id = ?", {character.cash, character.id})
+        TriggerEvent("ND:moneyChange", player, "cash", character.cash, "set", "Bank adjustment")
+        NDCore.Functions.UpdateMoney(player)
+    elseif key == "bank" then
+        MySQL.query.await("UPDATE characters SET bank = ? WHERE character_id = ?", {character.bank, character.id})
+        TriggerEvent("ND:moneyChange", player, "bank", character.bank, "set", "Bank adjustment")
+        NDCore.Functions.UpdateMoney(player)
         return
     end
     TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
