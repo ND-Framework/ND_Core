@@ -236,7 +236,7 @@ end
 function NDCore.Functions.AddMoney(amount, player, to)
     local amount = tonumber(amount)
     local player = tonumber(player)
-    TriggerEvent("ND:moneyChange", player, to, amount, "remove")
+    TriggerEvent("ND:moneyChange", player, to, amount, "add")
     if to == "bank" then
         MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     elseif to == "cash" then
