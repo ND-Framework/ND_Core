@@ -59,6 +59,8 @@ end)
 -- Delete character from database.
 RegisterNetEvent("ND:deleteCharacter", function(characterId)
     local player = source
+    local characters = NDCore.Functions.GetPlayerCharacters(player)
+    if not characters[characterId] then return end
     NDCore.Functions.DeleteCharacter(characterId)
 end)
 
