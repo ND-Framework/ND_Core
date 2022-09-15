@@ -353,12 +353,29 @@ function NDCore.Functions.SetPlayerData(player, key, value)
     local character = NDCore.Players[player]
     character[key] = value
     if key == "cash" then
-        MySQL.query.await("UPDATE characters SET cash = ? WHERE character_id = ?", {character.cash, character.id})
-        TriggerEvent("ND:moneyChange", player, "cash", character.cash, "set", "Bank adjustment")
+        local money = 0
+        if character.inventory then
+            for _, item in pairs(character.inventory) do
+                if item.name == "money" then
+                    money = money + item.count
+                end
+            end
+        end
+        if money ~= value then return end
+        MySQL.query.await("UPDATE characters SET cash = ? WHERE character_id = ?", {tonumber(value), character.id})
         NDCore.Functions.UpdateMoney(player)
+        return
     elseif key == "bank" then
-        MySQL.query.await("UPDATE characters SET bank = ? WHERE character_id = ?", {character.bank, character.id})
-        TriggerEvent("ND:moneyChange", player, "bank", character.bank, "set", "Bank adjustment")
+        local money = 0
+        if character.inventory then
+            for _, item in pairs(character.inventory) do
+                if item.name == "money" then
+                    money = money + item.count
+                end
+            end
+        end
+        if money ~= value then return end
+        MySQL.query.await("UPDATE characters SET bank = ? WHERE character_id = ?", {tonumber(value), character.id})
         NDCore.Functions.UpdateMoney(player)
         return
     end
