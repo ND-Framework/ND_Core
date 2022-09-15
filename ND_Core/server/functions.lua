@@ -114,14 +114,16 @@ function NDCore.Functions.TransferBank(amount, player, target)
         return false
     else
         TriggerEvent("ND:moneyChange", player, "bank", amount, "remove")
-        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
+        MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
         NDCore.Functions.UpdateMoney(player)
-        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[target].id})
-        NDCore.Functions.UpdateMoney(target)
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
             args = {"Success", "You paid " .. NDCore.Players[target].firstName .. " " .. NDCore.Players[target].lastName .. " $" .. amount .. "."}
         })
+        
+        TriggerEvent("ND:moneyChange", target, "bank", amount, "add")
+        MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.Players[target].id})
+        NDCore.Functions.UpdateMoney(target)
         TriggerClientEvent("chat:addMessage", target, {
             color = {0, 255, 0},
             args = {"Success", NDCore.Players[player].firstName .. " " .. NDCore.Players[player].lastName .. " sent you $" .. amount .. "."}
@@ -161,14 +163,16 @@ function NDCore.Functions.GiveCash(amount, player, target)
         return false
     else
         TriggerEvent("ND:moneyChange", player, "cash", amount, "remove")
-        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
+        MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
         NDCore.Functions.UpdateMoney(player)
-        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[target].id})
-        NDCore.Functions.UpdateMoney(target)
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
-            args = {"Success", "You gave $" .. amount .. "."}
+            args = {"Success", "You gave " .. NDCore.Players[target].firstName .. " " .. NDCore.Players[target].lastName .. " $" .. amount .. "."}
         })
+        
+        TriggerEvent("ND:moneyChange", target, "cash", amount, "add")
+        MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.Players[target].id})
+        NDCore.Functions.UpdateMoney(target)
         TriggerClientEvent("chat:addMessage", target, {
             color = {0, 255, 0},
             args = {"Success", " Received $" .. amount .. "."}
