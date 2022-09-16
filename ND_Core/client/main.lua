@@ -21,7 +21,7 @@ function NDCore.Functions.GetCharacters(cb)
 end
 
 -- discord rich precense will show on a users profile.
-if config.enableRichPrecence then
+if config.enableRichPresence then
     Citizen.CreateThread(function()
         while true do
             if NDCore.SelectedCharacter then
