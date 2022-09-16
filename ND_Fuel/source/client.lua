@@ -606,7 +606,7 @@ end)
 -- vehicle fuel consumption.
 CreateThread(function()
     while true do
-        Wait(500)
+        Wait(3500)
         local pedVeh = GetVehiclePedIsIn(ped)
         local seat = GetPedInVehicleSeat(pedVeh, -1)
         if pedVeh ~= 0 and seat ~= 0 then
