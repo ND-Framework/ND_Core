@@ -606,19 +606,22 @@ end)
 -- vehicle fuel consumption.
 CreateThread(function()
     while true do
-        Wait(3500)
+        Wait(500)
         local pedVeh = GetVehiclePedIsIn(ped)
-        if pedVeh ~= 0 then
+        local seat = GetPedInVehicleSeat(pedVeh, -1)
+        if pedVeh ~= 0 and seat ~= 0 then
             local vehClass = GetVehicleClass(pedVeh)
             if not DecorExistOn(pedVeh, FUEL_DECOR) then
                 SetFuel(pedVeh, math.random(200, 800) / 10)
             end
             local fuel = GetFuel(pedVeh)
-            if fuel < 5.0 and GetIsVehicleEngineRunning(pedVeh) then
-                DisableControlAction(0, 71)
-                SetVehicleEngineOn(pedVeh, false, true, true)
+            if GetIsVehicleEngineRunning(pedVeh) then
+                if fuel < 5.0 then
+                    DisableControlAction(0, 71)
+                    SetVehicleEngineOn(pedVeh, false, true, true)
+                end
+                SetFuel(pedVeh, fuel - ((GetVehicleCurrentRpm(pedVeh) * config.vehicleClasses[vehClass]) / 1.7))
             end
-            SetFuel(pedVeh, fuel - ((GetVehicleCurrentRpm(pedVeh) * config.vehicleClasses[vehClass]) / 1.7))
         end
     end
 end)
