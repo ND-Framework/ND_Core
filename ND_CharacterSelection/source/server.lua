@@ -34,6 +34,10 @@ end)
 RegisterNetEvent("ND_CharacterSelection:editCharacter", function(newCharacter)
     local player = source
 
+    -- check if player owns the character.
+    local characters = NDCore.Functions.GetPlayerCharacters(player)
+    if not characters[newCharacter.id] then return end
+        
     -- validate that the person has permission to use the department.
     local departmentCheck = validateDepartment(player, newCharacter.job)
     if not departmentCheck then return end
