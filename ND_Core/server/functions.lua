@@ -72,15 +72,14 @@ end
 -- update the players money on the client kinda like a refresh.
 function NDCore.Functions.UpdateMoney(player)
     local player = tonumber(player)
-    MySQL.query("SELECT cash, bank FROM characters WHERE character_id = ? LIMIT 1", {NDCore.Players[player].id}, function(result)
-        if result then
-            local cash = result[1].cash
-            local bank = result[1].bank
-            NDCore.Players[player].cash = cash
-            NDCore.Players[player].bank = bank
-            TriggerClientEvent("ND:updateMoney", player, cash, bank)
-        end
-    end)
+    local result = MySQL.query.await("SELECT cash, bank FROM characters WHERE character_id = ? LIMIT 1", {NDCore.Players[player].id})
+    if result then
+        local cash = result[1].cash
+        local bank = result[1].bank
+        NDCore.Players[player].cash = cash
+        NDCore.Players[player].bank = bank
+        TriggerClientEvent("ND:updateMoney", player, cash, bank)
+    end
 end
 
 -- Transfer money from one players bank account to another.
@@ -113,17 +112,17 @@ function NDCore.Functions.TransferBank(amount, player, target)
         })
         return false
     else
-        TriggerEvent("ND:moneyChange", player, "bank", amount, "remove")
         MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
         NDCore.Functions.UpdateMoney(player)
+        TriggerEvent("ND:moneyChange", player, "bank", amount, "remove")
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
             args = {"Success", "You paid " .. NDCore.Players[target].firstName .. " " .. NDCore.Players[target].lastName .. " $" .. amount .. "."}
         })
         
-        TriggerEvent("ND:moneyChange", target, "bank", amount, "add")
         MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.Players[target].id})
         NDCore.Functions.UpdateMoney(target)
+        TriggerEvent("ND:moneyChange", target, "bank", amount, "add")
         TriggerClientEvent("chat:addMessage", target, {
             color = {0, 255, 0},
             args = {"Success", NDCore.Players[player].firstName .. " " .. NDCore.Players[player].lastName .. " sent you $" .. amount .. "."}
@@ -162,17 +161,17 @@ function NDCore.Functions.GiveCash(amount, player, target)
         })
         return false
     else
-        TriggerEvent("ND:moneyChange", player, "cash", amount, "remove")
         MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
         NDCore.Functions.UpdateMoney(player)
+        TriggerEvent("ND:moneyChange", player, "cash", amount, "remove")
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
             args = {"Success", "You gave " .. NDCore.Players[target].firstName .. " " .. NDCore.Players[target].lastName .. " $" .. amount .. "."}
         })
         
-        TriggerEvent("ND:moneyChange", target, "cash", amount, "add")
         MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ?", {amount, NDCore.Players[target].id})
         NDCore.Functions.UpdateMoney(target)
+        TriggerEvent("ND:moneyChange", target, "cash", amount, "add")
         TriggerClientEvent("chat:addMessage", target, {
             color = {0, 255, 0},
             args = {"Success", " Received $" .. amount .. "."}
@@ -201,11 +200,11 @@ function NDCore.Functions.WithdrawMoney(amount, player)
     local player = tonumber(player)
     if amount <= 0 then return false end
     if NDCore.Players[player].bank < amount then return false end
-    TriggerEvent("ND:moneyChange", player, "bank", amount, "remove")
-    TriggerEvent("ND:moneyChange", player, "cash", amount, "add")
     MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     NDCore.Functions.UpdateMoney(player)
+    TriggerEvent("ND:moneyChange", player, "bank", amount, "remove")
+    TriggerEvent("ND:moneyChange", player, "cash", amount, "add")
     return true
 end
 
@@ -215,11 +214,11 @@ function NDCore.Functions.DepositMoney(amount, player)
     local player = tonumber(player)
     if amount <= 0 then return false end
     if NDCore.Players[player].cash < amount then return false end
-    TriggerEvent("ND:moneyChange", player, "cash", amount, "remove")
-    TriggerEvent("ND:moneyChange", player, "bank", amount, "add")
     MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     NDCore.Functions.UpdateMoney(player)
+    TriggerEvent("ND:moneyChange", player, "cash", amount, "remove")
+    TriggerEvent("ND:moneyChange", player, "bank", amount, "add")
     return true
 end
 
@@ -227,26 +226,26 @@ end
 function NDCore.Functions.DeductMoney(amount, player, from)
     local amount = tonumber(amount)
     local player = tonumber(player)
-    TriggerEvent("ND:moneyChange", player, from, amount, "remove")
     if from == "bank" then
         MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     elseif from == "cash" then
         MySQL.query.await("UPDATE characters SET cash = cash - ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     end
     NDCore.Functions.UpdateMoney(player)
+    TriggerEvent("ND:moneyChange", player, from, amount, "remove")
 end
 
 -- Adds money from the player, "bank" or "cash" needs to be specified.
 function NDCore.Functions.AddMoney(amount, player, to)
     local amount = tonumber(amount)
     local player = tonumber(player)
-    TriggerEvent("ND:moneyChange", player, to, amount, "add")
     if to == "bank" then
         MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     elseif to == "cash" then
         MySQL.query.await("UPDATE characters SET cash = cash + ? WHERE character_id = ? LIMIT 1", {amount, NDCore.Players[player].id})
     end
     NDCore.Functions.UpdateMoney(player)
+    TriggerEvent("ND:moneyChange", player, to, amount, "add")
 end
 
 -- Adds the players character to the NDCore.Players table, this table consists of every players selected character.
@@ -357,31 +356,9 @@ function NDCore.Functions.SetPlayerData(player, key, value)
     local character = NDCore.Players[player]
     character[key] = value
     if key == "cash" then
-        local money = 0
-        if character.inventory then
-            for _, item in pairs(character.inventory) do
-                if item.name == "money" then
-                    money = money + item.count
-                end
-            end
-        end
-        if money ~= value then return end
         MySQL.query.await("UPDATE characters SET cash = ? WHERE character_id = ?", {tonumber(value), character.id})
-        NDCore.Functions.UpdateMoney(player)
-        return
     elseif key == "bank" then
-        local money = 0
-        if character.inventory then
-            for _, item in pairs(character.inventory) do
-                if item.name == "money" then
-                    money = money + item.count
-                end
-            end
-        end
-        if money ~= value then return end
         MySQL.query.await("UPDATE characters SET bank = ? WHERE character_id = ?", {tonumber(value), character.id})
-        NDCore.Functions.UpdateMoney(player)
-        return
     end
     TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
 end
