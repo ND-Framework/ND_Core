@@ -73,6 +73,11 @@ RegisterNetEvent("ND:setCharacter", function(character)
     NDCore.SelectedCharacter = character
 end)
 
+-- Update main character info.
+RegisterNetEvent("ND:updateCharacter", function(character)
+    NDCore.SelectedCharacter = character
+end)
+
 -- Updates last lcoation.
 RegisterNetEvent("ND:updateLastLocation", function(location)
     NDCore.SelectedCharacter.lastLocation = location
