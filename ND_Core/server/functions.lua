@@ -360,7 +360,7 @@ function NDCore.Functions.SetPlayerData(player, key, value)
     elseif key == "bank" then
         MySQL.query.await("UPDATE characters SET bank = ? WHERE character_id = ?", {tonumber(value), character.id})
     end
-    TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
+    TriggerClientEvent("ND:updateCharacter", player, NDCore.Players[player])
 end
 
 -- Saves player inventory to the database.
