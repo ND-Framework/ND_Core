@@ -1,7 +1,7 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
 NDCore = exports["ND_Core"]:GetCoreObject()
-NDCore.Functions.VersionChecker("ND_ShotSpotter", GetCurrentResourceName(), "https://github.com/Andyyy7666/ND_Framework", "https://raw.githubusercontent.com/Andyyy7666/ND_Framework/main/ND_ShotSpotter/fxmanifest.lua")
+NDCore.Functions.VersionChecker("ND_ShotSpotter", GetCurrentResourceName(), "https://github.com/ND-Framework/ND_Framework", "https://raw.githubusercontent.com/ND-Framework/ND_Framework/main/ND_ShotSpotter/fxmanifest.lua")
 
 RegisterNetEvent("ND_ShotSpotter:Trigger", function(street, pedCoords, postal, zoneName)
     if server_config.useDiscordLogging then
