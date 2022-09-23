@@ -1,5 +1,5 @@
 NDCore = exports["ND_Core"]:GetCoreObject()
-NDCore.Functions.VersionChecker("ND_Banks", GetCurrentResourceName(), "https://github.com/Andyyy7666/ND_Framework", "https://raw.githubusercontent.com/Andyyy7666/ND_Framework/main/ND_Banks/fxmanifest.lua")
+NDCore.Functions.VersionChecker("ND_Banks", GetCurrentResourceName(), "https://github.com/ND-Framework/ND_Framework", "https://raw.githubusercontent.com/ND-Framework/ND_Framework/main/ND_Banks/fxmanifest.lua")
 
 RegisterNetEvent("ND_Banks:withdraw", function(amount)
     local player = source
