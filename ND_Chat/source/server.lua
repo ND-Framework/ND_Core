@@ -1,5 +1,5 @@
 NDCore = exports["ND_Core"]:GetCoreObject()
-NDCore.Functions.VersionChecker("ND_Chat", GetCurrentResourceName(), "https://github.com/Andyyy7666/ND_Framework", "https://raw.githubusercontent.com/Andyyy7666/ND_Framework/main/ND_Chat/fxmanifest.lua")
+NDCore.Functions.VersionChecker("ND_Chat", GetCurrentResourceName(), "https://github.com/ND-Framework/ND_Framework", "https://raw.githubusercontent.com/ND-Framework/ND_Framework/main/ND_Chat/fxmanifest.lua")
 
 if config["/me"] then
     RegisterCommand("me", function(source, args, rawCommand)
