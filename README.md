@@ -3,10 +3,10 @@
 
 <p align='center'><b><a href="https://ndframework.gitbook.io/nd-framework/">Documentation</a></b>
 
-# Dependencies:
+## Dependencies:
 [oxmysql](https://github.com/overextended/oxmysql/releases/download/v2.4.0/oxmysql.zip)
 
-# Addons
+## Addons
 * [Character Selection](https://github.com/ND-Framework/ND_CharacterSelection)
 * [Fuel (with nozle and hose)](https://github.com/ND-Framework/ND_Fuel)
 * [Shot Spotter](https://github.com/ND-Framework/ND_ShotSpotter)
