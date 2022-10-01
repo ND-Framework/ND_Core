@@ -271,7 +271,7 @@ function NDCore.Functions.SetActiveCharacter(player, characterId)
             groups = json.decode(i.groups),
             lastLocation = json.decode(i.last_location),
             clothing = json.decode(i.clothing),
-            inventory = json.decode(i.intentory)
+            inventory = json.decode(i.inventory)
         }
     end
     TriggerEvent("ND:characterLoaded", NDCore.Players[player])
