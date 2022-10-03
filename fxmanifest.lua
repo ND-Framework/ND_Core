@@ -9,13 +9,13 @@ game "gta5"
 lua54 "yes"
 
 shared_script "config_client.lua"
-client_script "client/main.lua"
+client_scripts {
+    "client/**"
+}
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
     "config_server.lua",
-    "server/main.lua",
-    "server/functions.lua",
-    "server/events.lua"
+    "server/**"
 }
 
 exports {
