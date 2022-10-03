@@ -8,7 +8,7 @@
 
 ## Addons
 * [Character Selection](https://github.com/ND-Framework/ND_CharacterSelection)
-* [Fuel (with nozle and hose)](https://github.com/ND-Framework/ND_Fuel)
+* [Fuel (with nozzle and hose)](https://github.com/ND-Framework/ND_Fuel)
 * [Shot Spotter](https://github.com/ND-Framework/ND_ShotSpotter)
 * [Banking](https://github.com/ND-Framework/ND_Banking)
 * [Door lcoks](https://github.com/ND-Framework/ND_Doorlocks)
