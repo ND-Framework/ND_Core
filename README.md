@@ -1,9 +1,12 @@
-<h1 align='center'>ND Framework</h1>
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/86536434/193703880-5cb7deef-af37-42cc-8df2-b13332afee67.png" />
+</p>
+
 <p align='center'><b><a href="discord.gg/nc82d8zvjm">Discord</a></b>
 
 <p align='center'><b><a href="https://ndframework.gitbook.io/nd-framework/">Documentation</a></b>
 
-## Dependencies:
+## Dependency:
 [oxmysql](https://github.com/overextended/oxmysql/releases/download/v2.4.0/oxmysql.zip)
 
 ## Addons
