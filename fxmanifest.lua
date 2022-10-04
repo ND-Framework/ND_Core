@@ -10,12 +10,15 @@ lua54 "yes"
 
 shared_script "config_client.lua"
 client_scripts {
-    "client/**"
+    "client/main.lua",
+    "client/events.lua"
 }
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
     "config_server.lua",
-    "server/**"
+    "server/main.lua",
+    "server/functions.lua",
+    "server/events.lua"
 }
 
 exports {
