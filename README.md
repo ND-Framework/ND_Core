@@ -14,7 +14,7 @@
 * [Fuel (with nozzle and hose)](https://github.com/ND-Framework/ND_Fuel)
 * [Shot Spotter](https://github.com/ND-Framework/ND_ShotSpotter)
 * [Banking](https://github.com/ND-Framework/ND_Banking)
-* [Door lcoks](https://github.com/ND-Framework/ND_Doorlocks)
+* [Door locks](https://github.com/ND-Framework/ND_Doorlocks)
 * [No Characters (use framework without character selection)](https://github.com/ND-Framework/ND_NoCharacters)
 
 # Need support?
