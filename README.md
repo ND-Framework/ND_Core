@@ -15,6 +15,7 @@
 * [Shot Spotter](https://github.com/ND-Framework/ND_ShotSpotter)
 * [Banking](https://github.com/ND-Framework/ND_Banking)
 * [Door locks](https://github.com/ND-Framework/ND_Doorlocks)
+* [Ox Inventory](https://github.com/overextended/ox_inventory/releases)
 * [No Characters (use framework without character selection)](https://github.com/ND-Framework/ND_NoCharacters)
 
 # Need support?
