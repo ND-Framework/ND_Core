@@ -2,7 +2,7 @@
 
 author "Andyyy#7666, N1K0#0001"
 description "ND Framework Core"
-version "3.1.4"
+version "3.1.5"
 
 fx_version "cerulean"
 game "gta5"
@@ -13,6 +13,7 @@ client_scripts {
     "client/main.lua",
     "client/events.lua"
 }
+
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
     "config_server.lua",
