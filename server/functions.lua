@@ -251,7 +251,7 @@ end
 -- Adds the players character to the NDCore.Players table, this table consists of every players selected character.
 function NDCore.Functions.SetActiveCharacter(player, characterId)
     if NDCore.Players[player] then
-        NDCore.Functions.SaveInventory(player)
+        TriggerEvent("ND:characterUnloaded", player, NDCore.Players[player])
     end
     local result = MySQL.query.await("SELECT * FROM characters WHERE character_id = ? LIMIT 1", {characterId})
     if result then
