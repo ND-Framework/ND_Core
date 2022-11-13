@@ -22,3 +22,7 @@ CreateThread(function()
         end
     end
 end)
+
+if GetExport("ox_inventory") then
+    SetConvarReplicated("inventory:framework", "nd")
+end
