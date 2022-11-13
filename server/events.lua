@@ -87,7 +87,7 @@ AddEventHandler("playerDropped", function()
     if character then
         NDCore.Functions.UpdateLastLocation(character.id, character.lastLocation)
     end
-    TriggerEvent("ND:characterUnloaded", player)
+    TriggerEvent("ND:characterUnloaded", player, character)
     character = nil
 end)
 
