@@ -364,10 +364,14 @@ function NDCore.Functions.SetPlayerData(player, key, value)
     TriggerClientEvent("ND:updateCharacter", player, NDCore.Players[player])
 end
 
--- Saves player inventory to the database.
-function NDCore.Functions.SaveInventory(player)
-    local inventory = NDCore.Players[player].inventory
-    MySQL.query("UPDATE `characters` SET inventory = ? WHERE character_id = ?", {json.encode(inventory), NDCore.Players[player].id})
+function NDCore.Functions.IsPlayerAdmin(src)
+    local discordInfo = NDCore.PlayersDiscordInfo[src]
+    if not discordInfo or not discordInfo.roles then return end
+    for _, adminRole in pairs(config.adminRoles) do
+        for _, role in pairs(discordInfo.roles) do
+            if role == adminRole then return true end
+        end
+    end
 end
 
 function NDCore.Functions.VersionChecker(expectedResourceName, resourceName, downloadLink, rawGithubLink)

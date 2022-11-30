@@ -3,6 +3,8 @@
 NDCore = {}
 NDCore.Players = {}
 NDCore.Functions = {}
+NDCore.Commands = {}
+NDCore.PlayersDiscordInfo = {}
 NDCore.Config = config
 
 function GetCoreObject()
@@ -30,4 +32,8 @@ AddEventHandler("onResourceStart", function(resourceName)
 end)
 if GetResourceState("ox_inventory") == "started" then
     SetConvarReplicated("inventory:framework", "nd")
+end
+
+for _, roleid in pairs(config.adminRoles) do
+    ExecuteCommand("add_principal identifier.discord:" .. roleid .. " group.admin")
 end

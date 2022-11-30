@@ -17,6 +17,11 @@ config = {
         "872921520719142932"
     },
 
+    -- These are admins roles that will give a user permission to admin commands and more.
+    adminRoles = {
+        "872921520719142932"
+    },
+
     -- Discord Rich presence
     enableRichPresence = true,
     updateIntervall = 60, -- how many seconds of delay until it updates status.
