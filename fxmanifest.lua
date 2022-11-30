@@ -2,13 +2,16 @@
 
 author "Andyyy#7666, N1K0#0001"
 description "ND Framework Core"
-version "3.1.5"
+version "3.2.0"
 
 fx_version "cerulean"
 game "gta5"
 lua54 "yes"
 
-shared_script "config_client.lua"
+shared_scripts {
+    "config_client.lua",
+    "shared/main.lua"
+}
 client_scripts {
     "client/main.lua",
     "client/events.lua"
@@ -18,9 +21,9 @@ server_scripts {
     "@oxmysql/lib/MySQL.lua",
     "config_server.lua",
     "server/main.lua",
-    "server/commands.lua",
     "server/functions.lua",
-    "server/events.lua"
+    "server/events.lua",
+    "server/commands.lua"
 }
 
 exports {
