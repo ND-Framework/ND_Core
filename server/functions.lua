@@ -345,23 +345,42 @@ function NDCore.Functions.UpdateLastLocation(characterId, location)
     return result
 end
 
--- Update the characters clothing into the database.
-function NDCore.Functions.UpdateClothes(characterId, clothing)
-    local result = MySQL.query.await("UPDATE characters SET clothing = ? WHERE character_id = ? LIMIT 1", {json.encode(clothing), characterId})
-    return result
+function NDCore.Functions.AddCommand(name, help, callback, argsrequired, arguments)
+    local commandName = name:lower()
+    if NDCore.Commands[commandName] then print("/" .. commandName .. " has already been registered.") return end
+
+    local arguments = arguments or {}
+
+    RegisterCommand(commandName, function(source, args, rawCommand)
+        if argsrequired and #args < #arguments then
+            return TriggerClientEvent("chat:addMessage", source, {
+                color = {255, 0, 0},
+                multiline = true,
+                args = {"System", "All arguments must be filled out!"}
+            })
+        end
+        callback(source, args, rawCommand)
+    end, false)
+
+    NDCore.Commands[commandName] = {
+        name = commandName,
+        help = help,
+        callback = callback,
+        argsrequired = argsrequired,
+        arguments = arguments
+    }
 end
 
--- Updates the player's data
-function NDCore.Functions.SetPlayerData(player, key, value)
-    if not key then return end
-    local character = NDCore.Players[player]
-    character[key] = value
-    if key == "cash" then
-        MySQL.query.await("UPDATE characters SET cash = ? WHERE character_id = ?", {tonumber(value), character.id})
-    elseif key == "bank" then
-        MySQL.query.await("UPDATE characters SET bank = ? WHERE character_id = ?", {tonumber(value), character.id})
+function NDCore.Functions.RefreshCommands(source)
+    local suggestions = {}
+    for command, info in pairs(NDCore.Commands) do
+        suggestions[#suggestions + 1] = {
+            name = "/" .. command,
+            help = info.help,
+            params = info.arguments
+        }
     end
-    TriggerClientEvent("ND:updateCharacter", player, NDCore.Players[player])
+    TriggerClientEvent("chat:addSuggestions", source, suggestions)
 end
 
 function NDCore.Functions.IsPlayerAdmin(src)
