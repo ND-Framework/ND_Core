@@ -38,7 +38,7 @@ end)
 -- Creating a new character.
 RegisterNetEvent("ND:newCharacter", function(newCharacter)
     local player = source
-    NDCore.Functions.CreateCharacter(player, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.twt, newCharacter.job, newCharacter.cash, newCharacter.bank)
+    NDCore.Functions.CreateCharacter(player, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.cash, newCharacter.bank)
 end)
 
 -- Update the character info when edited.
@@ -46,7 +46,7 @@ RegisterNetEvent("ND:editCharacter", function(newCharacter)
     local player = source
     local characters = NDCore.Functions.GetPlayerCharacters(player)
     if not characters[newCharacter.id] then return end
-    NDCore.Functions.UpdateCharacterData(newCharacter.id, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.twt, newCharacter.job)
+    NDCore.Functions.UpdateCharacterData(newCharacter.id, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender)
 end)
 
 -- Delete character from database.
@@ -63,6 +63,12 @@ RegisterNetEvent("ND:setCharacterOnline", function(id)
     local characters = NDCore.Functions.GetPlayerCharacters(player)
     if not characters[id] then return end
     NDCore.Functions.SetActiveCharacter(player, id)
+end)
+
+-- Update the characters clothes.
+RegisterNetEvent("ND:updateClothes", function(clothing)
+    local player = source
+    NDCore.Functions.SetPlayerData(player, "clothing", clothing)
 end)
 
 -- Disconnecting a player

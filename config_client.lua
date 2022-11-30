@@ -31,5 +31,44 @@ config = {
     firstButtonName = "DISCORD",
     firstButtonLink = "https://discord.gg/Z9Mxu72zZ6",
     secondButtonName = "TEBEX",
-    secondButtonLink = "https://andyyy.tebex.io/category/fivem-scripts"
+    secondButtonLink = "https://andyyy.tebex.io/category/fivem-scripts",
+
+
+    -- Groups can be gangs, jobs, subdivisions, etc.
+    groups = {
+        ["Ballas"] = {
+            "Member", -- rank 1
+            "Boss" -- rank 2
+        },
+        ["SWAT"] = {
+            "Member", -- rank 1
+            "Sniper", -- rank 2
+            "Team lead", -- rank 3
+            "Commander" -- rank 4
+        },
+        ["SAHP"] = {
+            "Trooper",
+            "Senior Trooper",
+            "Corporal",
+            "Sergeant",
+            "Lieutenant",
+            "Cheif"
+        },
+        ["LSPD"] = {
+            "Officer",
+            "Senior officer",
+            "Corporal",
+            "Sergeant",
+            "Lieutenant",
+            "Cheif"
+        },
+        ["BCSO"] = {
+            "Deputy",
+            "Senior Deputy",
+            "Corporal",
+            "Sergeant",
+            "Lieutenant",
+            "Cheif"
+        }
+    },
 }

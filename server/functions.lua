@@ -1,14 +1,13 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
--- return the players selected character.
+-- Get an active players character data.
 function NDCore.Functions.GetPlayer(player)
     return NDCore.Players[player]
 end
 
--- Callback to update each selected character on the server.
-function NDCore.Functions.GetPlayers(players)
-    if not cb then return NDCore.Players end
-    cb(NDCore.Players)
+-- Get all active players character data.
+function NDCore.Functions.GetPlayers(players, cb)
+    return NDCore.Players
 end
 
 local discordErrors = {
@@ -263,18 +262,17 @@ function NDCore.Functions.SetActiveCharacter(player, characterId)
             lastName = i.last_name,
             dob = i.dob,
             gender = i.gender,
-            twt = i.twt,
-            job = i.job,
             cash = i.cash,
             bank = i.bank,
             phoneNumber = i.phone_number,
-            groups = json.decode(i.groups),
             lastLocation = json.decode(i.last_location),
-            clothing = json.decode(i.clothing),
-            inventory = json.decode(i.inventory)
+            inventory = json.decode(i.inventory),
+            discordInfo = NDCore.PlayersDiscordInfo[player],
+            data = json.decode(i.data),
+            job = i.job
         }
     end
-    NDCore.Commands.Refresh(player)
+    NDCore.Functions.RefreshCommands(player)
     TriggerEvent("ND:characterLoaded", NDCore.Players[player])
     TriggerClientEvent("ND:setCharacter", player, NDCore.Players[player])
 end
@@ -285,13 +283,28 @@ function NDCore.Functions.GetPlayerCharacters(player)
     local result = MySQL.query.await("SELECT * FROM characters WHERE license = ?", {NDCore.Functions.GetPlayerIdentifierFromType("license", player)})
     for i = 1, #result do
         local temp = result[i]
-        characters[temp.character_id] = {id = temp.character_id, firstName = temp.first_name, lastName = temp.last_name, dob = temp.dob, gender = temp.gender, twt = temp.twt, job = temp.job, cash = temp.cash, bank = temp.bank, phoneNumber = temp.phone_number, groups = json.decode(temp.groups), lastLocation = json.decode(temp.last_location), clothing = json.decode(temp.clothing)}
+        characters[temp.character_id] = {
+            id = temp.character_id,
+            firstName = temp.first_name,
+            lastName = temp.last_name,
+            dob = temp.dob,
+            gender = temp.gender,
+            cash = temp.cash,
+            bank = temp.bank,
+            phoneNumber = temp.phone_number,
+            lastLocation = json.decode(temp.last_location),
+            inventory = json.decode(temp.inventory),
+            discordInfo = NDCore.PlayersDiscordInfo[player],
+            data = json.decode(temp.data),
+            job = temp.job
+        }
     end
     return characters
 end
 
 -- Creates a new character for the player and returns all their characters to the client.
-function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gender, twt, job, cash, bank)
+function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gender, cash, bank)
+    local characterId = false
     local license = NDCore.Functions.GetPlayerIdentifierFromType("license", player)
     if not cash or not bank or tonumber(cash) > config.startingCash or tonumber(bank) > config.startingBank then
         cash = config.startingCash
@@ -299,15 +312,15 @@ function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gend
     end
     local result = MySQL.query.await("SELECT character_id FROM characters WHERE license = ?", {license})
     if result and config.characterLimit > #result then
-        MySQL.query.await("INSERT INTO characters (license, first_name, last_name, dob, gender, twt, job, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {license, firstName, lastName, dob, gender, twt, job, cash, bank})
+        characterId = MySQL.insert.await("INSERT INTO characters (license, first_name, last_name, dob, gender, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?)", {license, firstName, lastName, dob, gender, cash, bank})
         TriggerClientEvent("ND:returnCharacters", player, NDCore.Functions.GetPlayerCharacters(player))
     end
-    return result
+    return characterId
 end
 
 -- Update/edit a character info by character id.
-function NDCore.Functions.UpdateCharacterData(characterId, firstName, lastName, dob, gender, twt, job)
-    local result = MySQL.query.await("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ?, twt = ?, job = ? WHERE character_id = ? LIMIT 1", {firstName, lastName, dob, gender, twt, job, characterId})
+function NDCore.Functions.UpdateCharacter(characterId, firstName, lastName, dob, gender)
+    local result = MySQL.query.await("UPDATE characters SET first_name = ?, last_name = ?, dob = ?, gender = ? WHERE character_id = ? LIMIT 1", {firstName, lastName, dob, gender, characterId})
     return result
 end
 
@@ -317,26 +330,248 @@ function NDCore.Functions.DeleteCharacter(characterId)
     return result
 end
 
--- Update the all the characters groups in the database.
-function NDCore.Functions.UpdateGroups(player, groups)
-    local result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), NDCore.Players[player].id})
-    return result
+-- Updates the player's data
+function NDCore.Functions.SetPlayerData(characterId, key, value)
+    if not key then return end
+
+    local player = nil
+    for id, character in pairs(NDCore.Players) do
+        if character.id == characterId then
+            player = id
+            break
+        end
+    end
+
+    if key == "cash" then
+        if player then
+            NDCore.Players[player][key] = value
+            TriggerEvent("ND:moneyChange", player, "cash", tonumber(value), "set")
+        end
+        MySQL.query("UPDATE characters SET cash = ? WHERE character_id = ?", {tonumber(value), characterId})
+    elseif key == "bank" then
+        if player then
+            NDCore.Players[player][key] = value
+            TriggerEvent("ND:moneyChange", player, "bank", tonumber(value), "set")
+        end
+        MySQL.query("UPDATE characters SET bank = ? WHERE character_id = ?", {tonumber(value), characterId})
+    elseif key == "job" then
+        if player then
+            NDCore.Players[player].job = value
+        end
+        MySQL.query("UPDATE characters SET job = ? WHERE character_id = ?", {value, characterId})
+    else
+        if player then
+            NDCore.Players[player].data[key] = value
+            MySQL.query("UPDATE characters SET `data` = ? WHERE character_id = ?", {json.encode(NDCore.Players[player].data), characterId})
+        else
+            MySQL.query("SELECT `data` FROM characters WHERE character_id = ?", {characterId}, function(result)
+                if result and result[1] then
+                    local data = json.decode(result[1].data)
+                    data[key] = value
+                    MySQL.query("UPDATE characters SET `data` = ? WHERE character_id = ?", {json.encode(data), characterId})
+                end
+            end)
+        end
+    end
+
+    if not player then return end
+    TriggerClientEvent("ND:updateCharacter", player, NDCore.Players[player])
 end
 
--- Set a group to a character in the database.
-function NDCore.Functions.SetGroup(player, group, groupName, groupLevel)
-    local groups = NDCore.Players[player].groups
-    groups[group] = {name = groupName, lvl = groupLevel}
-    result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), NDCore.Players[player].id})
-    return result
+-- Get a character by the character id.
+function NDCore.Functions.GetPlayerByCharacterId(id)
+    for _, character in pairs(NDCore.Players) do
+        if character.id == id then
+            return character
+        end
+    end
 end
 
--- Remove the group form a character in the database.
-function NDCore.Functions.RemoveGroup(player, group)
-    local groups = NDCore.Players[player].groups
-    groups[group] = nil
-    result = MySQL.query.await("UPDATE characters SET groups = ? WHERE character_id = ?", {json.encode(groups), NDCore.Players[player].id})
-    return result
+-- Generate a random string with letters and numbers.
+function randomString(length)
+    local number = {}
+    for i = 1, length do
+        number[i] = math.random(0, 1) == 1 and string.char(math.random(65, 90)) or math.random(0, 9)
+    end
+    return table.concat(number)
+end
+
+-- Give a player a license.
+function NDCore.Functions.CreatePlayerLicense(characterId, licenseType, expire)
+    local expireIn = tonumber(expire)
+    if not expireIn then
+        expireIn = 2592000
+    end
+
+    local time = os.time()
+    local license = {
+        type = licenseType,
+        status = "valid",
+        issued = time,
+        expires = time+expireIn,
+        identifier = randomString(16)
+    }
+
+    local character = NDCore.Functions.GetPlayerByCharacterId(characterId)
+    if character then
+        local data = character.data
+        if not data.licences then
+            data.licences = {}
+        end
+        character.data.licences[#character.data.licences+1] = license
+        NDCore.Functions.SetPlayerData(character.id, "licences", character.data.licences)
+        return true
+    end
+
+    local result = MySQL.query.await("SELECT data FROM characters WHERE character_id = ?", {characterId})
+    if result and result[1] then
+        local data = result[1].data
+        if not data.licences then
+            data.licences = {}
+        end
+        data.licences[#data.licences+1] = license
+        NDCore.Functions.SetPlayerData(character.id, "licences", data.licences)
+        return true
+    end
+end
+
+-- find a players license by it's identifier.
+function NDCore.Functions.FindLicenseByIdentifier(licences, identifier)
+    for key, license in pairs(licences) do
+        if license.identifier == identifier then
+            return license
+        end
+    end
+    return {}
+end
+
+-- Edit a license by the license identifier.
+function NDCore.Functions.EditPlayerLicense(characterId, identifier, newData)
+    local licences = {}
+    local character = NDCore.Functions.GetPlayerByCharacterId(characterId)
+    if character then
+        licences = character.data.licences
+    else
+        local result = MySQL.query.await("SELECT data FROM characters WHERE character_id = ?", {characterId})
+        if result and result[1] then
+            local data = result[1].data
+            if not data.licences then
+                data.licences = {}
+            end
+            licences = data.licences
+        end
+    end
+
+    local license = NDCore.Functions.FindLicenseByIdentifier(licences, identifier)
+    for k, v in pairs(newData) do
+        license[k] = v
+    end
+    NDCore.Functions.SetPlayerData(characterId, "licences", licences)
+    return licences
+end
+
+-- Set the players job and job rank.
+function NDCore.Functions.SetPlayerJob(characterId, job, rank)
+    if not job then return end
+
+    local jobRank = tonumber(rank)
+    if not jobRank then
+        jobRank = 1
+    end
+    
+    local result = MySQL.query.await("SELECT job FROM characters WHERE character_id = ?", {characterId})
+    if result and result[1] then
+        local character = NDCore.Functions.GetPlayerByCharacterId(characterId)
+        if character then
+            local oldRank = 1
+            if character.data.groups and character.data.groups[character.job] then
+                oldRank = character.data.groups[character.job].rank
+            end
+            TriggerEvent("ND:jobChanged", character.source, {name = job, rank = jobRank}, {name = character.job, rank = oldRank})
+            TriggerClientEvent("ND:jobChanged", character.source, {name = job, rank = jobRank}, {name = character.job, rank = oldRank})
+        end
+        NDCore.Functions.RemovePlayerFromGroup(characterId, result[1].job)
+    end
+
+    NDCore.Functions.SetPlayerData(characterId, "job", job)
+    NDCore.Functions.SetPlayerToGroup(characterId, job, jobRank)
+end
+
+-- Set a player to a group.
+function NDCore.Functions.SetPlayerToGroup(characterId, group, rank)
+    local groupRank = tonumber(rank)
+    if not groupRank then
+        groupRank = 1
+    end
+
+    local group = group:lower()
+    for groupName, groupRanks in pairs(config.groups) do
+        if groupName:lower() == group then
+            group = groupName
+            break
+        end
+    end
+
+    local character = NDCore.Functions.GetPlayerByCharacterId(characterId)
+    if character then
+        local data = character.data
+        if not data.groups then
+            data.groups = {}
+        end
+        data.groups[group] = {
+            rank = groupRank,
+            rankName = config.groups[group][groupRank]
+        }
+        NDCore.Functions.SetPlayerData(characterId, "groups", data.groups)
+        return true
+    end
+
+    local result = MySQL.query.await("SELECT data FROM characters WHERE character_id = ?", {characterId})
+    if result and result[1] then
+        local data = result[1].data
+        if not data.groups then
+            data.groups = {}
+        end
+        data.groups[group] = {
+            rank = groupRank,
+            rankName = config.groups[group][groupRank]
+        }
+        NDCore.Functions.SetPlayerData(characterId, "groups", data.groups)
+        return true
+    end
+end
+
+-- Remove a player from a group.
+function NDCore.Functions.RemovePlayerFromGroup(characterId, group)
+    local group = group:lower()
+    for groupName, groupRanks in pairs(config.groups) do
+        if groupName:lower() == group then
+            group = groupName
+            break
+        end
+    end
+
+    local character = NDCore.Functions.GetPlayerByCharacterId(characterId)
+    if character then
+        local data = character.data
+        if not data.groups then
+            data.groups = {}
+        end
+        data.groups[group] = nil
+        NDCore.Functions.SetPlayerData(characterId, "groups", data.groups)
+        return true
+    end
+
+    local result = MySQL.query.await("SELECT data FROM characters WHERE character_id = ?", {characterId})
+    if result and result[1] then
+        local data = result[1].data
+        if not data.groups then
+            data.groups = {}
+        end
+        data.groups[group] = nil
+        NDCore.Functions.SetPlayerData(characterId, "groups", data.groups)
+        return true
+    end
 end
 
 -- Update the characters last location into the database.
