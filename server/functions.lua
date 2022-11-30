@@ -6,8 +6,32 @@ function NDCore.Functions.GetPlayer(player)
 end
 
 -- Get all active players character data.
-function NDCore.Functions.GetPlayers(players, cb)
-    return NDCore.Players
+function NDCore.Functions.GetPlayers(getBy, value)
+    if not getBy or not value then
+        return NDCore.Players
+    end
+    local players = {}
+
+    if getBy == "groups" then
+        for player, playerInfo in pairs(NDCore.Players) do
+            if playerInfo.data.groups then
+                local valueGroup = value:lower()
+                for group, _ in pairs(playerInfo.data.groups) do
+                    if group.lower() == valueGroup then
+                        players[player] = playerInfo
+                    end
+                end
+            end
+        end
+    else
+        for player, playerInfo in pairs(NDCore.Players) do
+            if playerInfo[getBy] == value then
+                players[player] = playerInfo
+            end
+        end
+    end
+
+    return players
 end
 
 local discordErrors = {
