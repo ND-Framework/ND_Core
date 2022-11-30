@@ -10,14 +10,12 @@ function GetCoreObject()
     return NDCore
 end
 
-function NDCore.Functions.GetSelectedCharacter(cb)
-    if not cb then return NDCore.SelectedCharacter end
-    cb(NDCore.SelectedCharacter)
+function NDCore.Functions.GetSelectedCharacter()
+    return NDCore.SelectedCharacter
 end
 
-function NDCore.Functions.GetCharacters(cb)
-    if not cb then return NDCore.Characters end
-    cb(NDCore.Characters)
+function NDCore.Functions.GetCharacters()
+    return NDCore.Characters
 end
 
 -- discord rich precense will show on a users profile.
