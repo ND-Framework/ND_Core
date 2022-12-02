@@ -18,7 +18,12 @@ end)
 function isResourceStarted(resourceName, cb)
     local started = GetResourceState(resourceName) == "started"
     startedResources[resourceName] = started
-    callbacks[resourceName] = cb
+
+    if cb then
+        callbacks[resourceName] = cb
+        cb(started)
+    end
+    
     return started
 end
 

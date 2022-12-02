@@ -25,14 +25,10 @@ CreateThread(function()
     end
 end)
 
-AddEventHandler("onResourceStart", function(resourceName)
-    Wait(3000)
-    if resourceName ~= "ox_inventory" then return end
+isResourceStarted("ox_inventory", function(started)
+    if not started then return end
     SetConvarReplicated("inventory:framework", "nd")
 end)
-if GetResourceState("ox_inventory") == "started" then
-    SetConvarReplicated("inventory:framework", "nd")
-end
 
 for _, roleid in pairs(config.adminRoles) do
     ExecuteCommand("add_principal identifier.discord:" .. roleid .. " group.admin")
