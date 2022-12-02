@@ -542,9 +542,13 @@ function NDCore.Functions.SetPlayerToGroup(characterId, group, rank)
         if not data.groups then
             data.groups = {}
         end
+        local rankName = tostring(groupRank)
+        if config.groups[group] and config.groups[group][groupRank] then
+            rankName = config.groups[group][groupRank]
+        end
         data.groups[group] = {
             rank = groupRank,
-            rankName = config.groups[group][groupRank]
+            rankName = rankName
         }
         NDCore.Functions.SetPlayerData(characterId, "groups", data.groups)
         return true
@@ -556,9 +560,13 @@ function NDCore.Functions.SetPlayerToGroup(characterId, group, rank)
         if not data.groups then
             data.groups = {}
         end
+        local rankName = tostring(groupRank)
+        if config.groups[group] and config.groups[group][groupRank] then
+            rankName = config.groups[group][groupRank]
+        end
         data.groups[group] = {
             rank = groupRank,
-            rankName = config.groups[group][groupRank]
+            rankName = rankName
         }
         NDCore.Functions.SetPlayerData(characterId, "groups", data.groups)
         return true
@@ -615,10 +623,12 @@ function NDCore.Functions.AddCommand(name, help, callback, argsrequired, argumen
             return TriggerClientEvent("chat:addMessage", source, {
                 color = {255, 0, 0},
                 multiline = true,
-                args = {"System", "All arguments must be filled out!"}
+                args = {"Error", "all arguments required."}
             })
         end
-        callback(source, args, rawCommand)
+        local message = callback(source, args, rawCommand)
+        if not message then return end
+        TriggerClientEvent("chat:addMessage", source, message)
     end, false)
 
     NDCore.Commands[commandName] = {
