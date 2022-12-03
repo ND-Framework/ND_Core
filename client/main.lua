@@ -6,18 +6,6 @@ NDCore.Characters = {}
 NDCore.Functions = {}
 NDCore.Config = config
 
-function GetCoreObject()
-    return NDCore
-end
-
-function NDCore.Functions.GetSelectedCharacter()
-    return NDCore.SelectedCharacter
-end
-
-function NDCore.Functions.GetCharacters()
-    return NDCore.Characters
-end
-
 -- discord rich precense will show on a users profile.
 if config.enableRichPresence then
     Citizen.CreateThread(function()
