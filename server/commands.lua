@@ -12,13 +12,13 @@ NDCore.Functions.AddCommand("setmoney", "Admin command, manage player money.", f
 
     if action == "remove" then
         if not amount or amount < 1 then return end
-        NDCore.Functions.DeductMoney(amount, target, moneyType)
+        NDCore.Functions.DeductMoney(amount, target, moneyType, "Server staff action.")
     elseif action == "add" then
         if not amount or amount < 1 then return end
-        NDCore.Functions.AddMoney(amount, target, moneyType)
+        NDCore.Functions.AddMoney(amount, target, moneyType, "Server staff action.")
     elseif action == "set" then
         local character = NDCore.Functions.GetPlayer(target)
-        NDCore.Functions.SetPlayerData(character.id, moneyType, amount)
+        NDCore.Functions.SetPlayerData(character.id, moneyType, amount, "Server staff action.")
     end
 end, true, {
     { name="player", help="Player server id" },
