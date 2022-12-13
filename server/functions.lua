@@ -50,12 +50,28 @@ function NDCore.Functions.GetUserDiscordInfo(discordUserId)
         end
         local result = json.decode(resultData)
         local roles = {}
-        for _, roleId in pairs(result.roles) do
-            roles[roleId] = roleId
+        local nickname = ""
+        local tag = ""
+        if result and result.roles then
+            for _, roleId in pairs(result.roles) do
+                roles[roleId] = roleId
+            end
+            if result.nick then
+                nickname = result.nick
+            end
+            if result.user and result.user.username and result.user.discriminator then
+                tag = tostring(result.user.username) .. "#" .. tostring(result.user.discriminator)
+            end
+            data = {
+                nickname = nickname,
+                discordTag = tag,
+                roles = roles
+            }
+            return
         end
         data = {
-            nickname = result.nick,
-            discordTag = tostring(result.user.username) .. "#" .. tostring(result.user.discriminator),
+            nickname = nickname,
+            discordTag = tag,
             roles = roles
         }
     end, "GET", "", {["Content-Type"] = "application/json", ["Authorization"] = "Bot " .. server_config.discordServerToken})
