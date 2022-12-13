@@ -17,7 +17,7 @@ function NDCore.Functions.GetPlayers(getBy, value)
             if playerInfo.data.groups then
                 local valueGroup = value:lower()
                 for group, _ in pairs(playerInfo.data.groups) do
-                    if group.lower() == valueGroup then
+                    if group and group:lower() == valueGroup then
                         players[player] = playerInfo
                     end
                 end
