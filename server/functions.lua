@@ -388,30 +388,29 @@ function NDCore.Functions.SetPlayerData(characterId, key, value, description)
             NDCore.Players[player][key] = value
             TriggerEvent("ND:moneyChange", player, "cash", tonumber(value), "set", description)
         end
-        MySQL.query("UPDATE characters SET cash = ? WHERE character_id = ?", {tonumber(value), characterId})
+        MySQL.query.await("UPDATE characters SET cash = ? WHERE character_id = ?", {tonumber(value), characterId})
     elseif key == "bank" then
         if player then
             NDCore.Players[player][key] = value
             TriggerEvent("ND:moneyChange", player, "bank", tonumber(value), "set", description)
         end
-        MySQL.query("UPDATE characters SET bank = ? WHERE character_id = ?", {tonumber(value), characterId})
+        MySQL.query.await("UPDATE characters SET bank = ? WHERE character_id = ?", {tonumber(value), characterId})
     elseif key == "job" then
         if player then
             NDCore.Players[player].job = value
         end
-        MySQL.query("UPDATE characters SET job = ? WHERE character_id = ?", {value, characterId})
+        MySQL.query.await("UPDATE characters SET job = ? WHERE character_id = ?", {value, characterId})
     else
         if player then
             NDCore.Players[player].data[key] = value
-            MySQL.query("UPDATE characters SET `data` = ? WHERE character_id = ?", {json.encode(NDCore.Players[player].data), characterId})
+            MySQL.query.await("UPDATE characters SET `data` = ? WHERE character_id = ?", {json.encode(NDCore.Players[player].data), characterId})
         else
-            MySQL.query("SELECT `data` FROM characters WHERE character_id = ?", {characterId}, function(result)
-                if result and result[1] then
-                    local data = json.decode(result[1].data)
-                    data[key] = value
-                    MySQL.query("UPDATE characters SET `data` = ? WHERE character_id = ?", {json.encode(data), characterId})
-                end
-            end)
+            local result = MySQL.query.await("SELECT `data` FROM characters WHERE character_id = ?", {characterId})
+            if not result or not result[1] then return end
+
+            local data = json.decode(result[1].data)
+            data[key] = value
+            MySQL.query.await("UPDATE characters SET `data` = ? WHERE character_id = ?", {json.encode(data), characterId})
         end
     end
 
@@ -572,26 +571,29 @@ function NDCore.Functions.SetPlayerToGroup(characterId, group, rank)
     end
 
     local result = MySQL.query.await("SELECT data FROM characters WHERE character_id = ?", {characterId})
-    if result and result[1] then
-        local data = result[1].data
-        if not data.groups then
-            data.groups = {}
-        end
-        local rankName = tostring(groupRank)
-        if config.groups[group] and config.groups[group][groupRank] then
-            rankName = config.groups[group][groupRank]
-        end
-        data.groups[group] = {
-            rank = groupRank,
-            rankName = rankName
-        }
-        NDCore.Functions.SetPlayerData(characterId, "groups", data.groups)
-        return true
+    if not result or not result[1] then return end
+    local data = json.decode(result[1].data)
+    if not data then
+        data = {}
     end
+    if not data.groups then
+        data.groups = {}
+    end
+    local rankName = tostring(groupRank)
+    if config.groups[group] and config.groups[group][groupRank] then
+        rankName = config.groups[group][groupRank]
+    end
+    data.groups[group] = {
+        rank = groupRank,
+        rankName = rankName
+    }
+    NDCore.Functions.SetPlayerData(characterId, "groups", data.groups)
+    return true
 end
 
 -- Remove a player from a group.
 function NDCore.Functions.RemovePlayerFromGroup(characterId, group)
+    if not group then return end
     local group = group:lower()
     for groupName, groupRanks in pairs(config.groups) do
         if groupName:lower() == group then
