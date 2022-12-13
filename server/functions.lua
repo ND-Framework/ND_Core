@@ -122,7 +122,7 @@ function NDCore.Functions.UpdateMoney(player)
 end
 
 -- Transfer money from one players bank account to another.
-function NDCore.Functions.TransferBank(amount, player, target)
+function NDCore.Functions.TransferBank(amount, player, target, descriptionSender, descriptionReceiver)
     local amount = tonumber(amount)
     local player = tonumber(player)
     local target = tonumber(target)
@@ -153,7 +153,7 @@ function NDCore.Functions.TransferBank(amount, player, target)
     else
         MySQL.query.await("UPDATE characters SET bank = bank - ? WHERE character_id = ?", {amount, NDCore.Players[player].id})
         NDCore.Functions.UpdateMoney(player)
-        TriggerEvent("ND:moneyChange", player, "bank", amount, "remove", "Transfer")
+        TriggerEvent("ND:moneyChange", player, "bank", amount, "remove", descriptionSender or "Transfer")
         TriggerClientEvent("chat:addMessage", player, {
             color = {0, 255, 0},
             args = {"Success", "You paid " .. NDCore.Players[target].firstName .. " " .. NDCore.Players[target].lastName .. " $" .. amount .. "."}
@@ -161,7 +161,7 @@ function NDCore.Functions.TransferBank(amount, player, target)
         
         MySQL.query.await("UPDATE characters SET bank = bank + ? WHERE character_id = ?", {amount, NDCore.Players[target].id})
         NDCore.Functions.UpdateMoney(target)
-        TriggerEvent("ND:moneyChange", target, "bank", amount, "add", "Transfer")
+        TriggerEvent("ND:moneyChange", target, "bank", amount, "add", descriptionReceiver or "Transfer")
         TriggerClientEvent("chat:addMessage", target, {
             color = {0, 255, 0},
             args = {"Success", NDCore.Players[player].firstName .. " " .. NDCore.Players[player].lastName .. " sent you $" .. amount .. "."}
