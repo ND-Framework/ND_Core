@@ -343,7 +343,7 @@ function NDCore.Functions.GetPlayerCharacters(player)
 end
 
 -- Creates a new character for the player and returns all their characters to the client.
-function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gender, cash, bank)
+function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gender, cash, bank, cb)
     local characterId = false
     local license = NDCore.Functions.GetPlayerIdentifierFromType("license", player)
     if not cash or not bank or tonumber(cash) > config.startingCash or tonumber(bank) > config.startingBank then
