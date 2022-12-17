@@ -683,38 +683,36 @@ end
 
 function NDCore.Functions.VersionChecker(expectedResourceName, resourceName, downloadLink, rawGithubLink)
     if expectedResourceName ~= resourceName then
-        print("^1[^4" .. expectedResourceName .. "^1] WARNING^0")
-        print("Change the resource name to ^4" .. expectedResourceName .. " ^0or else it won't work properly!")
+        print(("^4%s ^1WARNING^0"):format(expectedResourceName))
+        print(("Change the resource name to ^4%s ^0or else it won't work properly!"):format(expectedResourceName))
         StopResource(resourceName)
         return
     end
     PerformHttpRequest(rawGithubLink, function(errorCode, resultData, resultHeaders)
-        local i, j = string.find(tostring(resultData), "version")
-        local resultData = string.sub(tostring(resultData), i, j + 12)
-        local resultData = string.gsub(resultData, "version \"", "")
-        local i, j = string.find(resultData, "\"")
-        local resultData = string.sub(resultData, 1, i - 1)
-        local githubVersion = string.gsub(resultData, "%.", "")
-        local fileVersion = string.gsub(GetResourceMetadata(expectedResourceName, "version", 0), "%.", "")
-        local githubVersion = tonumber(githubVersion)
-        local fileVersion = tonumber(fileVersion)
+        local i, j = tostring(resultData):find("version")
+        local resultData = tostring(resultData):sub(i, j + 12)
+        local resultData = resultData:gsub("version \"", "")
+        local i, j = resultData:find("\"")
+        local resultData = resultData:sub(1, i - 1)
+        local githubVersion = resultData:gsub("%.", "")
+        local fileVersion = GetResourceMetadata(expectedResourceName, "version", 0):gsub("%.", "")
 
         if not githubVersion and not fileVersion then
-            print("^1[^4" .. expectedResourceName .. "^1] WARNING^0")
-            print("You may not have the latest version of ^4" .. expectedResourceName .. "^0. A newer, improved version may be present at ^5" .. downloadLink .. "^0")
+            print(("^4%s ^1WARNING^0"):format(expectedResourceName))
+            print(("You may not have the latest version of ^4%s^0. A newer, improved version may be present at ^5%s^0"):format(expectedResourceName, downloadLink))
         elseif githubVersion > fileVersion then
-            local oldVersion = string.sub(fileVersion, 1, 1) .. "." .. string.sub(fileVersion, 2, 2) .. "." .. string.sub(fileVersion, 3, 3)
-            local newVersion = string.sub(githubVersion, 1, 1) .. "." .. string.sub(githubVersion, 2, 2) .. "." .. string.sub(githubVersion, 3, 3)
-            print("^1[^4" .. expectedResourceName .. "^1] WARNING^0")
-            print("^4" .. expectedResourceName .. " ^0is outdated. Please update it from ^5" .. downloadLink .. " ^0| Current Version: ^1" .. oldVersion .. " ^0| New Version: ^2" .. newVersion .. " ^0|")
+            local oldVersion =  ("%s.%s.%s"):format(fileVersion:sub(1, 1), fileVersion:sub(2, 2), fileVersion:sub(3, 3))
+            local newVersion = ("%s.%s.%s"):format(githubVersion:sub(1, 1), githubVersion:sub(2, 2), githubVersion:sub(3, 3))
+            print(("^4%s ^1WARNING^0"):format(expectedResourceName))
+            print(("^4%s ^0is outdated. Please update it from ^5%s ^0| Current Version: ^1%s ^0| New Version: ^2%s ^0|"):format(expectedResourceName, downloadLink, oldVersion, newVersion))
         elseif githubVersion < fileVersion then
-            local oldVersion = string.sub(fileVersion, 1, 1) .. "." .. string.sub(fileVersion, 2, 2) .. "." .. string.sub(fileVersion, 3, 3)
-            local newVersion = string.sub(githubVersion, 1, 1) .. "." .. string.sub(githubVersion, 2, 2) .. "." .. string.sub(githubVersion, 3, 3)
-            print("^1[^4" .. expectedResourceName .. "^1] WARNING^0")
-            print("^4" .. expectedResourceName .. " ^0version number is higher than expected | Current Version: ^3" .. oldVersion .. " ^0| Expected Version: ^2" .. newVersion .. " ^0|")
+            local oldVersion = ("%s.%s.%s"):format(fileVersion:sub(1, 1), fileVersion:sub(2, 2), fileVersion:sub(3, 3))
+            local newVersion = ("%s.%s.%s"):format(githubVersion:sub(1, 1), githubVersion:sub(2, 2), githubVersion:sub(3, 3))
+            print(("^4%s ^1WARNING^0"):format(expectedResourceName))
+            print(("^4%s ^0version number is higher than expected | Current Version: ^3%s ^0| Expected Version: ^2%s ^0|"):format(expectedResourceName, oldVersion, newVersion))
         else
-            local newVersion = string.sub(githubVersion, 1, 1) .. "." .. string.sub(githubVersion, 2, 2) .. "." .. string.sub(githubVersion, 3, 3)
-            print("^4" .. expectedResourceName .. " ^0is up to date | Current Version: ^2" .. newVersion .. " ^0|")
+            local newVersion = ("%s.%s.%s"):format(githubVersion:sub(1, 1), githubVersion:sub(2, 2), githubVersion:sub(3, 3))
+            print(("^4%s ^0is up to date | Current Version: ^2%s ^0|"):format(expectedResourceName, newVersion))
         end
     end)
 end
