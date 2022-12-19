@@ -690,6 +690,7 @@ function NDCore.Functions.VersionChecker(expectedResourceName, resourceName, dow
     end
     PerformHttpRequest(rawGithubLink, function(errorCode, resultData, resultHeaders)
         local i, j = tostring(resultData):find("version")
+        if not i or not j then return end
         local resultData = tostring(resultData):sub(i, j + 12)
         local resultData = resultData:gsub("version \"", "")
         local i, j = resultData:find("\"")
