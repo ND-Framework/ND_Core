@@ -15,16 +15,17 @@ shared_scripts {
 client_scripts {
     "client/main.lua",
     "client/functions.lua",
-    "client/events.lua"
+    "client/events.lua",
+    "shared/import.lua"
 }
-
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
     "config_server.lua",
     "server/main.lua",
     "server/functions.lua",
     "server/events.lua",
-    "server/commands.lua"
+    "server/commands.lua",
+    "shared/import.lua"
 }
 
 exports {
