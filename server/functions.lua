@@ -718,3 +718,53 @@ function NDCore.Functions.VersionChecker(expectedResourceName, resourceName, dow
     end)
 end
 NDCore.Functions.VersionChecker("ND_Core", GetCurrentResourceName(), "https://github.com/ND-Framework/ND_Core", "https://raw.githubusercontent.com/ND-Framework/ND_Core/main/fxmanifest.lua")
+
+
+-- Callbacks are licensed under LGPL v3.0
+-- <https://github.com/overextended/ox_lib>
+NDCore.callback = {}
+local events = {}
+
+RegisterNetEvent("ND:callbacks", function(key, ...)
+	local cb = events[key]
+	return cb and cb(...)
+end)
+
+function triggerCallback(_, name, playerId, cb, ...)
+	local key = ("%s:%s:%s"):format(name, math.random(0, 100000), playerId)
+	TriggerClientEvent(("ND:%s_cb"):format(name), playerId, key, ...)
+
+	local promise = not cb and promise.new()
+
+	events[key] = function(response, ...)
+        response = { response, ... }
+		events[key] = nil
+
+		if promise then
+			return promise:resolve(response)
+		end
+
+        if cb then
+            cb(table.unpack(response))
+        end
+	end
+
+	if promise then
+		return table.unpack(Citizen.Await(promise))
+	end
+end
+
+setmetatable(NDCore.callback, {
+	__call = triggerCallback
+})
+
+function NDCore.callback.await(name, playerId, ...)
+    return triggerCallback(nil, name, playerId, false, ...)
+end
+
+function NDCore.callback.register(name, callback)
+    RegisterNetEvent(("ND:%s_cb"):format(name), function(key, ...)
+        local src = source
+        TriggerClientEvent("ND:callbacks", src, key, callback(src, ...))
+    end)
+end
