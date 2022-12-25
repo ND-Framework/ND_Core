@@ -343,16 +343,12 @@ function NDCore.Functions.GetPlayerCharacters(player)
 end
 
 -- Creates a new character for the player and returns all their characters to the client.
-function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gender, cash, bank, cb)
+function NDCore.Functions.CreateCharacter(player, firstName, lastName, dob, gender, cb)
     local characterId = false
     local license = NDCore.Functions.GetPlayerIdentifierFromType("license", player)
-    if not cash or not bank or tonumber(cash) > config.startingCash or tonumber(bank) > config.startingBank then
-        cash = config.startingCash
-        bank = config.startingBank
-    end
     local result = MySQL.query.await("SELECT character_id FROM characters WHERE license = ?", {license})
     if result and config.characterLimit > #result then
-        characterId = MySQL.insert.await("INSERT INTO characters (license, first_name, last_name, dob, gender, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?)", {license, firstName, lastName, dob, gender, cash, bank})
+        characterId = MySQL.insert.await("INSERT INTO characters (license, first_name, last_name, dob, gender, cash, bank) VALUES (?, ?, ?, ?, ?, ?, ?)", {license, firstName, lastName, dob, gender, config.startingCash, config.startingBank})
         if cb then cb(characterId) end
         TriggerClientEvent("ND:returnCharacters", player, NDCore.Functions.GetPlayerCharacters(player))
     end
