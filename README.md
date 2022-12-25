@@ -4,7 +4,7 @@
 
 <p align='center'><b><a href="discord.gg/nc82d8zvjm">Discord</a></b>
 
-<p align='center'><b><a href="https://ndframework.gitbook.io/nd-framework/">Documentation</a></b>
+<p align='center'><b><a href="https://ndfw.gitbook.io/nd-framework/">Documentation</a></b>
 
 ## Dependency:
 [oxmysql](https://github.com/overextended/oxmysql/releases/download/v2.4.0/oxmysql.zip)
@@ -25,4 +25,4 @@
 * [Appearance Shops](https://github.com/ND-Framework/ND_AppearanceShops)
 
 # Need support?
-[![Need Support?](https://user-images.githubusercontent.com/86536434/147299047-73691b78-2690-4786-b58b-27d24e48a0d2.png)](https://discord.gg/Z9Mxu72zZ6)
+[![Discord](https://discordapp.com/api/guilds/857672921912836116/widget.png?style=banner3)](https://discord.gg/Z9Mxu72zZ6)
