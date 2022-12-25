@@ -68,7 +68,8 @@ end)
 -- Update the characters clothes.
 RegisterNetEvent("ND:updateClothes", function(clothing)
     local player = source
-    NDCore.Functions.SetPlayerData(player, "clothing", clothing)
+    local character = NDCore.Players[player].id
+    NDCore.Functions.SetPlayerData(character.id, "clothing", clothing)
 end)
 
 -- Disconnecting a player
