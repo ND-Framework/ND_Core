@@ -20,7 +20,7 @@ function NDCore.Functions.GetPlayersFromCoords(distance, coords)
     distance = distance or 5
     local closePlayers = {}
     local players = GetActivePlayers()
-    for _, player in pairs(players) do
+    for _, player in ipairs(players) do
         local target = GetPlayerPed(player)
         local targetCoords = GetEntityCoords(target)
         local targetdistance = #(targetCoords - coords)
