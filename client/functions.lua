@@ -11,16 +11,15 @@ function NDCore.Functions.GetCharacters()
 end
 
 
-function NDCore.Functions.GetPlayersFromCoords(coords, distance)
-    local players = GetActivePlayers()
-    local ped = PlayerPedId()
+function NDCore.Functions.GetPlayersFromCoords(distance, coords)
     if coords then
         coords = type(coords) == 'table' and vec3(coords.x, coords.y, coords.z) or coords
     else
-        coords = GetEntityCoords(ped)
+        coords = GetEntityCoords(PlayerPedId())
     end
     distance = distance or 5
     local closePlayers = {}
+    local players = GetActivePlayers()
     for _, player in pairs(players) do
         local target = GetPlayerPed(player)
         local targetCoords = GetEntityCoords(target)
