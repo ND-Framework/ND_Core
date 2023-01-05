@@ -83,7 +83,9 @@ AddEventHandler("playerDropped", function()
     local player = source
     local character = NDCore.Players[player]
     if character then
-        NDCore.Functions.UpdateLastLocation(character.id, character.lastLocation)
+        local ped = GetPlayerPed(player)
+        local lastLocation = GetEntityCoords(ped)
+        NDCore.Functions.UpdateLastLocation(character.id, {x = lastLocation.x, y = lastLocation.y, z = lastLocation.z})
     end
     TriggerEvent("ND:characterUnloaded", player, character)
     character = nil
