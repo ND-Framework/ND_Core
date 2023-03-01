@@ -2,7 +2,7 @@
   <img src="https://user-images.githubusercontent.com/86536434/193703880-5cb7deef-af37-42cc-8df2-b13332afee67.png" />
 </p>
 
-<p align='center'><b><a href="https://discord.gg/nc82d8zvjm">Discord</a></b>
+<p align='center'><b><a href="https://discord.gg/andys-development-857672921912836116">Discord</a></b>
 
 <p align='center'><b><a href="https://ndfw.gitbook.io/nd-framework/">Documentation</a></b>
 
