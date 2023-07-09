@@ -8,18 +8,19 @@ fx_version "cerulean"
 game "gta5"
 lua54 "yes"
 
-shared_scripts {
-    "init.lua"
-}
 client_scripts {
+    "client/main.lua",
     "client/functions.lua",
     "client/events.lua",
-    "client/main.lua"
 }
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
     "server/main.lua",
+    "server/functions.lua",
     "server/player.lua"
+}
+shared_scripts {
+    "init.lua"
 }
 
 dependency "oxmysql"

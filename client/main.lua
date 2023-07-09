@@ -1,3 +1,5 @@
+NDCore = {}
+
 CreateThread(function()
     SetDiscordAppId(Config.discordAppId)
     SetDiscordRichPresenceAsset(Config.discordAsset)
