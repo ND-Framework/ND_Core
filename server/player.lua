@@ -100,6 +100,13 @@ local function charCreateLicense(self, licenseType, expire)
     if not self.source then return end
     ActivePlayers[self.source] = self
 end
+
+local function charSetCoords(self, coords)
+    if not self.source or not coords then return end
+    local ped = GetPlayerPed(self.source)
+    if not DoesEntityExist(ped) then return end
+    SetEntityCoords(ped, coords.x, coords.y, coords.z)
+    return true
 end
 
 local function initPlayerTable(playerTable)
@@ -112,6 +119,7 @@ local function initPlayerTable(playerTable)
     playerTable.save = charSave,
     playerTable.unload = charUnload,
     playerTable.createLicense = charCreateLicense
+    playerTable.setCoords = charSetCoords
     return playerTable
 end
 
