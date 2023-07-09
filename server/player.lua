@@ -1,5 +1,8 @@
 local function charDelete(self)
     local result = MySQL.query.await("DELETE FROM nd_characters WHERE charid = ?", {self.id})
+    if result and self.source then
+        ActivePlayers[self.source] = nil
+    end
     return result
 end
 
@@ -9,6 +12,7 @@ local function charDeductMoney(self, account, amount, reason)
     self[account] -= amount
     if self.source then
         TriggerEvent("ND:moneyChange", self.source, account, amount, "remove", reason)
+        ActivePlayers[self.source] = self
     end
     return true
 end
@@ -19,6 +23,7 @@ local function charAddMoney(self, account, amount, reason)
     self[account] += amount
     if self.source then
         TriggerEvent("ND:moneyChange", self.source, account, amount, "add", reason)
+        ActivePlayers[self.source] = self
     end
     return true
 end
@@ -37,6 +42,11 @@ end
 
 local function charSetMetadata(self, key, value)
     self.metadata[key] = value
+    if self.source then
+        ActivePlayers[self.source] = self
+        return ActivePlayers[self.source].metadata
+    end
+    return self.metadata
 end
 
 local function charUnload(self)
@@ -44,6 +54,7 @@ local function charUnload(self)
     local ped = GetPlayerPed(self.source)
     self:setMetadata("location", GetEntityCoords(ped))
     self:save()
+    if not self.source then return end
     ActivePlayers[self.source] = nil
 end
 
@@ -85,6 +96,10 @@ local function charCreateLicense(self, licenseType, expire)
         return
     end
     self.metadata.licenses = {license}
+
+    if not self.source then return end
+    ActivePlayers[self.source] = self
+end
 end
 
 local function initPlayerTable(playerTable)
