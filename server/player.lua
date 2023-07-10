@@ -1,6 +1,7 @@
 local function createCharacterTable(info)
     local self = {
         source = info.source,
+        license = info.license,
         name = info.name,
         firstname = info.firstname,
         lastname = info.lastname,
@@ -8,73 +9,94 @@ local function createCharacterTable(info)
         gender = info.gender,
         cash = info.cash,
         bank = info.bank,
-        license = info.license,
+        groups = info.groups,
         metadata = info.metadata,
         inventory = info.inventory
     }
-
-    function self.delete()
-        local result = MySQL.query.await("DELETE FROM nd_characters WHERE charid = ?", {self.id})
-        if result and self.source then
-            ActivePlayers[self.source] = nil
-        end
-        return result
-    end
     
+    ---@param account string
+    ---@param amount number
+    ---@param reason string|nil
+    ---@return boolean
     function self.deductMoney(account, amount, reason)
         local amount = tonumber(amount)
         if not amount or account ~= "bank" and account ~= "cash" then return end
         self[account] -= amount
         if self.source then
             TriggerEvent("ND:moneyChange", self.source, account, amount, "remove", reason)
-            ActivePlayers[self.source] = self
         end
         return true
     end
     
+    ---@param account string
+    ---@param amount number
+    ---@param reason string|nil
+    ---@return boolean
     function self.addMoney(account, amount, reason)
         local amount = tonumber(amount)
         if not amount or account ~= "bank" and account ~= "cash" then return end
         self[account] += amount
         if self.source then
             TriggerEvent("ND:moneyChange", self.source, account, amount, "add", reason)
-            ActivePlayers[self.source] = self
         end
         return true
     end
-    
+
+    ---@param amount number
+    ---@return boolean
     function self.depositMoney(amount)
         local amount = tonumber(amount)
         if not amount or self.cash < amount or amount <= 0 then return end
-        return self:deductMoney("cash", amount, "Deposit") and self:AddMoney("bank", amount, "Deposit")
+        return self.deductMoney("cash", amount, "Deposit") and self.addMoney("bank", amount, "Deposit")
     end
     
+    ---@param amount number
+    ---@return boolean
     function self.withdrawMoney(amount)
         local amount = tonumber(amount)
         if not amount or self.bank < amount or amount <= 0 then return end
-        return self:deductMoney("bank", amount, "Withdraw") and self:AddMoney("cash", amount, "Withdraw")
+        return self.deductMoney("bank", amount, "Withdraw") and self.addMoney("cash", amount, "Withdraw")
     end
     
+    ---@param key string
+    ---@param value any
+    ---@return table
     function self.setMetadata(key, value)
         self.metadata[key] = value
-        if self.source then
-            ActivePlayers[self.source] = self
-            return ActivePlayers[self.source].metadata
-        end
         return self.metadata
     end
+
+    -- Completely delete character
+    function self.delete()
+        local result = MySQL.query.await("DELETE FROM nd_characters WHERE charid = ?", {self.id})
+        if result and ActivePlayers[self.source] then
+            ActivePlayers[self.source] = nil
+        end
+        return result
+    end
     
-    function self.unload(self)
-        TriggerEvent("ND:characterUnloaded", self.source, self)
-        local ped = GetPlayerPed(self.source)
-        self:setMetadata("location", GetEntityCoords(ped))
-        self:save()
+    -- Unload and save character
+    function self.unload()
         if not self.source then return end
+        local ped = GetPlayerPed(self.source)
+        if ped then
+            local coords = GetEntityCoords(ped)
+            local heading = GetEntityHeading(ped)
+            self.setMetadata("location", {
+                x = coords.x,
+                y = coords.y,
+                x = coords.z,
+                w = heading
+            })
+        end
+        TriggerEvent("ND:characterUnloaded", self.source, self)
+        self.save()
         ActivePlayers[self.source] = nil
     end
     
-    function self.save(self)
-        MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, metadata = ?, inventory = ? WHERE charid = ?", {
+    -- Save character information to database
+    function self.save()
+        MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, groups = ?, metadata = ?, inventory = ? WHERE charid = ?", {
             self.name,
             self.firstname,
             self.lastname,
@@ -82,12 +104,16 @@ local function createCharacterTable(info)
             self.gender,
             self.cash,
             self.bank,
+            json.encode(self.groups),
             json.encode(self.metadata),
             json.encode(self.inventory),
             self.id,
         })
     end
     
+    ---Create a license/permit for the character
+    ---@param licenseType string
+    ---@param expire number
     function self.createLicense(licenseType, expire)
         local expireIn = tonumber(expire) or 2592000
         local time = os.time()
@@ -111,17 +137,57 @@ local function createCharacterTable(info)
             return
         end
         self.metadata.licenses = {license}
-    
-        if not self.source then return end
-        ActivePlayers[self.source] = self
     end
     
+    ---@param coords vector3|vector4
+    ---@return boolean
     function self.setCoords(coords)
         if not self.source or not coords then return end
         local ped = GetPlayerPed(self.source)
         if not DoesEntityExist(ped) then return end
         SetEntityCoords(ped, coords.x, coords.y, coords.z)
+        if coords.w then
+            SetEntityHeading(ped, coords.w)
+        end
         return true
+    end
+
+    ---@param eventName string
+    ---@param ... any
+    ---@return boolean
+    function self.triggerEvent(eventName, ...)
+        if not self.source then return end
+        TriggerClientEvent(eventName, self.source, ...)
+        return true
+    end
+
+    ---@param reason string
+    function self.drop(reason)
+        if not self.source then return end
+        DropPlayer(self.source, reason)
+    end
+
+    -- Set the character as the players active character/currently playing character
+    function self.active()
+        local char = ActivePlayers[self.source]
+        if char and char.id == self.id then return true end
+        if char then char:unload() end
+        ActivePlayers[self.source] = self
+        TriggerEvent("ND:characterLoaded", self)
+        TriggerClientEvent("ND:characterLoaded", self.source, self)
+    end
+
+    ---@param name string
+    ---@param rank number
+    function self.addGroup(name, rank)
+        self.groups[name] = {
+
+        }
+    end
+
+    ---@param name string
+    function self.removeGroup(name)
+        self.groups[name] = nil
     end
 
     return self
@@ -133,6 +199,7 @@ function NDCore.newCharacter(src, info)
 
     local charInfo = createCharacterTable({
         source = src,
+        license = license,
         name = GetPlayerName(src) or "",
         firstname = info.firstname or "",
         lastname = info.lastname or "",
@@ -140,7 +207,7 @@ function NDCore.newCharacter(src, info)
         gender = info.gender or "",
         cash = info.cash or 0,
         bank = info.bank or 0,
-        license = license,
+        groups = info.groups or {},
         metadata = info.metadata or {},
         inventory = info.inventory or {},
     })
@@ -154,7 +221,7 @@ function NDCore.newCharacter(src, info)
         charInfo.gender,
         charInfo.cash,
         charInfo.bank,
-        charInfo.metadata
+        json.encode(charInfo.metadata)
     })
 
     return charInfo
@@ -167,6 +234,7 @@ function NDCore.fetchCharacter(id)
     local info = result[1]
     return createCharacterTable({
         id = id,
+        license = info.license,
         name = info.name,
         firstname = info.firstname,
         lastname = info.lastname,
@@ -174,9 +242,9 @@ function NDCore.fetchCharacter(id)
         gender = info.gender,
         cash = info.cash,
         bank = info.bank,
-        license = info.license,
+        groups = json.decode(info.groups),
         metadata = json.decode(info.metadata),
-        inventory = json.decode(i.inventory)
+        inventory = json.decode(info.inventory)
     })
 end
 
@@ -189,6 +257,7 @@ function NDCore.getPlayerCharacters(src)
         local info = result[i]
         characters[info.charid] = createCharacterTable({
             id = info.charid,
+            license = info.license,
             name = info.name,
             firstname = info.firstname,
             lastname = info.lastname,
@@ -196,7 +265,7 @@ function NDCore.getPlayerCharacters(src)
             gender = info.gender,
             cash = info.cash,
             bank = info.bank,
-            license = info.license,
+            groups = json.decode(info.groups),
             metadata = json.decode(info.metadata),
             inventory = json.decode(info.inventory),
         })
