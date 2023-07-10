@@ -179,10 +179,22 @@ local function createCharacterTable(info)
 
     ---@param name string
     ---@param rank number
+    ---@return boolean
     function self.addGroup(name, rank)
+        local groupInfo = Config.groups[name]
+        if not groupInfo return end
         self.groups[name] = {
-
+            label = groupInfo.label,
+            rankName = groupInfo.ranks[rank] or rank,
+            rank = rank
         }
+        return true
+    end
+
+    ---@param name string
+    ---@return table
+    function self.getGroup(name)
+        return self.groups[name]
     end
 
     ---@param name string
@@ -193,6 +205,9 @@ local function createCharacterTable(info)
     return self
 end
 
+---@param src number
+---@param info table
+---@return table
 function NDCore.newCharacter(src, info)
     local license = GetPlayerIdentifierByType(src, "license")
     if not license then return end
@@ -227,6 +242,8 @@ function NDCore.newCharacter(src, info)
     return charInfo
 end
 
+---@param id number
+---@return table
 function NDCore.fetchCharacter(id)
     local result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ?", {id})
     if not result then return end
@@ -248,6 +265,8 @@ function NDCore.fetchCharacter(id)
     })
 end
 
+---@param src number
+---@return table
 function NDCore.getPlayerCharacters(src)
     local characters = {}
     local result = MySQL.query.await("SELECT * FROM nd_characters WHERE license = ?", {GetPlayerIdentifierByType(src, "license")})
@@ -273,6 +292,9 @@ function NDCore.getPlayerCharacters(src)
     return characters
 end
 
+---@param src number
+---@param id number
+---@return table
 function NDCore.setActiveCharacter(src, id)
     local char = ActivePlayers[src]
     if char then char:unload() end

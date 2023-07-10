@@ -8,6 +8,7 @@ Config = {
     discordActionLink = GetConvar("discordActionLink", "https://discord.gg/Z9Mxu72zZ6"),
     discordActionText2 = GetConvar("core:discordActionText2", "STORE"),
     discordActionLink2 = GetConvar("core:discordActionLink2", "https://andyyy.tebex.io/category/fivem-scripts"),
+    groups = json.decode(GetConvar("core:groups")) or {}
 }
 
 local nd_core = exports["ND_Core"]
