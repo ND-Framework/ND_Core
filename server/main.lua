@@ -9,3 +9,8 @@ AddEventHandler("playerDropped", function()
 end)
 
 SetConvarServerInfo("ND_Core", GetResourceMetadata(GetCurrentResourceName(), "version", 0) or "invalid")
+
+local file = LoadResourceFile(GetCurrentResourceName(), "query.sql")
+if file then
+    MySQL.query(file)
+end
