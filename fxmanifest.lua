@@ -10,17 +10,17 @@ lua54 "yes"
 
 client_scripts {
     "client/main.lua",
+    "shared/functions.lua",
     "client/functions.lua",
     "client/events.lua",
 }
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
     "server/main.lua",
+    "shared/functions.lua",
     "server/player.lua",
     "server/functions.lua"
 }
-shared_scripts {
-    "init.lua"
-}
+shared_script "init.lua"
 
 dependency "oxmysql"
