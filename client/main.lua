@@ -28,8 +28,8 @@ CreateThread(function()
             sleep = 0
             BeginScaleformMovieMethodOnFrontendHeader("SET_HEADING_DETAILS")
             ScaleformMovieMethodAddParamPlayerNameString(("%s %s"):format(NDCore.player.firstname, NDCore.player.lastname))
-            PushScaleformMovieFunctionParameterString(("Cash: $%d"):format(NDCore.player.cash))
-            PushScaleformMovieFunctionParameterString(("Bank: $%d"):format(NDCore.player.bank))
+            ScaleformMovieMethodAddParamTextureNameString(("Cash: $%d"):format(NDCore.player.cash))
+            ScaleformMovieMethodAddParamTextureNameString(("Bank: $%d"):format(NDCore.player.bank))
             EndScaleformMovieMethod()
         elseif sleep == 0 then
             sleep = 500
