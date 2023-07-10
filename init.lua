@@ -11,7 +11,9 @@ Config = {
     groups = json.decode(GetConvar("core:groups")) or {},
     characterIdentifier = GetConvar("core:characterIdentifier", "license"),
     randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
-    disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1
+    disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
+    discordGuildId = GetConvar("core:discordGuildId"),
+    discordBotToken = GetConvar("core:discordBotToken")
 }
 
 local nd_core = exports["ND_Core"]
