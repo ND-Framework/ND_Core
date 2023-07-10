@@ -17,9 +17,3 @@ function NDCore.GetPlayersFromCoords(distance, coords)
     end
     return closePlayers
 end
-
-for name, func in pairs(NDCore) do
-    if type(func) == "function" then
-        exports(name, func)
-    end
-end

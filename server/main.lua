@@ -1,5 +1,19 @@
-NDCore = {}
 ActivePlayers = {}
+
+function NDCore.getPlayer(src)
+    return ActivePlayers[src]
+end
+
+function NDCore.getPlayers(metadata, data)
+    if not metadata or not data then return ActivePlayers end 
+    local players = {}
+    for src, info in pairs(ActivePlayers) do
+        if info.metadata[metadata] == data then
+            players[src] = info
+        end
+    end
+    return players
+end
 
 AddEventHandler("playerDropped", function()
     local src = source
