@@ -1,14 +1,21 @@
-ActivePlayers = {}
+-- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
-function NDCore.getPlayer(src)
-    return ActivePlayers[src]
+NDCore = {}
+NDCore.Players = {}
+NDCore.Functions = {}
+NDCore.Commands = {}
+NDCore.PlayersDiscordInfo = {}
+NDCore.Config = config
+
+function GetCoreObject()
+    return NDCore
 end
 
-AddEventHandler("playerDropped", function()
-    local src = source
-    local char = ActivePlayers[src]
-    if not char then return end
-    char:unload()
+isResourceStarted("ox_inventory", function(started)
+    if not started then return end
+    SetConvarReplicated("inventory:framework", "nd")
 end)
 
-SetConvarServerInfo("ND_Core", GetResourceMetadata(GetCurrentResourceName(), "version", 0) or "invalid")
+for _, roleid in pairs(config.adminRoles) do
+    ExecuteCommand("add_principal identifier.discord:" .. roleid .. " group.admin")
+end

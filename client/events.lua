@@ -4,29 +4,21 @@ end)
 
 -- updates the money on the client.
 RegisterNetEvent("ND:updateMoney", function(cash, bank)
-    NDCore.player.cash = cash
-    NDCore.player.bank = bank
+    NDCore.SelectedCharacter.cash = cash
+    NDCore.SelectedCharacter.bank = bank
 end)
 
 -- Sets main character.
 RegisterNetEvent("ND:setCharacter", function(character)
-    NDCore.player = character
+    NDCore.SelectedCharacter = character
 end)
 
 -- Update main character info.
 RegisterNetEvent("ND:updateCharacter", function(character)
-    NDCore.player = character
+    NDCore.SelectedCharacter = character
 end)
 
 -- Updates last lcoation.
 RegisterNetEvent("ND:updateLastLocation", function(location)
-    if not NDCore.player then return end
-    NDCore.player.lastLocation = location
-end)
-
--- Enable pvp for players.
-AddEventHandler("playerSpawned", function()
-    print("^0ND Framework support discord: ^5https://discord.gg/Z9Mxu72zZ6")
-    SetCanAttackFriendly(PlayerPedId(), true, false)
-    NetworkSetFriendlyFireOption(true)
+    NDCore.SelectedCharacter.lastLocation = location
 end)
