@@ -1,7 +1,11 @@
 local function createCharacterTable(info)
+    local playerInfo = PlayersInfo[info.source] or {}
+
     local self = {
         source = info.source,
         identifier = info.identifier,
+        identifiers = playerInfo.identifiers or {},
+        discord = playerInfo.discord or {}
         name = info.name,
         firstname = info.firstname,
         lastname = info.lastname,
@@ -182,7 +186,7 @@ local function createCharacterTable(info)
     ---@return boolean
     function self.addGroup(name, rank)
         local groupInfo = Config.groups[name]
-        if not groupInfo return end
+        if not groupInfo then return end
         self.groups[name] = {
             label = groupInfo.label,
             rankName = groupInfo.ranks[rank] or rank,
@@ -267,12 +271,11 @@ end
 
 ---@param src number
 ---@return table
-function NDCore.getPlayerCharacters(src)
+function NDCore.fetchAllCharacters(src)
     local characters = {}
     local result = MySQL.query.await("SELECT * FROM nd_characters WHERE identifier = ?", {GetPlayerIdentifierByType(src, Config.characterIdentifier)})
-    local amount = #result
 
-    for i=1, amount do
+    for i=1, #result do
         local info = result[i]
         characters[info.charid] = createCharacterTable({
             id = info.charid,
