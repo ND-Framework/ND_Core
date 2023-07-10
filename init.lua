@@ -9,7 +9,9 @@ Config = {
     discordActionText2 = GetConvar("core:discordActionText2", "STORE"),
     discordActionLink2 = GetConvar("core:discordActionLink2", "https://andyyy.tebex.io/category/fivem-scripts"),
     groups = json.decode(GetConvar("core:groups")) or {},
-    characterIdentifier = GetConvar("core:characterIdentifier", "license")
+    characterIdentifier = GetConvar("core:characterIdentifier", "license"),
+    randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
+    disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1
 }
 
 local nd_core = exports["ND_Core"]
