@@ -1,7 +1,7 @@
 local function createCharacterTable(info)
     local self = {
         source = info.source,
-        license = info.license,
+        identifier = info.identifier,
         name = info.name,
         firstname = info.firstname,
         lastname = info.lastname,
@@ -209,12 +209,12 @@ end
 ---@param info table
 ---@return table
 function NDCore.newCharacter(src, info)
-    local license = GetPlayerIdentifierByType(src, "license")
-    if not license then return end
+    local identifier = GetPlayerIdentifierByType(src, Config.characterIdentifier)
+    if not identifier then return end
 
     local charInfo = createCharacterTable({
         source = src,
-        license = license,
+        identifier = identifier,
         name = GetPlayerName(src) or "",
         firstname = info.firstname or "",
         lastname = info.lastname or "",
@@ -227,8 +227,8 @@ function NDCore.newCharacter(src, info)
         inventory = info.inventory or {},
     })
 
-    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (license, name, firstname, lastname, dob, gender, cash, bank, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {
-        license,
+    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {
+        identifier,
         charInfo.name,
         charInfo.firstname,
         charInfo.lastname,
@@ -251,7 +251,7 @@ function NDCore.fetchCharacter(id)
     local info = result[1]
     return createCharacterTable({
         id = id,
-        license = info.license,
+        identifier = info.identifier,
         name = info.name,
         firstname = info.firstname,
         lastname = info.lastname,
@@ -269,14 +269,14 @@ end
 ---@return table
 function NDCore.getPlayerCharacters(src)
     local characters = {}
-    local result = MySQL.query.await("SELECT * FROM nd_characters WHERE license = ?", {GetPlayerIdentifierByType(src, "license")})
+    local result = MySQL.query.await("SELECT * FROM nd_characters WHERE identifier = ?", {GetPlayerIdentifierByType(src, Config.characterIdentifier)})
     local amount = #result
 
     for i=1, amount do
         local info = result[i]
         characters[info.charid] = createCharacterTable({
             id = info.charid,
-            license = info.license,
+            identifier = info.identifier,
             name = info.name,
             firstname = info.firstname,
             lastname = info.lastname,
