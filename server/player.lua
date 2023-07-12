@@ -5,7 +5,7 @@ local function createCharacterTable(info)
         source = info.source,
         identifier = info.identifier,
         identifiers = playerInfo.identifiers or {},
-        discord = playerInfo.discord or {}
+        discord = playerInfo.discord or {},
         name = info.name,
         firstname = info.firstname,
         lastname = info.lastname,
@@ -162,6 +162,13 @@ local function createCharacterTable(info)
     function self.triggerEvent(eventName, ...)
         if not self.source then return end
         TriggerClientEvent(eventName, self.source, ...)
+        return true
+    end
+
+    
+    function self.notify(...)
+        if not self.source then return end
+        TriggerClientEvent("ox_lib:notify", self.source, ...)
         return true
     end
 
