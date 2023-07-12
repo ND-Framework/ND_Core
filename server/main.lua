@@ -1,18 +1,19 @@
 NDCore = {}
 ActivePlayers = {}
 PlayersInfo = {}
+local resourceName = GetCurrentResourceName()
 local tempPlayersInfo = {}
 local databaseFiles = {
     "database/characters.sql",
     "database/vehicles.sql"
 }
+local discordErrors = {
+    [400] = "Improper HTTP request",
+    [401] = "Discord bot token might be missing or incorrect",
+    [404] = "User might not be in the server",
+    [429] = "Discord bot rate limited"
+}
 
-AddEventHandler("playerDropped", function()
-    local src = source
-    local char = ActivePlayers[src]
-    if not char then return end
-    char:unload()
-end)
 Config = {
     serverName = GetConvar("core:serverName", "Unconfigured ND-Core Server"),
     discordInvite = GetConvar("core:discordInvite", "https://discord.gg/Z9Mxu72zZ6"),
@@ -32,13 +33,8 @@ Config = {
     groups = json.decode(GetConvar("core:groups", "[]"))
 }
 
-SetConvarServerInfo("ND_Core", GetResourceMetadata(GetCurrentResourceName(), "version", 0) or "invalid")
+SetConvarServerInfo("ND_Core", GetResourceMetadata(resourceName, "version", 0) or "invalid")
 SetConvarReplicated("inventory:framework", "nd")
-
-local file = LoadResourceFile(GetCurrentResourceName(), "query.sql")
-if file then
-    MySQL.query(file)
-end
 
 local function getIdentifierList(src)
     local list = {}
@@ -46,18 +42,12 @@ local function getIdentifierList(src)
         local identifier = GetPlayerIdentifier(src, i)
         if identifier then
             local colon = identifier:find(":")
-            list[identifierType] = identifier:sub(1, colon-1)
+            local identifierType = identifier:sub(1, colon-1)
+            list[identifierType] = identifier
         end
     end
     return list
 end
-
-local discordErrors = {
-    [400] = "Improper HTTP request",
-    [401] = "Discord bot token might be missing or incorrect",
-    [404] = "User might not be in the server",
-    [429] = "Discord bot rate limited"
-}
 
 local function getDiscordInfo(discordUserId)
     local done = false
@@ -66,7 +56,7 @@ local function getDiscordInfo(discordUserId)
     PerformHttpRequest(("https://discordapp.com/api/guilds/%s/members/%s"):format(Config.discordGuildId, discordUserId), function(errorCode, resultData, resultHeaders)
         if errorCode ~= 200 then
             done = true
-            return print(("Error %d: %s"):format(errorCode, discordErrors[errorCode]))
+            return print(("^3Warning: %d %s"):format(errorCode, discordErrors[errorCode]))
         end
 
         local result = json.decode(resultData)
@@ -104,7 +94,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
             Wait(0)
             return
         end
-        discordInfo = getDiscordInfo(discordIdentifier:gsub("discord:"))
+        discordInfo = getDiscordInfo(discordIdentifier:gsub("discord:", ""))
     end
 
     deferrals.update("Connecting...")
@@ -121,6 +111,16 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
         Wait(0)
     end
 end)
+
+AddEventHandler("playerDropped", function()
+    local src = source
+    local char = ActivePlayers[src]
+    if char then
+        char:unload()
+    end
+    PlayersInfo[src] = nil
+end)
+
 for i=1, #databaseFiles do
     local file = LoadResourceFile(resourceName, databaseFiles[i])
     if file then
