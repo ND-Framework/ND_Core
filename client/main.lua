@@ -16,6 +16,7 @@ Config = {
     groups = json.decode(GetConvar("core:groups", "[]"))
 }
 
+-- Discord rich presence.
 CreateThread(function()
     SetDiscordAppId(Config.discordAppId)
     SetDiscordRichPresenceAsset(Config.discordAsset)
@@ -35,6 +36,7 @@ CreateThread(function()
     end
 end)
 
+-- Pause menu information.
 CreateThread(function()
     AddTextEntry("FE_THDR_GTAO", Config.serverName)
     local sleep = 500
@@ -51,4 +53,16 @@ CreateThread(function()
             sleep = 500
         end
     end
+end)
+
+AddEventHandler("playerSpawned", function()
+    print("^0ND Framework support discord: ^5https://discord.gg/Z9Mxu72zZ6")
+    SetCanAttackFriendly(PlayerPedId(), true, false)
+    NetworkSetFriendlyFireOption(true)
+end)
+
+AddEventHandler("onResourceStart", function(resourceName)
+    if resourceName ~= GetCurrentResourceName() then return end
+    SetCanAttackFriendly(PlayerPedId(), true, false)
+    NetworkSetFriendlyFireOption(true)
 end)
