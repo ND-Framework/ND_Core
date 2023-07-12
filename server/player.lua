@@ -26,7 +26,8 @@ local function createCharacterTable(info)
         local amount = tonumber(amount)
         if not amount or account ~= "bank" and account ~= "cash" then return end
         self[account] -= amount
-        if self.source then
+        if ActivePlayers[self.source] then
+            self.triggerEvent("ND:updateMoney", self.cash, self.bank)
             TriggerEvent("ND:moneyChange", self.source, account, amount, "remove", reason)
         end
         return true
@@ -40,7 +41,8 @@ local function createCharacterTable(info)
         local amount = tonumber(amount)
         if not amount or account ~= "bank" and account ~= "cash" then return end
         self[account] += amount
-        if self.source then
+        if ActivePlayers[self.source] then
+            self.triggerEvent("ND:updateMoney", self.cash, self.bank)
             TriggerEvent("ND:moneyChange", self.source, account, amount, "add", reason)
         end
         return true
@@ -67,6 +69,7 @@ local function createCharacterTable(info)
     ---@return table
     function self.setMetadata(key, value)
         self.metadata[key] = value
+        self.triggerEvent("ND:updateCharacter", self)
         return self.metadata
     end
 
@@ -81,7 +84,7 @@ local function createCharacterTable(info)
     
     -- Unload and save character
     function self.unload()
-        if not self.source then return end
+        if not ActivePlayers[self.source] then return end
         local ped = GetPlayerPed(self.source)
         if ped then
             local coords = GetEntityCoords(ped)
@@ -138,9 +141,10 @@ local function createCharacterTable(info)
     
         if licenses then
             self.metadata.licenses[#licenses+1] = license
-            return
+        else
+            self.metadata.licenses = {license}
         end
-        self.metadata.licenses = {license}
+        self.triggerEvent("ND:updateCharacter", self)
     end
     
     ---@param coords vector3|vector4
@@ -164,7 +168,6 @@ local function createCharacterTable(info)
         TriggerClientEvent(eventName, self.source, ...)
         return true
     end
-
     
     function self.notify(...)
         if not self.source then return end
@@ -182,7 +185,7 @@ local function createCharacterTable(info)
     function self.active()
         local char = ActivePlayers[self.source]
         if char and char.id == self.id then return true end
-        if char then char:unload() end
+        if char then char.unload() end
         ActivePlayers[self.source] = self
         TriggerEvent("ND:characterLoaded", self)
         TriggerClientEvent("ND:characterLoaded", self.source, self)
@@ -199,6 +202,7 @@ local function createCharacterTable(info)
             rankName = groupInfo.ranks[rank] or rank,
             rank = rank
         }
+        self.triggerEvent("ND:updateCharacter", self)
         return true
     end
 
@@ -211,6 +215,7 @@ local function createCharacterTable(info)
     ---@param name string
     function self.removeGroup(name)
         self.groups[name] = nil
+        self.triggerEvent("ND:updateCharacter", self)
     end
 
     return self
@@ -307,7 +312,7 @@ end
 ---@return table
 function NDCore.setActiveCharacter(src, id)
     local char = ActivePlayers[src]
-    if char then char:unload() end
+    if char then char.unload() end
 
     local character = NDCore.fetchCharacter(id)
     character.source = src

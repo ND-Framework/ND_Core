@@ -116,7 +116,7 @@ AddEventHandler("playerDropped", function()
     local src = source
     local char = ActivePlayers[src]
     if char then
-        char:unload()
+        char.unload()
     end
     PlayersInfo[src] = nil
 end)

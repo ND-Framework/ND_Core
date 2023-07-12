@@ -44,14 +44,14 @@ function NDCore.transferVehicle(vehicleID, fromSource, toSource)
     if not playerOwnedVehicles[vehicleID] then return end
     local veh = NetworkGetEntityFromNetworkId(playerOwnedVehicles[vehicleID].netid)
     if not veh then
-        playerFrom:notify({
+        playerFrom.notify({
             title = "Ownership transfered",
             description = "Vehicle ownership of has been transfered.",
             type = "success",
             position = "bottom-right",
             duration = 4000
         })
-        playerTo:notify({
+        playerTo.notify({
             title = "Ownership received",
             description = "Received vehicle ownership.",
             type = "inform",
@@ -67,16 +67,16 @@ function NDCore.transferVehicle(vehicleID, fromSource, toSource)
         [playerTo.id] = true
     }
 
-    playerFrom:triggerEvent("ND_Vehicles:blip", playerOwnedVehicles[vehicleID].netid, false)
+    playerFrom.triggerEvent("ND_Vehicles:blip", playerOwnedVehicles[vehicleID].netid, false)
 
-    playerFrom:notify({
+    playerFrom.notify({
         title = "Ownership transfered",
         description = ("Vehicle ownership of %s has been transfered."):format(GetVehicleNumberPlateText(veh)),
         type = "success",
         position = "bottom-right",
         duration = 4000
     })
-    playerTo:notify({
+    playerTo.notify({
         title = "Ownership received",
         description = ("Received vehicle ownership of %s."):format(GetVehicleNumberPlateText(veh)),
         type = "inform",
@@ -91,7 +91,7 @@ function NDCore.setVehicleOwned(src, properties, stored)
     properties.plate = plate
     local id = MySQL.insert.await("INSERT INTO vehicles (owner, plate, properties, stored) VALUES (?, ?, ?, ?)", {player.id, properties.plate, json.encode(properties), stored and 1 or 0})
     local vehicles = getVehicles(player.id)
-    player:triggerEvent("ND_Vehicles:returnVehicles", vehicles)
+    player.triggerEvent("ND_Vehicles:returnVehicles", vehicles)
     return id
 end
 
@@ -109,14 +109,14 @@ function NDCore.giveVehicleKeys(vehicle, source, target)
     local targetPlayer = NDCore.getPlayer(target)
     state.keys[targetPlayer.id] = true
 
-    player:notify({
+    player.notify({
         title = "Keys shared",
         description = ("You've shared vehicle keys to %s."):format(GetVehicleNumberPlateText(vehicle)),
         type = "success",
         position = "bottom-right",
         duration = 4000
     })
-    targetPlayer:notify({
+    targetPlayer.notify({
         title = "Keys received",
         description = ("Received vehicle keys to %s."):format(GetVehicleNumberPlateText(vehicle)),
         type = "inform",
@@ -126,7 +126,7 @@ function NDCore.giveVehicleKeys(vehicle, source, target)
     return true
 end
 
-function NDCore.giveVehicleAccess(source, vehicle)
+function NDCore.giveVehicleAccess(source, vehicle, access)
     local state = Entity(vehicle).state
     if not state then return end
 
@@ -135,15 +135,15 @@ function NDCore.giveVehicleAccess(source, vehicle)
 
     if not state.keys then
         state.keys = {
-            [player.id] = true
+            [player.id] = access
         }
     else
         local keys = state.keys
-        keys[player.id] = true
+        keys[player.id] = access
         state.keys = keys
     end
 
-    player:triggerEvent("ND_Vehicles:setOwnedIfNot", NetworkGetNetworkIdFromEntity(vehicle))
+    player.triggerEvent("ND_Vehicles:setOwnedIfNot", NetworkGetNetworkIdFromEntity(vehicle))
 end
 
 local function isParkingAvailable(source, coords)
@@ -175,7 +175,7 @@ function NDCore.spawnOwnedVehicle(source, vehicleID, coords)
     if type(coords) == "table" then
         spawnCoords = isParkingAvailable(source, coords)
         if not spawnCoords then
-            player:notify({
+            player.notify({
                 title = "Can't bring out vehicle",
                 description = "No parking spot available for your vehicle. It's still in your garage.",
                 type = "error",
@@ -190,7 +190,7 @@ function NDCore.spawnOwnedVehicle(source, vehicleID, coords)
     for _, vehicle in pairs(vehicles) do
         if vehicle.owner == player.id and vehicle.id == vehicleID then
             MySQL.query.await("UPDATE vehicles SET stored = ? WHERE id = ?", {0, vehicleID})
-            player:triggerEvent("ND_VehicleSystem:returnVehicles", getVehicles(player.id))
+            player.triggerEvent("ND_VehicleSystem:returnVehicles", getVehicles(player.id))
 
             local veh = CreateVehicleServerSetter(vehicle.properties.model, getVehicleType(vehicle.properties.model), spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.w)
             while not DoesEntityExist(veh) do Wait(0) end
@@ -203,9 +203,19 @@ function NDCore.spawnOwnedVehicle(source, vehicleID, coords)
             state.owner = vehicle.owner
             state.id = vehicle.id
             state.props = vehicle.properties
-            state.keys = {
-                [player.id] = true
-            }
+
+            if Config.useInventoryForKeys then
+                exports.ox_inventory:AddItem(source, "keys", 1, {
+                    vehOwner = vehicle.owner,
+                    vehId = vehicle.id,
+                    vehPlate = vehicle.properties and vehicle.properties.plate,
+                    vehModel = vehicle.properties and vehicle.properties.model
+                })
+            else
+                state.keys = {
+                    [player.id] = true
+                }
+            end
 
             return true
         end
@@ -222,7 +232,7 @@ function NDCore.returnVehicleToGarage(source, veh, properties)
     for _, vehicle in pairs(vehicles) do
         if vehicle.owner == player.id and vehicle.id == vehID then
             MySQL.query.await("UPDATE vehicles SET properties = ?, stored = ? WHERE id = ?", {json.encode(properties), 1, vehID})
-            player:triggerEvent("ND_Vehicles:returnVehicles", getVehicles(player.id))
+            player.triggerEvent("ND_Vehicles:returnVehicles", getVehicles(player.id))
             DeleteEntity(veh)
             return true
         end
@@ -261,10 +271,6 @@ if Config.useInventoryForKeys then
         if not owner or owner ~= player.id then return end
 
         local props = state.props
-        local keys = state.keys
-        keys[player.id] = true
-        state.keys = keys
-
         exports.ox_inventory:AddItem(source, "keys", 1, {
             vehOwner = owner,
             vehId = state.id,
@@ -285,6 +291,6 @@ else
             if veh == 0 then return end
         end
         
-        giveKeys(veh, src, target)
+        NDCore.giveVehicleKeys(veh, src, target)
     end, false)
 end
