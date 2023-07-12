@@ -17,12 +17,10 @@ end)
 
 function NDCore.isResourceStarted(resourceName, cb)
     local started = GetResourceState(resourceName) == "started"
-    startedResources[resourceName] = started
-
     if cb then
+        startedResources[resourceName] = started
         callbacks[resourceName] = cb
         cb(started)
     end
-    
     return started
 end
