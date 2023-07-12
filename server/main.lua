@@ -2,6 +2,10 @@ NDCore = {}
 ActivePlayers = {}
 PlayersInfo = {}
 local tempPlayersInfo = {}
+local databaseFiles = {
+    "database/characters.sql",
+    "database/vehicles.sql"
+}
 
 AddEventHandler("playerDropped", function()
     local src = source
@@ -99,3 +103,9 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
         Wait(0)
     end
 end)
+for i=1, #databaseFiles do
+    local file = LoadResourceFile(resourceName, databaseFiles[i])
+    if file then
+        MySQL.query(file)
+    end
+end
