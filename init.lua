@@ -1,21 +1,3 @@
-Config = {
-    serverName = GetConvar("core:serverName", "Unconfigured ND-Core Server"),
-    discordInvite = GetConvar("core:discordInvite", "https://discord.gg/Z9Mxu72zZ6"),
-    discordAppId = GetConvar("core:discordAppId", "858146067018416128"),
-    discordAsset = GetConvar("core:discordAsset", "andyyy"),
-    discordAssetSmall = GetConvar("core:discordAssetSmall", "andyyy"),
-    discordActionText = GetConvar("core:discordActionText", "DISCORD"),
-    discordActionLink = GetConvar("discordActionLink", "https://discord.gg/Z9Mxu72zZ6"),
-    discordActionText2 = GetConvar("core:discordActionText2", "STORE"),
-    discordActionLink2 = GetConvar("core:discordActionLink2", "https://andyyy.tebex.io/category/fivem-scripts"),
-    groups = json.decode(GetConvar("core:groups")) or {},
-    characterIdentifier = GetConvar("core:characterIdentifier", "license"),
-    randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
-    disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
-    discordGuildId = GetConvar("core:discordGuildId"),
-    discordBotToken = GetConvar("core:discordBotToken")
-}
-
 local nd_core = exports["ND_Core"]
 
 NDCore = setmetatable({}, {
