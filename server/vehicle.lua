@@ -1,7 +1,7 @@
 local playerOwnedVehicles = {}
 
 local function isPlateAvailable(plate)
-    return not MySQL.scalar.await("SELECT 1 FROM vehicles WHERE plate = ?", {plate})
+    return not MySQL.scalar.await("SELECT 1 FROM nd_vehicles WHERE plate = ?", {plate})
 end
 
 local function generatePlate()
@@ -21,7 +21,7 @@ local function generatePlateWait()
 end
 
 local function getVehicles(characterId)
-    local result = MySQL.query.await("SELECT * FROM vehicles WHERE owner = ?", {characterId})
+    local result = MySQL.query.await("SELECT * FROM nd_vehicles WHERE owner = ?", {characterId})
     if not result then return {} end
     local vehicles = {}
     for _, vehicle in pairs(result) do
@@ -89,7 +89,7 @@ function NDCore.setVehicleOwned(src, properties, stored)
     local player = NDCore.getPlayer(src)
     local plate = generatePlateWait()
     properties.plate = plate
-    local id = MySQL.insert.await("INSERT INTO vehicles (owner, plate, properties, stored) VALUES (?, ?, ?, ?)", {player.id, properties.plate, json.encode(properties), stored and 1 or 0})
+    local id = MySQL.insert.await("INSERT INTO nd_vehicles (owner, plate, properties, stored) VALUES (?, ?, ?, ?)", {player.id, properties.plate, json.encode(properties), stored and 1 or 0})
     local vehicles = getVehicles(player.id)
     player.triggerEvent("ND_Vehicles:returnVehicles", vehicles)
     return id
@@ -146,63 +146,37 @@ function NDCore.giveVehicleAccess(source, vehicle, access)
     player.triggerEvent("ND_Vehicles:setOwnedIfNot", NetworkGetNetworkIdFromEntity(vehicle))
 end
 
-local function isParkingAvailable(source, coords)
-    local tries = 1
-    while tries < #coords do
-        Wait(300)
-        local coord = coords[math.random(1, #coords)]
-        local available = lib.callback.await("ND_Vehicles:getParkedVehicle", source, vector3(coord.x, coord.y, coord.z))
-        if available then
-            return coord
-        end
-        tries += 1
-    end
-    return false
-end
-
 local function getVehicleType(model)
-    local tempVehicle = CreateVehicle(model, 0, 0, 0, 0, false, false)
+    local tempVehicle = CreateVehicle(model, 0, 0, 0, 0, true, true)
     while not DoesEntityExist(tempVehicle) do Wait(0) end
     local entityType = GetVehicleType(tempVehicle)
     DeleteEntity(tempVehicle)
     return entityType
 end
 
-function NDCore.spawnOwnedVehicle(source, vehicleID, coords)
+function NDCore.spawnOwnedVehicle(source, vehicleID, coords, heading)
     local player = NDCore.getPlayer(source)
-    local spawnCoords = coords
-
-    if type(coords) == "table" then
-        spawnCoords = isParkingAvailable(source, coords)
-        if not spawnCoords then
-            player.notify({
-                title = "Can't bring out vehicle",
-                description = "No parking spot available for your vehicle. It's still in your garage.",
-                type = "error",
-                position = "bottom",
-                duration = 4000
-            })
-            return
-        end
-    end
-
     local vehicles = getVehicles(player.id)
     for _, vehicle in pairs(vehicles) do
-        if vehicle.owner == player.id and vehicle.id == vehicleID then
-            MySQL.query.await("UPDATE vehicles SET stored = ? WHERE id = ?", {0, vehicleID})
-            player.triggerEvent("ND_VehicleSystem:returnVehicles", getVehicles(player.id))
+        if vehicle.id == vehicleID and vehicle.owner == player.id then
+            MySQL.query.await("UPDATE nd_vehicles SET stored = ? WHERE id = ?", {0, vehicleID})
+            vehicle.available = false
+            player.triggerEvent("ND_Vehicles:returnVehicles", vehicles)
 
-            local veh = CreateVehicleServerSetter(vehicle.properties.model, getVehicleType(vehicle.properties.model), spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.w)
+            local model = vehicle.properties.model
+            local veh = CreateVehicleServerSetter(model, getVehicleType(model), coords.x, coords.y, coords.z, coords.w or heading)
             while not DoesEntityExist(veh) do Wait(0) end
 
             playerOwnedVehicles[vehicle.id] = {
-                netid = NetworkGetNetworkIdFromEntity(veh)
+                netid = NetworkGetNetworkIdFromEntity(veh),
+                entity = veh
             }
 
             local state = Entity(veh).state
             state.owner = vehicle.owner
             state.id = vehicle.id
             state.props = vehicle.properties
+            state.locked = true
 
             if Config.useInventoryForKeys then
                 exports.ox_inventory:AddItem(source, "keys", 1, {
@@ -231,7 +205,7 @@ function NDCore.returnVehicleToGarage(source, veh, properties)
     
     for _, vehicle in pairs(vehicles) do
         if vehicle.owner == player.id and vehicle.id == vehID then
-            MySQL.query.await("UPDATE vehicles SET properties = ?, stored = ? WHERE id = ?", {json.encode(properties), 1, vehID})
+            MySQL.query.await("UPDATE nd_vehicles SET properties = ?, stored = ? WHERE id = ?", {json.encode(properties), 1, vehID})
             player.triggerEvent("ND_Vehicles:returnVehicles", getVehicles(player.id))
             DeleteEntity(veh)
             return true
@@ -248,7 +222,7 @@ function NDCore.saveVehicleProperties(source, veh, properties)
     
     for _, vehicle in pairs(vehicles) do
         if vehicle.owner == player.id and vehicle.id == vehID then
-            MySQL.query.await("UPDATE vehicles SET properties = ? WHERE id = ?", {json.encode(properties), vehID})
+            MySQL.query.await("UPDATE nd_vehicles SET properties = ? WHERE id = ?", {json.encode(properties), vehID})
             return true
         end
     end
@@ -261,6 +235,73 @@ RegisterNetEvent("ND_Vehicles:syncAlarm", function(netid, success, action)
 end)
 
 if Config.useInventoryForKeys then
+    local function toggleVehicleLock(id, veh, nearby)
+        local player = NDCore.getPlayer(id)
+        if nearby then
+            local state = Entity(veh).state
+            local locked = not state.locked
+            state.locked = locked
+            if locked then
+                player.notify({
+                    title = "LOCKED",
+                    description = "Your vehicle has now been locked.",
+                    type = "success",
+                    position = "bottom-right",
+                    duration = 3000
+                })
+                return
+            end
+            player.notify({
+                title = "UNLOCKED",
+                description = "Your vehicle has now been unlocked.",
+                type = "inform",
+                position = "bottom-right",
+                duration = 3000
+            })
+            return
+        end
+        player.notify({
+            title = "No signal",
+            description = "Vehicle to far away.",
+            type = "error",
+            position = "bottom-right",
+            duration = 3000
+        })
+    end
+
+
+    exports("keys", function(event, item, inventory, slot, data)
+        if event ~= "usingItem" then return end
+        local metadata
+        for i=1, #inventory.items do
+            local item = inventory.items[i]
+            if item.slot == slot then
+                metadata = item.metadata
+                break
+            end
+        end
+
+        if not metadata then return false end
+        local veh = playerOwnedVehicles[metadata.vehId] and playerOwnedVehicles[metadata.vehId].entity
+        if veh and DoesEntityExist(veh) then
+            local ped = GetPlayerPed(inventory.id)
+            local pedCoords = GetEntityCoords(ped)
+            local vehCoords = GetEntityCoords(veh)
+            if not pedCoords or not vehCoords then return end
+            toggleVehicleLock(inventory.id, veh, #(pedCoords-vehCoords) < 25.0)
+            return false
+        end
+
+        lib.callback("ND_Vehicles:getNearbyVehicleById", inventory.id, function(netId)
+            if not netId then return end
+            local veh = NetworkGetEntityFromNetworkId(netId)
+            if veh then
+                toggleVehicleLock(inventory.id, veh, true)
+            end
+        end, metadata.vehId)
+        return false
+    end)
+    
     RegisterCommand("getkeys", function(source, args, rawCommand)
         local veh = GetVehiclePedIsIn(GetPlayerPed(source))
         if not veh or veh == 0 then return end
