@@ -2,6 +2,7 @@ local function createCharacterTable(info)
     local playerInfo = PlayersInfo[info.source] or {}
 
     local self = {
+        id = info.id,
         source = info.source,
         identifier = info.identifier,
         identifiers = playerInfo.identifiers or {},
@@ -236,7 +237,7 @@ function NDCore.newCharacter(src, info)
     local identifier = GetPlayerIdentifierByType(src, Config.characterIdentifier)
     if not identifier then return end
 
-    local charInfo = createCharacterTable({
+    local charInfo = {
         source = src,
         identifier = identifier,
         name = GetPlayerName(src) or "",
@@ -249,7 +250,7 @@ function NDCore.newCharacter(src, info)
         groups = info.groups or {},
         metadata = info.metadata or {},
         inventory = info.inventory or {},
-    })
+    }
 
     charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, groups, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
         identifier,
@@ -264,7 +265,7 @@ function NDCore.newCharacter(src, info)
         json.encode(charInfo.metadata)
     })
 
-    return charInfo
+    return createCharacterTable(charInfo)
 end
 
 ---@param id number
@@ -275,7 +276,7 @@ function NDCore.fetchCharacter(id)
     
     local info = result[1]
     return createCharacterTable({
-        id = id,
+        id = info.charid,
         identifier = info.identifier,
         name = info.name,
         firstname = info.firstname,
@@ -321,15 +322,10 @@ end
 ---@param id number
 ---@return table
 function NDCore.setActiveCharacter(src, id)
-    local char = ActivePlayers[src]
-    if char then char.unload() end
-
+    if not src then return end
     local character = NDCore.fetchCharacter(id)
     character.source = src
     character.name = GetPlayerName(src)
-    ActivePlayers[src] = character
-
-    TriggerEvent("ND:characterLoaded", character)
-    TriggerClientEvent("ND:characterLoaded", src, character)
+    character.active()
     return ActivePlayers[src]
 end
