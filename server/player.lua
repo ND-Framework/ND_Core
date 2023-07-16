@@ -63,8 +63,15 @@ local function createCharacterTable(info)
         if not amount or self.bank < amount or amount <= 0 then return end
         return self.deductMoney("bank", amount, "Withdraw") and self.addMoney("cash", amount, "Withdraw")
     end
+
+    ---@param key any
+    ---@param value any
+    function self.setData(key, value)
+        self[key] = value
+        self.triggerEvent("ND:updateCharacter", self)
+    end
     
-    ---@param key string
+    ---@param key any
     ---@param value any
     ---@return table
     function self.setMetadata(key, value)
@@ -188,7 +195,8 @@ local function createCharacterTable(info)
         if char then char.unload() end
         ActivePlayers[self.source] = self
         TriggerEvent("ND:characterLoaded", self)
-        TriggerClientEvent("ND:characterLoaded", self.source, self)
+        self.triggerEvent("ND:characterLoaded", self)
+        return true
     end
 
     ---@param name string
@@ -243,7 +251,7 @@ function NDCore.newCharacter(src, info)
         inventory = info.inventory or {},
     })
 
-    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {
+    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, groups, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
         identifier,
         charInfo.name,
         charInfo.firstname,
@@ -252,6 +260,7 @@ function NDCore.newCharacter(src, info)
         charInfo.gender,
         charInfo.cash,
         charInfo.bank,
+        json.encode(charInfo.groups),
         json.encode(charInfo.metadata)
     })
 
@@ -290,6 +299,7 @@ function NDCore.fetchAllCharacters(src)
     for i=1, #result do
         local info = result[i]
         characters[info.charid] = createCharacterTable({
+            source = src,
             id = info.charid,
             identifier = info.identifier,
             name = info.name,
