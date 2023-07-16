@@ -3,10 +3,6 @@ ActivePlayers = {}
 PlayersInfo = {}
 local resourceName = GetCurrentResourceName()
 local tempPlayersInfo = {}
-local databaseFiles = {
-    "database/characters.sql",
-    "database/vehicles.sql"
-}
 local discordErrors = {
     [400] = "Improper HTTP request",
     [401] = "Discord bot token might be missing or incorrect",
@@ -121,9 +117,9 @@ AddEventHandler("playerDropped", function()
     PlayersInfo[src] = nil
 end)
 
-for i=1, #databaseFiles do
-    local file = LoadResourceFile(resourceName, databaseFiles[i])
-    if file then
-        MySQL.query(file)
-    end
-end
+SetTimeout(500, function()
+    NDCore.loadSQL({
+        "database/characters.sql",
+        "database/vehicles.sql"
+    }, resourceName)
+end)

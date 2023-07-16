@@ -22,6 +22,28 @@ function NDCore.getPlayers(key, value)
     return players
 end
 
+---@param fileLocation string|tabale
+---@return boolean
+function NDCore.loadSQL(fileLocation, resource)
+    local resourceName = resource or GetInvokingResource() or  GetCurrentResourceName()
+
+    if type(fileLocation) == "string" then
+        local file = LoadResourceFile(resourceName, fileLocation)
+        if not file then return end
+        MySQL.query(file)
+        return true
+    end
+    
+    for i=1, #fileLocation do
+        local file = LoadResourceFile(resourceName, fileLocation[i])
+        if file then
+            MySQL.query(file)
+            Wait(100)
+        end
+    end
+    return true
+end
+
 for name, func in pairs(NDCore) do
     if type(func) == "function" then
         exports(name, func)
