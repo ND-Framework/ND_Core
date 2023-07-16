@@ -17,13 +17,11 @@ end
 
 -- Sets main character.
 RegisterNetEvent("ND:characterLoaded", function(character)
-    if not NDCore.player then return end
     NDCore.player = removeCharacterFunctions(character)
 end)
 
 -- Update main character info.
 RegisterNetEvent("ND:updateCharacter", function(character)
-    if not NDCore.player then return end
     NDCore.player = removeCharacterFunctions(character)
 end)
 

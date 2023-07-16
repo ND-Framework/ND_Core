@@ -26,7 +26,7 @@ CreateThread(function()
     local presenceText = ("Playing: %s"):format(Config.serverName)
     while true do
         if NDCore.player then
-            local presence = ("Playing: %s as % %"):format(Config.serverName, NDCore.player.firstname, NDCore.player.lastname)
+            local presence = ("Playing: %s as %s %s"):format(Config.serverName, NDCore.player.firstname, NDCore.player.lastname)
             local presenceTextSmall = ("Playing as: %s %s"):format(NDCore.player.firstname, NDCore.player.lastname)
             SetRichPresence(presence)
             SetDiscordRichPresenceAssetText(presenceText)
