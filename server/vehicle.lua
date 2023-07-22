@@ -340,3 +340,10 @@ else
         NDCore.giveVehicleKeys(veh, src, target)
     end, false)
 end
+RegisterNetEvent("entityCreated", function(entity)
+    if GetEntityType(entity) ~= 2 then return end
+    local state = Entity(entity).state
+    if state.owner or math.random(1, 100) <= Config.randomUnlockedVehicleChance then return end
+    if state.locked ~= nil then return end
+    state.locked = true
+end)
