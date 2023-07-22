@@ -65,18 +65,30 @@ local function createCharacterTable(info)
         return self.deductMoney("bank", amount, "Withdraw") and self.addMoney("cash", amount, "Withdraw")
     end
 
-    ---@param key any
+    ---@param key string|table
     ---@param value any
     function self.setData(key, value)
-        self[key] = value
+        if type(key) == "table" then
+            for k, v in pairs(key) do
+                self[k] = v
+            end
+        else
+            self[key] = value
+        end
         self.triggerEvent("ND:updateCharacter", self)
     end
     
-    ---@param key any
+    ---@param key string|table
     ---@param value any
     ---@return table
     function self.setMetadata(key, value)
-        self.metadata[key] = value
+        if type(key) == "table" then
+            for k, v in pairs(key) do
+                self.metadata[k] = v
+            end
+        else
+            self.metadata[key] = value
+        end
         self.triggerEvent("ND:updateCharacter", self)
         return self.metadata
     end
@@ -202,6 +214,7 @@ local function createCharacterTable(info)
 
     ---@param name string
     ---@param rank number
+    ---@param isJob boolean
     ---@return boolean
     function self.addGroup(name, rank, isJob)
         local groupInfo = Config.groups[name]
