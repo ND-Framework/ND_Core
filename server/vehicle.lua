@@ -156,6 +156,7 @@ end
 
 function NDCore.spawnOwnedVehicle(source, vehicleID, coords, heading)
     local player = NDCore.getPlayer(source)
+    if not player then return end
     local vehicles = getVehicles(player.id)
     for _, vehicle in pairs(vehicles) do
         if vehicle.id == vehicleID and vehicle.owner == player.id then
@@ -178,13 +179,15 @@ function NDCore.spawnOwnedVehicle(source, vehicleID, coords, heading)
             state.props = vehicle.properties
             state.locked = true
 
-            if Config.useInventoryForKeys then
-                exports.ox_inventory:AddItem(source, "keys", 1, {
-                    vehOwner = vehicle.owner,
-                    vehId = vehicle.id,
-                    vehPlate = vehicle.properties and vehicle.properties.plate,
-                    vehModel = vehicle.properties and vehicle.properties.model
-                })
+            if GetResourceState("ox_inventory") == "started" and Config.useInventoryForKeys then
+                if exports.ox_inventory:GetItem(source, "keys", {vehId = vehicle.id}, true) == 0 then
+                    exports.ox_inventory:AddItem(source, "keys", 1, {
+                        vehOwner = vehicle.owner,
+                        vehId = vehicle.id,
+                        vehPlate = vehicle.properties and vehicle.properties.plate,
+                        vehModel = vehicle.properties and lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, vehicle.properties.model) or ""
+                    })
+                end
             else
                 state.keys = {
                     [player.id] = true
@@ -303,6 +306,7 @@ if Config.useInventoryForKeys then
     end)
     
     RegisterCommand("getkeys", function(source, args, rawCommand)
+        if GetResourceState("ox_inventory") ~= "started" then return end
         local veh = GetVehiclePedIsIn(GetPlayerPed(source))
         if not veh or veh == 0 then return end
 
@@ -316,7 +320,7 @@ if Config.useInventoryForKeys then
             vehOwner = owner,
             vehId = state.id,
             vehPlate = props.plate,
-            vehModel = props.model
+            vehModel = lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, props.model)
         })
     end, false)
 else
