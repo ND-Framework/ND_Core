@@ -22,6 +22,12 @@ function NDCore.getPlayers(key, value)
     return players
 end
 
+---@param source number
+---@return table
+function NDCore.getPlayerServerInfo(source)
+    return PlayersInfo[source]
+end
+
 ---@param fileLocation string|tabale
 ---@return boolean
 function NDCore.loadSQL(fileLocation, resource)
