@@ -74,6 +74,9 @@ end)
 local function playKeyFob(veh)
     local keyFob
     local ped = cache.ped
+    local coords = GetEntityCoords(ped)
+    if #(coords-GetEntityCoords(veh)) > 25.0 then return end
+
     if GetVehiclePedIsIn(ped) == 0 then
         ClearPedTasks(ped)
         lib.requestAnimDict("anim@mp_player_intmenu@key_fob@")
@@ -94,13 +97,13 @@ local function playKeyFob(veh)
     return keyFob and DeleteEntity(keyFob)
 end
 
+RegisterNetEvent("ND_Vehicles:keyFob", function(vehicleNetId)
+    playKeyFob(NetToVeh(vehicleNetId))
+end)
+
 AddStateBagChangeHandler("locked", nil, function(bagName, key, value, reserved, replicated)
     local entity = GetEntityFromStateBagName(bagName)
     if entity == 0 then return end
-    
-    CreateThread(function()
-        playKeyFob(entity)
-    end)
 
     if value then
         SetVehicleDoorsLocked(entity, 4)
@@ -127,4 +130,10 @@ lib.callback.register("ND_Vehicles:getNearbyVehicleById", function(vehId)
             return VehToNet(veh)
         end
     end
+end)
+
+lib.callback.register("ND_Vehicles:getVehicleModelMakeLabel", function(model)
+    local make = GetLabelText(GetMakeNameFromVehicleModel(model))
+    local name = GetLabelText(GetDisplayNameFromVehicleModel(model))
+    return ("%s %s"):format(make, name)
 end)

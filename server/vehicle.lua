@@ -244,6 +244,7 @@ if Config.useInventoryForKeys then
             local state = Entity(veh).state
             local locked = not state.locked
             state.locked = locked
+            player.triggerEvent("ND_Vehicles:keyFob", NetworkGetNetworkIdFromEntity(veh))
             if locked then
                 player.notify({
                     title = "LOCKED",
