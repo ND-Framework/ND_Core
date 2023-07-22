@@ -101,18 +101,26 @@ RegisterNetEvent("ND_Vehicles:keyFob", function(vehicleNetId)
     playKeyFob(NetToVeh(vehicleNetId))
 end)
 
+local dontLock = {
+    [8] = true, -- Motorcycles
+    [13] = true, -- Cycles
+    [14] = true -- boats
+}
+
 AddStateBagChangeHandler("locked", nil, function(bagName, key, value, reserved, replicated)
     local entity = GetEntityFromStateBagName(bagName)
     if entity == 0 then return end
+    if dontLock[GetVehicleClass(entity)] then return end
 
     if value then
-        SetVehicleDoorsLocked(entity, 4)
+        -- SetVehicleDoorsLockedForAllPlayers(entity, true)
         return SetVehicleDoorsLocked(entity, 2)
     end
 
     CreateThread(function()
-        while GetVehiclePedIsEntering(cache.ped) ~= 0 do Wait(10) end
-        SetVehicleDoorsLocked(entity, 1)
+        while GetVehiclePedIsEntering(cache.ped) == entity do Wait(10) end
+        -- SetVehicleDoorsLockedForAllPlayers(entity, false)
+        SetVehicleDoorsLocked(entity, 0)
     end)
 end)
 
