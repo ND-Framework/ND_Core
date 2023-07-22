@@ -137,3 +137,11 @@ lib.callback.register("ND_Vehicles:getVehicleModelMakeLabel", function(model)
     local name = GetLabelText(GetDisplayNameFromVehicleModel(model))
     return ("%s %s"):format(make, name)
 end)
+
+SetTimeout(1000, function()
+    if GetResourceState("ox_inventory") ~= "started" or not Config.useInventoryForKeys then return end
+    exports.ox_inventory:displayMetadata({
+        vehPlate = "Plate",
+        vehModel = "Model"
+    })
+end)
