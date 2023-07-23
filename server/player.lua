@@ -306,12 +306,18 @@ end
 
 ---@param id number
 ---@return table
-function NDCore.fetchCharacter(id)
-    local result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ?", {id})
+function NDCore.fetchCharacter(id, src)
+    local result
+    if src then
+        result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ? and identifier = ?", {id, GetPlayerIdentifierByType(src, Config.characterIdentifier)})
+    else
+        result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ?", {id})
+    end
+
     if not result then return end
-    
     local info = result[1]
     return createCharacterTable({
+        source = src,
         id = info.charid,
         identifier = info.identifier,
         name = info.name,
@@ -359,8 +365,7 @@ end
 ---@return table
 function NDCore.setActiveCharacter(src, id)
     if not src then return end
-    local character = NDCore.fetchCharacter(id)
-    character.source = src
+    local character = NDCore.fetchCharacter(id, src)
     character.name = GetPlayerName(src)
     character.active()
     return ActivePlayers[src]
