@@ -74,6 +74,27 @@ AddEventHandler("playerJoining", function(oldId)
     tempPlayersInfo[oldId] = nil
 end)
 
+local function checkDiscordIdentifier(identifiers)
+    if not Config.discordBotToken or not Config.discordGuildId then return end
+
+    local discordIdentifier = identifiers["discord"]
+    if not discordIdentifier then return end
+
+    return getDiscordInfo(discordIdentifier:gsub("discord:", ""))
+end
+
+AddEventHandler("onResourceStart", function(name)
+    if name ~= resourceName or not Config.discordBotToken or not Config.discordGuildId then return end
+    for _, playerId in ipairs(GetPlayers()) do
+        local src = tonumber(playerId)
+        local identifiers = getIdentifierList(src)
+        PlayersInfo[src] = {
+            identifiers = identifiers,
+            discord = checkDiscordIdentifier(identifiers)
+        }
+    end
+end)
+
 AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
     local tempSrc = source
     local identifiers = getIdentifierList(tempSrc)
@@ -83,14 +104,12 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
     deferrals.defer()
     Wait(0)
 
-    if mainIdentifier and Config.discordBotToken and Config.discordGuildId then
-        local discordIdentifier = identifiers["discord"]
-        if not discordIdentifier then
+    if mainIdentifier then        
+        discordInfo = checkDiscordIdentifier(identifiers)
+        if not discordInfo then
             deferrals.done(("Your discord was not found, join our discord here: %s."):format(Config.discordInvite))
             Wait(0)
-            return
         end
-        discordInfo = getDiscordInfo(discordIdentifier:gsub("discord:", ""))
     end
 
     deferrals.update("Connecting...")
