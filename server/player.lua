@@ -217,17 +217,19 @@ local function createCharacterTable(info)
     ---@param isJob boolean
     ---@return boolean
     function self.addGroup(name, rank, isJob)
+        local groupRank = tonumber(rank) or 1
         local groupInfo = Config.groups[name]
         if not groupInfo then return end
         if isJob then
+            self.job = name
             for _, group in pairs(self.groups) do
                 group.isJob = nil
             end
         end
         self.groups[name] = {
             label = groupInfo.label,
-            rankName = groupInfo.ranks[rank] or rank,
-            rank = rank,
+            rankName = groupInfo.ranks[groupRank] or groupRank,
+            rank = groupRank,
             isJob = isJob
         }
         self.triggerEvent("ND:updateCharacter", self)
@@ -242,6 +244,9 @@ local function createCharacterTable(info)
 
     ---@param name string
     function self.removeGroup(name)
+        if self.job == "name" then
+            self.job = nil
+        end
         self.groups[name] = nil
         self.triggerEvent("ND:updateCharacter", self)
     end
@@ -257,7 +262,7 @@ local function createCharacterTable(info)
     ---@return boolean
     function self.getJob(job)
         for name, group in pairs(self.groups) do
-            if group.isJob and not job or name == job then
+            if group.isJob and not job or group.isJob and name == job then
                 return group
             end
         end
