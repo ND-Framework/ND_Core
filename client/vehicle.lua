@@ -154,3 +154,10 @@ AddEventHandler("onResourceStart", function(resourceName)
         vehModel = "Model"
     })
 end)
+
+if GetResourceState("ox_inventory") == "started" then
+    exports.ox_inventory:displayMetadata({
+        vehPlate = "Plate",
+        vehModel = "Model"
+    })
+end
