@@ -3,12 +3,6 @@ NDCore.players = {}
 PlayersInfo = {}
 local resourceName = GetCurrentResourceName()
 local tempPlayersInfo = {}
-local discordErrors = {
-    [400] = "Improper HTTP request",
-    [401] = "Discord bot token might be missing or incorrect",
-    [404] = "User might not be in the server",
-    [429] = "Discord bot rate limited"
-}
 
 Config = {
     serverName = GetConvar("core:serverName", "Unconfigured ND-Core Server"),
@@ -43,29 +37,6 @@ local function getIdentifierList(src)
         end
     end
     return list
-end
-
-local function getDiscordInfo(discordUserId)
-    local done = false
-    local data
-
-    PerformHttpRequest(("https://discordapp.com/api/guilds/%s/members/%s"):format(Config.discordGuildId, discordUserId), function(errorCode, resultData, resultHeaders)
-        if errorCode ~= 200 then
-            done = true
-            return print(("^3Warning: %d %s"):format(errorCode, discordErrors[errorCode]))
-        end
-
-        local result = json.decode(resultData)
-        data = {
-            nickname = result.nick or result.user.username,
-            user = result.user,
-            roles = result.roles
-        }
-        done = true
-    end, "GET", "", {["Content-Type"] = "application/json", ["Authorization"] = ("Bot %s"):format(Config.discordBotToken)})
-
-    while not done do Wait(500) end
-    return data
 end
 
 AddEventHandler("playerJoining", function(oldId)
