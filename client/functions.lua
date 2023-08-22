@@ -2,7 +2,11 @@ function NDCore.getPlayer()
     return NDCore.player
 end
 
-function NDCore.GetPlayersFromCoords(distance, coords)
+function NDCore.getCharacters()
+    return NDCore.characters
+end
+
+function NDCore.getPlayersFromCoords(distance, coords)
     if coords then
         coords = type(coords) == "table" and vec3(coords.x, coords.y, coords.z) or coords
     else
