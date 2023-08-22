@@ -25,7 +25,7 @@ local function createCharacterTable(info)
     ---@return boolean
     function self.deductMoney(account, amount, reason)
         local amount = tonumber(amount)
-        if not amount or account ~= "bank" and account ~= "cash" then return end
+        if not amount or amount <= 0 or account ~= "bank" and account ~= "cash" then return end
         self[account] -= amount
         if NDCore.players[self.source] then
             self.triggerEvent("ND:updateMoney", self.cash, self.bank)
@@ -40,7 +40,7 @@ local function createCharacterTable(info)
     ---@return boolean
     function self.addMoney(account, amount, reason)
         local amount = tonumber(amount)
-        if not amount or account ~= "bank" and account ~= "cash" then return end
+        if not amount or amount <= 0 or account ~= "bank" and account ~= "cash" then return end
         self[account] += amount
         if NDCore.players[self.source] then
             self.triggerEvent("ND:updateMoney", self.cash, self.bank)
