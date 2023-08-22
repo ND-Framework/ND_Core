@@ -239,6 +239,7 @@ local function createCharacterTable(info)
             isJob = isJob
         }
         self.triggerEvent("ND:updateCharacter", self)
+        ExecuteCommand(("add_principal identifier.%s group.%s"):format(self.identifier, name))
         return true
     end
 
@@ -255,6 +256,7 @@ local function createCharacterTable(info)
         end
         self.groups[name] = nil
         self.triggerEvent("ND:updateCharacter", self)
+        ExecuteCommand(("remove_principal identifier.%s group.%s"):format(self.identifier, name))
     end
 
     ---@param name string
