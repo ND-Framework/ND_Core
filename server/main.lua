@@ -1,5 +1,5 @@
 NDCore = {}
-ActivePlayers = {}
+NDCore.players = {}
 PlayersInfo = {}
 local resourceName = GetCurrentResourceName()
 local tempPlayersInfo = {}
@@ -80,7 +80,7 @@ local function checkDiscordIdentifier(identifiers)
     local discordIdentifier = identifiers["discord"]
     if not discordIdentifier then return end
 
-    return getDiscordInfo(discordIdentifier:gsub("discord:", ""))
+    return NDCore.getDiscordInfo(discordIdentifier:gsub("discord:", ""))
 end
 
 AddEventHandler("onResourceStart", function(name)
@@ -92,6 +92,7 @@ AddEventHandler("onResourceStart", function(name)
             identifiers = identifiers,
             discord = checkDiscordIdentifier(identifiers)
         }
+        Wait(65)
     end
 end)
 
@@ -129,7 +130,7 @@ end)
 
 AddEventHandler("playerDropped", function()
     local src = source
-    local char = ActivePlayers[src]
+    local char = NDCore.players[src]
     if char then
         char.unload()
     end

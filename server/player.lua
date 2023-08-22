@@ -27,7 +27,7 @@ local function createCharacterTable(info)
         local amount = tonumber(amount)
         if not amount or account ~= "bank" and account ~= "cash" then return end
         self[account] -= amount
-        if ActivePlayers[self.source] then
+        if NDCore.players[self.source] then
             self.triggerEvent("ND:updateMoney", self.cash, self.bank)
             TriggerEvent("ND:moneyChange", self.source, account, amount, "remove", reason)
         end
@@ -42,7 +42,7 @@ local function createCharacterTable(info)
         local amount = tonumber(amount)
         if not amount or account ~= "bank" and account ~= "cash" then return end
         self[account] += amount
-        if ActivePlayers[self.source] then
+        if NDCore.players[self.source] then
             self.triggerEvent("ND:updateMoney", self.cash, self.bank)
             TriggerEvent("ND:moneyChange", self.source, account, amount, "add", reason)
         end
@@ -71,9 +71,15 @@ local function createCharacterTable(info)
         if type(key) == "table" then
             for k, v in pairs(key) do
                 self[k] = v
+                if k == "cash" or k == "bank" then
+                    TriggerEvent("ND:moneyChange", self.source, k, v, "set")
+                end
             end
         else
             self[key] = value
+            if key == "cash" or key == "bank" then
+                TriggerEvent("ND:moneyChange", self.source, key, value, "set")
+            end
         end
         self.triggerEvent("ND:updateCharacter", self)
     end
@@ -96,15 +102,15 @@ local function createCharacterTable(info)
     -- Completely delete character
     function self.delete()
         local result = MySQL.query.await("DELETE FROM nd_characters WHERE charid = ?", {self.id})
-        if result and ActivePlayers[self.source] then
-            ActivePlayers[self.source] = nil
+        if result and NDCore.players[self.source] then
+            NDCore.players[self.source] = nil
         end
         return result
     end
     
     -- Unload and save character
     function self.unload()
-        if not ActivePlayers[self.source] then return end
+        if not NDCore.players[self.source] then return end
         local ped = GetPlayerPed(self.source)
         if ped then
             local coords = GetEntityCoords(ped)
@@ -118,7 +124,7 @@ local function createCharacterTable(info)
         end
         TriggerEvent("ND:characterUnloaded", self.source, self)
         self.save()
-        ActivePlayers[self.source] = nil
+        NDCore.players[self.source] = nil
     end
     
     -- Save character information to database
@@ -203,10 +209,10 @@ local function createCharacterTable(info)
 
     -- Set the character as the players active character/currently playing character
     function self.active()
-        local char = ActivePlayers[self.source]
+        local char = NDCore.players[self.source]
         if char and char.id == self.id then return true end
         if char then char.unload() end
-        ActivePlayers[self.source] = self
+        NDCore.players[self.source] = self
         TriggerEvent("ND:characterLoaded", self)
         self.triggerEvent("ND:characterLoaded", self)
         return true
@@ -373,5 +379,5 @@ function NDCore.setActiveCharacter(src, id)
     local character = NDCore.fetchCharacter(id, src)
     character.name = GetPlayerName(src)
     character.active()
-    return ActivePlayers[src]
+    return character
 end
