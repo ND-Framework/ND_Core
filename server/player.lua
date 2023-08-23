@@ -216,7 +216,11 @@ local function createCharacterTable(info)
     
     function self.notify(...)
         if not self.source then return end
-        TriggerClientEvent("ox_lib:notify", self.source, ...)
+        if GetResourceState("ModernHUD") == "started" then
+            TriggerClientEvent("ModernHUD:notify", self.source, ...)
+        elseif GetResourceState("ox_lib") == "started" then
+            TriggerClientEvent("ox_lib:notify", self.source, ...)
+        end
         return true
     end
 
