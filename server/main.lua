@@ -108,6 +108,14 @@ AddEventHandler("playerDropped", function()
     PlayersInfo[src] = nil
 end)
 
+AddEventHandler("onResourceStop", function(name)
+    if name ~= resourceName then return end
+    for src, player in pairs(NDCore.players) do
+        player.save()
+        Wait(10)
+    end
+end)
+
 SetTimeout(500, function()
     NDCore.loadSQL({
         "database/characters.sql",
