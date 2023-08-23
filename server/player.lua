@@ -172,6 +172,25 @@ local function createCharacterTable(info)
         end
         self.triggerEvent("ND:updateCharacter", self)
     end
+
+    function self.getLicense(identifier)
+        local licenses = self.metadata.licenses or {}
+        for i=1, #licenses do
+            local data = licenses[i]
+            if data.identifier == identifier then
+                return data, i
+            end
+        end
+    end
+
+    function self.updateLicense(identifier, newData)
+        local data, i = self.getLicense(identifier)
+        if not data then return end
+        for k, v in pairs(newData) do
+            data[k] = v
+        end
+        self.save()
+    end
     
     ---@param coords vector3|vector4
     ---@return boolean

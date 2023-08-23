@@ -158,17 +158,7 @@ end
 function NDCore.Functions.EditPlayerLicense(characterId, identifier, newData)
     local player = NDCore.fetchCharacter(characterId)
     if not player then return end
-
-    local licenses = player.metadata.licenses
-    if licenses then        
-        local license, key = NDCore.Functions.FindLicenseByIdentifier(licenses, identifier)
-        for k, v in pairs(newData) do
-            license[k] = v
-        end
-        licenses[key] = license
-        player.setMetadata("licenses", licenses)
-    end
-    return licenses or {}
+    player.updateLicense(identifier, newData)
 end
 
 -- Set the players job and job rank.
