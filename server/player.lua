@@ -111,6 +111,9 @@ local function createCharacterTable(info)
     -- Unload and save character
     function self.unload()
         if not NDCore.players[self.source] then return end
+        for name, _ in pairs(self.groups) do
+            ExecuteCommand(("remove_principal identifier.%s group.%s"):format(self.identifier, name))
+        end
         local ped = GetPlayerPed(self.source)
         if ped then
             local coords = GetEntityCoords(ped)
@@ -235,6 +238,9 @@ local function createCharacterTable(info)
         local char = NDCore.players[self.source]
         if char and char.id == self.id then return true end
         if char then char.unload() end
+        for name, _ in pairs(self.groups) do
+            ExecuteCommand(("add_principal identifier.%s group.%s"):format(self.identifier, name))
+        end
         NDCore.players[self.source] = self
         TriggerEvent("ND:characterLoaded", self)
         self.triggerEvent("ND:characterLoaded", self)

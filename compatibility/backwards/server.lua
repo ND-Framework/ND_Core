@@ -196,6 +196,13 @@ function NDCore.Functions.UpdateLastLocation(characterId, location)
     })
 end
 
+function NDCore.Functions.IsPlayerAdmin(src)
+    local player = NDCore.getPlayer(src)
+    if player.groups["admin"] then
+        return true
+    end
+end
+
 -- Getting all the characters the player has and returning them to the client.
 RegisterNetEvent("ND:GetCharacters", function()
     local src = source
