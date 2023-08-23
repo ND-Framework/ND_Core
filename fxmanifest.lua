@@ -14,7 +14,8 @@ client_scripts {
     "shared/functions.lua",
     "client/vehicle.lua",
     "client/functions.lua",
-    "client/events.lua"
+    "client/events.lua",
+    "compatibility/**/client.lua"
 }
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
@@ -22,7 +23,8 @@ server_scripts {
     "shared/functions.lua",
     "server/player.lua",
     "server/vehicle.lua",
-    "server/functions.lua"
+    "server/functions.lua",
+    "compatibility/**/server.lua"
 }
 
 file "init.lua"
