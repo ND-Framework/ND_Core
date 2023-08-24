@@ -24,3 +24,19 @@ function NDCore.isResourceStarted(resourceName, cb)
     end
     return started
 end
+
+function NDCore.formatNum(num)
+    return tostring(num):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+end
+
+function NDCore.cleanString(x, y)
+    -- x = string
+    -- y = true to save whitespace, default false
+    if y or false then
+        x = string.gsub(tostring(x), '[^%w%s_]', '') -- Save WS
+        return x
+    else
+        x = string.gsub(tostring(x), '[^%w_]', '') -- Kill WS
+        return x
+    end
+end
