@@ -65,6 +65,26 @@ local function createCharacterTable(info)
         return self.deductMoney("bank", amount, "Withdraw") and self.addMoney("cash", amount, "Withdraw")
     end
 
+    ---@param data string
+    ---@return any
+    function self.getData(data)
+        return self[data]
+    end
+
+    ---@param metadata string|table
+    ---@return any
+    function self.getMetadata(metadata)
+        if type(metadata) ~= "table" then
+            return self.metadata[metadata]
+        end
+        local returnData = {}
+        for i=1, #metadata then
+            local data = metadata[i]
+            returnData[data] = self.metadata[data]
+        end
+        return returnData
+    end
+
     ---@param key string|table
     ---@param value any
     function self.setData(key, value)
