@@ -353,7 +353,7 @@ end)
 
 Config.ox_inventory = NDCore.isResourceStarted("ox_inventory", function(started)
     Config.ox_inventory = started
-    if not Config.useInventoryForKeys then return end
+    if not started or not Config.useInventoryForKeys then return end
     Wait(1000)
     exports.ox_inventory:displayMetadata({
         vehPlate = "Plate",
