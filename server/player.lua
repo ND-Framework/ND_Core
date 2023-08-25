@@ -78,7 +78,7 @@ local function createCharacterTable(info)
             return self.metadata[metadata]
         end
         local returnData = {}
-        for i=1, #metadata then
+        for i=1, #metadata do
             local data = metadata[i]
             returnData[data] = self.metadata[data]
         end
@@ -276,7 +276,6 @@ local function createCharacterTable(info)
         local groupInfo = Config.groups[name]
         if not groupInfo then return end
         if isJob then
-            self.job = name
             for _, group in pairs(self.groups) do
                 group.isJob = nil
             end
@@ -300,9 +299,6 @@ local function createCharacterTable(info)
 
     ---@param name string
     function self.removeGroup(name)
-        if self.job == "name" then
-            self.job = nil
-        end
         self.groups[name] = nil
         self.triggerEvent("ND:updateCharacter", self)
         lib.removePrincipal(self.source, ("group.%s"):format(name))
@@ -317,14 +313,20 @@ local function createCharacterTable(info)
 
     ---@param job string
     ---@return boolean
-    function self.getJob(job)
+    function self.getJob()
         for name, group in pairs(self.groups) do
-            if group.isJob and not job or group.isJob and name == job then
-                return group
+            if group.isJob then
+                return name, group
             end
         end
     end
 
+    local jobName, jobInfo = self.getJob()
+    if jobInfo then
+        self.job = jobName
+        self.jobInfo = jobInfo
+    end
+    
     return self
 end
 
