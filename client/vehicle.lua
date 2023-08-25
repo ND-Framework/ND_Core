@@ -185,6 +185,15 @@ local vehicleClassNames = {
     [22] = "Open wheel"
 }
 
+local vehicleClassNotDisableAirControl = {
+    [8] = true, --motorcycle
+    [13] = true, --bicycles
+    [14] = true, --boats
+    [15] = true, --helicopter
+    [16] = true, --plane
+    [19] = true --military
+}
+
 local function getVehicleBlipSprite(entity)
     if not IsEntityAVehicle(entity) then
         return 148 -- circle blip
@@ -342,8 +351,9 @@ lib.callback.register("ND_Vehicles:getVehicleModelMakeLabel", function(model)
     return ("%s %s"):format(make, name)
 end)
 
-AddEventHandler("onResourceStart", function(resourceName)
-    if resourceName ~= "ox_inventory" or not Config.useInventoryForKeys then return end
+Config.ox_inventory = NDCore.isResourceStarted("ox_inventory", function(started)
+    Config.ox_inventory = started
+    if not Config.useInventoryForKeys then return end
     Wait(1000)
     exports.ox_inventory:displayMetadata({
         vehPlate = "Plate",
@@ -351,9 +361,65 @@ AddEventHandler("onResourceStart", function(resourceName)
     })
 end)
 
-if GetResourceState("ox_inventory") == "started" then
-    exports.ox_inventory:displayMetadata({
-        vehPlate = "Plate",
-        vehModel = "Model"
-    })
+local inventoryKeyCheck = {
+    lastCheck = 0,
+    hasKey = false
+}
+
+local function hasVehicleKeys(veh)
+    if Config.useInventoryForKeys then
+        local time = GetCloudTimeAsInt()
+        if inventoryKeyCheck.lastCheck and (time-inventoryKeyCheck.lastCheck) < 5 then
+            return inventoryKeyCheck.hasKey
+        end
+
+        local metadata = {
+            vehPlate = GetVehicleNumberPlateText(veh)
+        }
+        local hasKey = exports.ox_inventory:GetItemCount("keys", metadata) > 0
+        inventoryKeyCheck.lastCheck = time
+        inventoryKeyCheck.hasKey = hasKey
+        return hasKey
+    end
+    local state = Entity(veh).state
+    local keys = state.keys
+    local player = NDCore.getPlayer()
+    return player and keys[player.id]
 end
+
+CreateThread(function()
+    local inVehcile = false
+    local wait = 500
+    local angle = 0.0
+    while true do
+        Wait(wait)
+        local veh = GetVehiclePedIsIn(cache.ped)
+        local isDriver = GetPedInVehicleSeat(veh, -1) == cache.ped
+
+        if veh ~= 0 and isDriver then
+            local steeringAngle = GetVehicleSteeringAngle(veh)
+            if steeringAngle > 10.0 or steeringAngle < -10.0 then
+                angle = steeringAngle
+            end
+            if GetIsTaskActive(cache.ped, 2) then
+                SetVehicleSteeringAngle(veh, angle) -- save wheels steering angle.
+            end
+            
+            if Config.disableVehicleAirControl and not vehicleClassNotDisableAirControl[GetVehicleClass(veh)] and (IsEntityInAir(veh) or IsEntityUpsidedown(veh)) then
+                wait = 0
+                DisableControlAction(0, 59) -- disable vehicle air control.
+                DisableControlAction(0, 60)
+            elseif not GetIsVehicleEngineRunning(veh) and not hasVehicleKeys(veh) then
+                wait = 0
+                DisableControlAction(0, 59)
+                if IsVehicleEngineStarting(veh) then
+                    SetVehicleEngineOn(veh, false, true, true) -- don't turn on engine if no keys.
+                end
+            else
+                wait = 500
+            end
+        elseif wait ~= 500 then
+            wait = 500
+        end
+    end
+end)
