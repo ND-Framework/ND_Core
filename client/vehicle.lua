@@ -706,5 +706,30 @@ lib.addKeybind({
     end
 })
 
+lib.addKeybind({
+    name = "vehicleShuffleSeat",
+    description = "Suffle vehicle seat.",
+    defaultKey = "",
+    onPressed = function(self)
+        if not cache.vehicle then return end
+        local seats = {
+            [-1] = 0,
+            [0] = -1,
+            [1] = 2,
+            [2] = 1,
+            [3] = 4,
+            [4] = 3,
+            [5] = 6,
+            [6] = 5
+        }
+        SetPedIntoVehicle(cache.ped, cache.vehicle, seats[cache.seat])
     end
+})
+
+lib.onCache("ped", function(value)
+    SetPedConfigFlag(value, 184, true)
+end)
+
+SetTimeout(500, function()
+    SetPedConfigFlag(cache.ped, 184, true)
 end)
