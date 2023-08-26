@@ -1,4 +1,12 @@
+local ox_inventory
+local inventoryStarted = false
 local playerOwnedVehicles = {}
+
+NDCore.isResourceStarted("ox_inventory", function(started)
+    inventoryStarted = started
+    if not started then return end
+    ox_inventory = exports.ox_inventory
+end)
 
 local function isPlateAvailable(plate)
     return not MySQL.scalar.await("SELECT 1 FROM nd_vehicles WHERE plate = ?", {plate})
@@ -179,20 +187,19 @@ function NDCore.spawnOwnedVehicle(source, vehicleID, coords, heading)
             state.props = vehicle.properties
             state.locked = true
 
-            if GetResourceState("ox_inventory") == "started" and Config.useInventoryForKeys then
-                if exports.ox_inventory:GetItem(source, "keys", {vehId = vehicle.id}, true) == 0 then
-                    exports.ox_inventory:AddItem(source, "keys", 1, {
-                        vehOwner = vehicle.owner,
-                        vehId = vehicle.id,
-                        vehPlate = vehicle.properties and vehicle.properties.plate,
-                        vehModel = vehicle.properties and lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, vehicle.properties.model) or ""
-                    })
-                end
-            else
-                state.keys = {
-                    [player.id] = true
-                }
+            if inventoryStarted and Config.useInventoryForKeys and ox_inventory:GetItem(source, "keys", {vehId = vehicle.id}, true) == 0 then
+                ox_inventory:AddItem(source, "keys", 1, {
+                    vehOwner = vehicle.owner,
+                    vehId = vehicle.id,
+                    vehPlate = vehicle.properties and vehicle.properties.plate,
+                    vehModel = vehicle.properties and lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, vehicle.properties.model) or "",
+                    keyEnabled = true
+                })
             end
+
+            state.keys = {
+                [player.id] = true
+            }
 
             return true
         end
@@ -240,34 +247,6 @@ RegisterNetEvent("ND_Vehicles:lockpick", function(netId, success)
     state.locked = false
 end)
 
-if Config.useInventoryForKeys then
-    local function toggleVehicleLock(id, veh, nearby)
-        local player = NDCore.getPlayer(id)
-        if nearby then
-            local state = Entity(veh).state
-            local locked = not state.locked
-            state.locked = locked
-            player.triggerEvent("ND_Vehicles:keyFob", NetworkGetNetworkIdFromEntity(veh))
-            if locked then
-                player.notify({
-                    title = "LOCKED",
-                    description = "Your vehicle has now been locked.",
-                    type = "success",
-                    position = "bottom-right",
-                    duration = 3000
-                })
-                return
-            end
-            player.notify({
-                title = "UNLOCKED",
-                description = "Your vehicle has now been unlocked.",
-                type = "inform",
-                position = "bottom-right",
-                duration = 3000
-            })
-            return
-        end
-        player.notify({
 RegisterNetEvent("ND_Vehicles:hotwire", function(netId)
     local src = source
     local ped = GetPlayerPed(src)
@@ -277,6 +256,20 @@ RegisterNetEvent("ND_Vehicles:hotwire", function(netId)
     local state = Entity(veh).state
     state.hotwired = true
 end)
+
+local function toggleVehicleLock(source, veh, nearby, metadata)
+    local player = NDCore.getPlayer(source)
+
+    if metadata and not metadata.keyEnabled then
+        return player.notify({
+            title = "No signal",
+            description = "Vehicle key disabled.",
+            type = "error",
+            position = "bottom-right",
+            duration = 3000
+        })
+    elseif not nearby then
+        return player.notify({
             title = "No signal",
             description = "Vehicle to far away.",
             type = "error",
@@ -285,73 +278,110 @@ end)
         })
     end
 
-
-    exports("keys", function(event, item, inventory, slot, data)
-        if event ~= "usingItem" then return end
-        local metadata
-        for i=1, #inventory.items do
-            local item = inventory.items[i]
-            if item.slot == slot then
-                metadata = item.metadata
-                break
-            end
-        end
-
-        if not metadata then return false end
-        local veh = playerOwnedVehicles[metadata.vehId] and playerOwnedVehicles[metadata.vehId].entity
-        if veh and DoesEntityExist(veh) then
-            local ped = GetPlayerPed(inventory.id)
-            local pedCoords = GetEntityCoords(ped)
-            local vehCoords = GetEntityCoords(veh)
-            if not pedCoords or not vehCoords then return end
-            toggleVehicleLock(inventory.id, veh, #(pedCoords-vehCoords) < 25.0)
-            return false
-        end
-
-        lib.callback("ND_Vehicles:getNearbyVehicleById", inventory.id, function(netId)
-            if not netId then return end
-            local veh = NetworkGetEntityFromNetworkId(netId)
-            if veh then
-                toggleVehicleLock(inventory.id, veh, true)
-            end
-        end, metadata.vehId)
-        return false
-    end)
-    
-    RegisterCommand("getkeys", function(source, args, rawCommand)
-        if GetResourceState("ox_inventory") ~= "started" then return end
-        local veh = GetVehiclePedIsIn(GetPlayerPed(source))
-        if not veh or veh == 0 then return end
-
-        local player = NDCore.getPlayer(source)
-        local state = Entity(veh).state
-        local owner = state.owner
-        if not owner or owner ~= player.id then return end
-
-        local props = state.props
-        exports.ox_inventory:AddItem(source, "keys", 1, {
-            vehOwner = owner,
-            vehId = state.id,
-            vehPlate = props.plate,
-            vehModel = lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, props.model)
+    local state = Entity(veh).state
+    local locked = not state.locked
+    state.locked = locked
+    player.triggerEvent("ND_Vehicles:keyFob", NetworkGetNetworkIdFromEntity(veh))
+    if locked then
+        return player.notify({
+            title = "LOCKED",
+            description = "Your vehicle has now been locked.",
+            type = "success",
+            position = "bottom-right",
+            duration = 3000
         })
-    end, false)
-else
-    RegisterCommand("givekeys", function(source, args, rawCommand)
-        local src = source
-        if not args[1] then return end
-        local target = tonumber(args[1])
-        if not GetPlayerPing(target) then return end
-
-        local veh = GetVehiclePedIsIn(GetPlayerPed(src))
-        if veh == 0 then
-            veh = GetVehiclePedIsIn(GetPlayerPed(src), true)
-            if veh == 0 then return end
-        end
-        
-        NDCore.giveVehicleKeys(veh, src, target)
-    end, false)
+    end
+    player.notify({
+        title = "UNLOCKED",
+        description = "Your vehicle has now been unlocked.",
+        type = "inform",
+        position = "bottom-right",
+        duration = 3000
+    })
 end
+
+local function lockNearestVehicle(source, vehId, metadata)
+    local veh = playerOwnedVehicles[vehId] and playerOwnedVehicles[vehId].entity
+    if veh and DoesEntityExist(veh) then
+        local ped = GetPlayerPed(source)
+        local pedCoords = GetEntityCoords(ped)
+        local vehCoords = GetEntityCoords(veh)
+        if not pedCoords or not vehCoords then return end
+        return toggleVehicleLock(source, veh, #(pedCoords-vehCoords) < 25.0, metadata)
+    end
+
+    lib.callback("ND_Vehicles:getNearbyVehicleById", source, function(netId)
+        local veh = netId and NetworkGetEntityFromNetworkId(netId)
+        if not veh then return end
+        toggleVehicleLock(source, veh, true, metadata)
+    end, vehId)
+end
+
+exports("keys", function(event, item, inventory, slot, data)
+    if event ~= "usingItem" or not Config.useInventoryForKeys or not inventoryStarted then return end
+    local metadata
+    for i=1, #inventory.items do
+        local item = inventory.items[i]
+        if item.slot == slot then
+            metadata = item.metadata
+            break
+        end
+
+    if not metadata then return false end
+    lockNearestVehicle(inventory.id, metadata.vehId, metadata)
+    return false
+end)
+
+RegisterCommand("getkeys", function(source, args, rawCommand)
+    if not Config.useInventoryForKeys or not inventoryStarted then return end
+    local veh = GetVehiclePedIsIn(GetPlayerPed(source))
+    if not veh or veh == 0 then return end
+
+    local player = NDCore.getPlayer(source)
+    local state = Entity(veh).state
+    local owner = state.owner
+    if not owner or owner ~= player.id then return end
+
+    local props = state.props
+    ox_inventory:AddItem(source, "keys", 1, {
+        vehOwner = owner,
+        vehId = state.id,
+        vehPlate = props.plate,
+        vehModel = lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, props.model),
+        keyEnabled = true
+    })
+end, false)
+
+RegisterCommand("givekeys", function(source, args, rawCommand)
+    if Config.useInventoryForKeys and inventoryStarted then return end
+
+    local src = source
+    if not args[1] then return end
+    local target = tonumber(args[1])
+    if not GetPlayerPing(target) then return end
+
+    local veh = GetVehiclePedIsIn(GetPlayerPed(src))
+    if veh == 0 then
+        veh = GetVehiclePedIsIn(GetPlayerPed(src), true)
+        if veh == 0 then return end
+    end
+    
+    NDCore.giveVehicleKeys(veh, src, target)
+end, false)
+
+RegisterNetEvent("ND_Vehicles:toggleVehicleLock", function(netId)
+    if Config.useInventoryForKeys and inventoryStarted then return end
+
+    local src = source
+    local veh = NetworkGetEntityFromNetworkId(netId)
+    if not DoesEntityExist(veh) then return end
+
+    local ped = GetPlayerPed(src)
+    local pedCoords = GetEntityCoords(ped)
+    local vehCoords = GetEntityCoords(veh)
+    if not pedCoords or not vehCoords then return end
+    toggleVehicleLock(src, veh, #(pedCoords-vehCoords) < 25.0)
+end)
 
 RegisterNetEvent("entityCreated", function(entity)
     if not DoesEntityExist(entity) or GetEntityType(entity) ~= 2 then return end
