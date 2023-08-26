@@ -335,9 +335,9 @@ lib.callback.register("ND_Vehicles:getNearbyVehicleById", function(vehId)
     local vehicles = lib.getNearbyVehicles(coords, 25.0, true)
     for i=1, #vehicles do
         local veh = vehicles[i]
-        local state = Entity(veh).state
+        local state = Entity(veh.vehicle).state
         if state and state.id == vehId then
-            return VehToNet(veh)
+            return VehToNet(veh.vehicle)
         end
     end
 end)
