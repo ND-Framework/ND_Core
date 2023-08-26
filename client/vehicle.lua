@@ -477,3 +477,118 @@ CreateThread(function()
         end
     end
 end)
+
+local function hotwireVehicle()
+    local state = playerVehicle and Entity(playerVehicle).state
+    if not playerVehicle or state.hotwired then return end
+
+    local finished = false
+    lib.requestModel(`imp_prop_impexp_pliers_02`)
+    lib.requestModel(`prop_tool_screwdvr01`)
+    lib.requestAnimDict("veh@handler@base")
+
+    if GetFollowVehicleCamViewMode() > 2 then
+        SetFollowVehicleCamViewMode(0)
+    end
+
+    CreateThread(function()
+        while not finished do
+            Wait(0)
+            DisableFirstPersonCamThisFrame()
+        end
+    end)
+
+    local modelWithHandles = {`seashark`, `seashark2`, `seashark3`}
+    local vehicleModel = GetEntityModel(playerVehicle)
+    local bikeHandles = GetVehicleClass(playerVehicle) == 8 or lib.table.contains(modelWithHandles, vehicleModel)
+
+    local success = lib.progressCircle({
+        duration = math.random(10000, 20000),
+        label = "Hotwiring",
+        useWhileDead = false,
+        allowRagdoll = false,
+        allowCuffed = false,
+        allowFalling = false,
+        canCancel = true,
+        anim = {
+            dict = bikeHandles and "anim@veh@boat@jetski@front@base" or "veh@handler@base",
+            clip = "hotwire"
+        },
+        disable = {
+            move = true,
+            car = true,
+            combat = true
+        },
+        prop = {
+            {
+                model = `imp_prop_impexp_pliers_02`,
+                bone = 0x49D9, -- SKEL_R_Hand
+                pos = vec3(0.1, -0.05, 0.0),
+                rot = vec3(-1.5, -15.0, -1.5)
+            },
+            {
+                model = `prop_tool_screwdvr01`,
+                bone = 0xDEAD, -- SKEL_R_Hand
+                pos = vec3(0.1, 0.08, -0.03),
+                rot = vec3(90.0, 0.0, 0.0)
+            }
+        }
+    })
+
+    finished = true
+    if not success then return end
+    if not playerVehicle then return false, true end
+    TriggerServerEvent("ND_Vehicles:hotwire", VehToNet(playerVehicle))
+    return true, true
+end
+
+local function lockpickVehicle()
+    if cache.vehicle then return end
+    local pos = GetEntityCoords(cache.ped)
+    local rot = GetEntityRotation(cache.ped, 2)
+    local veh = lib.getClosestVehicle(pos, 2.5, false)
+    if not veh then return end
+
+    local dificulties = {
+        "easy",
+        "medium",
+        "hard"
+    }
+    local dificultyTime = {
+        easy = 500,
+        medium = 800,
+        hard = 1000
+    }
+
+    lib.requestAnimDict("veh@break_in@0h@p_m_one@")
+    for i=1, 7 do
+        TaskPlayAnimAdvanced(cache.ped, "veh@break_in@0h@p_m_one@", "std_force_entry_ds", pos.x, pos.y, pos.z+0.025, rot.x, rot.y, rot.z, 8.0, 8.0, 1800, 28, 0.1)
+        local dificulty = dificulties[math.random(1, #dificulties)]
+        local success = lib.skillCheck(dificulty)
+        if not success or not DoesEntityExist(veh) or #(pos-GetEntityCoords(veh)) > 2.5 then
+            TriggerServerEvent("ND_Vehicles:lockpick", VehToNet(veh), false)
+            return false, true
+        end
+        Wait(dificultyTime[dificulty])
+    end
+
+    veh = lib.getClosestVehicle(pos, 2.5, false)
+    if not veh then return false, true end
+    TriggerServerEvent("ND_Vehicles:lockpick", VehToNet(veh), true)
+    PlaySoundFromEntity(-1, "Remote_Control_Fob", cache.ped, "PI_Menu_Sounds", true, 0)
+    return true, true
+end
+
+exports("lockpick", function(data, slot)
+    local _, used = lockpickVehicle()
+    if used then
+        exports.ox_inventory:useItem(data)
+    end
+end)
+
+exports("hotwire", function(data, slot)
+    local _, used = hotwireVehicle()
+    if used then
+        exports.ox_inventory:useItem(data)
+    end
+end)

@@ -268,6 +268,15 @@ if Config.useInventoryForKeys then
             return
         end
         player.notify({
+RegisterNetEvent("ND_Vehicles:hotwire", function(netId)
+    local src = source
+    local ped = GetPlayerPed(src)
+    local playerVeh = GetVehiclePedIsIn(ped)
+    local veh = NetworkGetEntityFromNetworkId(netId)
+    if not playerVeh or playerVeh == 0 or playerVeh ~= veh then return end
+    local state = Entity(veh).state
+    state.hotwired = true
+end)
             title = "No signal",
             description = "Vehicle to far away.",
             type = "error",
