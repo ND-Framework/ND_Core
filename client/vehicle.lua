@@ -348,74 +348,110 @@ lib.callback.register("ND_Vehicles:getVehicleModelMakeLabel", function(model)
     return ("%s %s"):format(make, name)
 end)
 
-Config.ox_inventory = NDCore.isResourceStarted("ox_inventory", function(started)
+local playerVehicle = cache.seat == -1 and cache.vehicle
+local cloudTime = GetCloudTimeAsInt()
+local vehicleLockCheckTime = {
+    lastCheck = cloudTime,
+    lastUse = cloudTime
+}
+local keyCheckTime = {
+    lastCheck = cloudTime,
+    hasKey = false
+}
+
+local function hasVehicleKeys(veh)
+    local state = Entity(veh).state
+    if Config.ox_inventory and Config.useInventoryForKeys then
+        local metadata = {
+            vehPlate = GetVehicleNumberPlateText(veh),
+            keyEnabled = true
+        }
+        local hasKey = exports.ox_inventory:GetItemCount("keys", metadata) > 0
+        return hasKey or state.hotwired
+    end
+
+    local keys = state and state.keys
+    local player = NDCore.getPlayer()
+    local hasKey = player and keys and keys[player.id]
+    return hasKey or state.hotwired
+end
+
+local function hasVehicleKeysCheck(veh)
+    local time = GetCloudTimeAsInt()
+    if time-keyCheckTime.lastCheck < 5 then
+        return keyCheckTime.hasKey
+    end
+
+    local hasKey = hasVehicleKeys(veh)
+    keyCheckTime.lastCheck = time
+    keyCheckTime.hasKey = hasKey
+    return hasKey
+end
+
+local function getNearestVehicle(hasKeysForOnly)
+    local coords = GetEntityCoords(cache.ped)
+    local vehicles = lib.getNearbyVehicles(coords, 25.0, true)
+    local nearestVeh = {}
+
+    local function setNearestVehicle(veh)
+        if hasKeysForOnly and not hasVehicleKeys(veh.vehicle) then return end
+        local nearestDist = nearestVeh.dist
+        local dist = #(GetEntityCoords(cache.ped)-veh.coords)
+        if not nearestDist or dist < nearestDist then
+            nearestVeh.dist = dist
+            nearestVeh.coords = veh.coords
+            nearestVeh.entity = veh.vehicle
+        end
+    end
+
+    for i=1, #vehicles do
+        setNearestVehicle(vehicles[i])
+    end
+    return nearestVeh.entity, nearestVeh.coords, nearestVeh.dist
+end
+
+NDCore.isResourceStarted("ox_inventory", function(started)
     Config.ox_inventory = started
-    if not started or not Config.useInventoryForKeys then return end
+    if not started or not Config.useInventoryForKeys then
+        return vehicleLockKeybind:disable(false)
+    end
     Wait(1000)
+    vehicleLockKeybind:disable(true)
     exports.ox_inventory:displayMetadata({
         vehPlate = "Plate",
         vehModel = "Model"
     })
 end)
 
-local keyCheckTime = {
-    lastCheck = GetCloudTimeAsInt(),
-    hasKey = false
-}
-
-local function hasVehicleKeys(veh)
-    local time = GetCloudTimeAsInt()
-    if time-keyCheckTime.lastCheck < 5 then
-        return keyCheckTime.hasKey
-    end
-
-    if Config.ox_inventory and Config.useInventoryForKeys then
-        local metadata = {
-            vehPlate = GetVehicleNumberPlateText(veh)
-        }
-        local hasKey = exports.ox_inventory:GetItemCount("keys", metadata) > 0
-        keyCheckTime.lastCheck = time
-        keyCheckTime.hasKey = hasKey
-        return hasKey
-    end
-
-    local state = Entity(veh).state
-    local keys = state.keys
-    local player = NDCore.getPlayer()
-    local hasKey = player and keys and keys[player.id]
-
-    keyCheckTime.lastCheck = time
-    keyCheckTime.hasKey = hasKey
-    return hasKey
-end
-
+-- save wheels steering angle.
 CreateThread(function()
-    local inVehcile = false
-    local wait = 500
     local angle = 0.0
     while true do
-        Wait(wait)
-        local veh = GetVehiclePedIsIn(cache.ped)
-        local isDriver = GetPedInVehicleSeat(veh, -1) == cache.ped
-
-        if veh ~= 0 and isDriver then
-            local steeringAngle = GetVehicleSteeringAngle(veh)
-            if steeringAngle > 10.0 or steeringAngle < -10.0 then
-                angle = steeringAngle
-            end
+        Wait(300)
+        if playerVehicle then
             if GetIsTaskActive(cache.ped, 2) then
-                SetVehicleSteeringAngle(veh, angle) -- save wheels steering angle.
+                SetVehicleSteeringAngle(playerVehicle, angle)
             end
-            
-            if Config.disableVehicleAirControl and not vehicleClassNotDisableAirControl[GetVehicleClass(veh)] and (IsEntityInAir(veh) or IsEntityUpsidedown(veh)) then
+            angle = DoesEntityExist(playerVehicle) and GetVehicleSteeringAngle(playerVehicle)
+        end
+    end
+end)
+
+CreateThread(function()
+    local wait = 500
+    while true do
+        Wait(wait)
+        playerVehicle = cache.seat == -1 and cache.vehicle
+        if playerVehicle then
+            if Config.disableVehicleAirControl and not vehicleClassNotDisableAirControl[GetVehicleClass(playerVehicle)] and (IsEntityInAir(playerVehicle) or IsEntityUpsidedown(playerVehicle)) then
                 wait = 0
                 DisableControlAction(0, 59) -- disable vehicle air control.
                 DisableControlAction(0, 60)
-            elseif not GetIsVehicleEngineRunning(veh) and not hasVehicleKeys(veh) then
+            elseif not GetIsVehicleEngineRunning(playerVehicle) and not hasVehicleKeysCheck(playerVehicle) then
                 wait = 0
                 DisableControlAction(0, 59)
-                if IsVehicleEngineStarting(veh) then
-                    SetVehicleEngineOn(veh, false, true, true) -- don't turn on engine if no keys.
+                if DoesEntityExist(playerVehicle) and IsVehicleEngineStarting(playerVehicle) then
+                    SetVehicleEngineOn(playerVehicle, false, true, true) -- don't turn on engine if no keys.
                 end
             else
                 wait = 500
