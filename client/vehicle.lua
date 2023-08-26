@@ -361,30 +361,35 @@ Config.ox_inventory = NDCore.isResourceStarted("ox_inventory", function(started)
     })
 end)
 
-local inventoryKeyCheck = {
-    lastCheck = 0,
+local keyCheckTime = {
+    lastCheck = GetCloudTimeAsInt(),
     hasKey = false
 }
 
 local function hasVehicleKeys(veh)
-    if Config.useInventoryForKeys then
-        local time = GetCloudTimeAsInt()
-        if inventoryKeyCheck.lastCheck and (time-inventoryKeyCheck.lastCheck) < 5 then
-            return inventoryKeyCheck.hasKey
-        end
+    local time = GetCloudTimeAsInt()
+    if time-keyCheckTime.lastCheck < 5 then
+        return keyCheckTime.hasKey
+    end
 
+    if Config.ox_inventory and Config.useInventoryForKeys then
         local metadata = {
             vehPlate = GetVehicleNumberPlateText(veh)
         }
         local hasKey = exports.ox_inventory:GetItemCount("keys", metadata) > 0
-        inventoryKeyCheck.lastCheck = time
-        inventoryKeyCheck.hasKey = hasKey
+        keyCheckTime.lastCheck = time
+        keyCheckTime.hasKey = hasKey
         return hasKey
     end
+
     local state = Entity(veh).state
     local keys = state.keys
     local player = NDCore.getPlayer()
-    return player and keys[player.id]
+    local hasKey = player and keys and keys[player.id]
+
+    keyCheckTime.lastCheck = time
+    keyCheckTime.hasKey = hasKey
+    return hasKey
 end
 
 CreateThread(function()
