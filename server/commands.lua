@@ -16,7 +16,7 @@ local moneyActions = {
 
 lib.addCommand("setmoney", {
     help = "Admin command, manage player money.",
-    -- restricted = "group.admin",
+    restricted = "group.admin",
     params = {
         {
             name = "target",
