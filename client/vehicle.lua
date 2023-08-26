@@ -632,5 +632,79 @@ exports("keyControl", function(action, slot)
     end
 end)
 
+local cruiseSpeedSet = 0
+local cruiseSpeedVehicle = 0
+local cruiseControlEnabled = false
+
+local function cruiseControl()
+    cruiseSpeedVehicle = GetEntitySpeed(playerVehicle) * 2.236936
+    if not playerVehicle then
+        lib.notify({
+            title = "Cruise control",
+            description = "Vehicle cruise control disabled.",
+            type = "inform",
+            position = "bottom-right",
+            duration = 3000
+        })
+        return
+    end
+    if cruiseSpeedVehicle < cruiseSpeedSet/3 then
+        lib.notify({
+            title = "Cruise control",
+            description = "Vehicle cruise control disabled.",
+            type = "inform",
+            position = "bottom-right",
+            duration = 3000
+        })
+        return
+    end
+    if cruiseSpeedVehicle < cruiseSpeedSet then
+        SetControlNormal(0, 71, 0.6)
+    end
+    return true
+end
+
+lib.addKeybind({
+    name = "vehicleCruiseControl",
+    description = "Toggle vehicle cruise control",
+    defaultKey = "",
+    onPressed = function(self)
+        if cruiseControlEnabled and cruiseSpeedVehicle-1 > cruiseSpeedSet then
+            cruiseSpeedSet = cruiseSpeedVehicle
+            return lib.notify({
+                title = "Cruise control",
+                description = ("Increased to %d mph."):format(math.floor(cruiseSpeedSet)),
+                type = "inform",
+                position = "bottom-right",
+                duration = 3000
+            })
+        elseif cruiseControlEnabled then
+            cruiseControlEnabled = false
+            return lib.notify({
+                title = "Cruise control",
+                description = "Vehicle cruise control disabled.",
+                type = "inform",
+                position = "bottom-right",
+                duration = 3000
+            })
+        end
+        if not playerVehicle then return end
+        cruiseControlEnabled = true
+        cruiseSpeedVehicle = math.floor(GetEntitySpeed(playerVehicle) * 2.236936)
+        cruiseSpeedSet = cruiseSpeedVehicle
+        lib.notify({
+            title = "Cruise control",
+            description = ("Set to %d mph."):format(math.floor(cruiseSpeedSet)),
+            type = "inform",
+            position = "bottom-right",
+            duration = 3000
+        })
+        CreateThread(function()
+            while cruiseControlEnabled and cruiseControl() do Wait(0) end
+            cruiseControlEnabled = false
+        end)
+    end
+})
+
     end
 end)
