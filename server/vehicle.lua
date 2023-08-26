@@ -231,10 +231,13 @@ function NDCore.saveVehicleProperties(source, veh, properties)
     end
 end
 
-RegisterNetEvent("ND_Vehicles:syncAlarm", function(netid, success, action)
-    local veh = NetworkGetEntityFromNetworkId(netid)
+RegisterNetEvent("ND_Vehicles:lockpick", function(netId, success)
+    local veh = NetworkGetEntityFromNetworkId(netId)
     local owner = NetworkGetEntityOwner(veh)
-    TriggerClientEvent("ND_Vehicles:syncAlarm", owner, netid, success, action)
+    TriggerClientEvent("ND_Vehicles:syncAlarm", owner, netId)
+    if not success then return end
+    local state = Entity(veh).state
+    state.locked = false
 end)
 
 if Config.useInventoryForKeys then

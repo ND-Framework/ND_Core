@@ -243,15 +243,12 @@ RegisterNetEvent("ND_Vehicles:blip", function(netid, status)
     EndTextCommandSetBlipName(blip)
 end)
 
-RegisterNetEvent("ND_Vehicles:syncAlarm", function(netid, success, action)
+RegisterNetEvent("ND_Vehicles:syncAlarm", function(netid)
     local veh = NetToVeh(netid)
     if not veh then return end
     SetVehicleAlarmTimeLeft(veh, 1)
     SetVehicleAlarm(veh, true)
     StartVehicleAlarm(veh)
-    if success and action == "lockpick" then
-        setVehicleLocked(veh, false)
-    end
 end)
 
 RegisterNetEvent("ND_VehicleSystem:setOwnedIfNot", function(netid)
