@@ -24,7 +24,8 @@ server_scripts {
     "server/player.lua",
     "server/vehicle.lua",
     "server/functions.lua",
-    "compatibility/**/server.lua"
+    "compatibility/**/server.lua",
+    "server/commands.lua"
 }
 
 file "init.lua"

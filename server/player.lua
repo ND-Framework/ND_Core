@@ -87,18 +87,18 @@ local function createCharacterTable(info)
 
     ---@param key string|table
     ---@param value any
-    function self.setData(key, value)
+    function self.setData(key, value, reason)
         if type(key) == "table" then
             for k, v in pairs(key) do
                 self[k] = v
                 if k == "cash" or k == "bank" then
-                    TriggerEvent("ND:moneyChange", self.source, k, v, "set")
+                    TriggerEvent("ND:moneyChange", self.source, k, v, "set", reason)
                 end
             end
         else
             self[key] = value
             if key == "cash" or key == "bank" then
-                TriggerEvent("ND:moneyChange", self.source, key, value, "set")
+                TriggerEvent("ND:moneyChange", self.source, key, value, "set", reason)
             end
         end
         self.triggerEvent("ND:updateCharacter", self)
