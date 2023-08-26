@@ -410,6 +410,22 @@ local function getNearestVehicle(hasKeysForOnly)
     return nearestVeh.entity, nearestVeh.coords, nearestVeh.dist
 end
 
+local vehicleLockKeybind = lib.addKeybind({
+    name = "vehicleKey",
+    description = "Unlock/lock vehicle (double click)",
+    defaultKey = "E",
+    onPressed = function(self)
+        local time = GetCloudTimeAsInt()
+        if time-vehicleLockCheckTime.lastCheck < 1 and time-vehicleLockCheckTime.lastUse > 1 then
+            vehicleLockCheckTime.lastUse = time
+            local veh = getNearestVehicle(true)
+            if not veh then return end
+            TriggerServerEvent("ND_Vehicles:toggleVehicleLock", VehToNet(veh))
+        end
+        vehicleLockCheckTime.lastCheck = time
+    end
+})
+
 NDCore.isResourceStarted("ox_inventory", function(started)
     Config.ox_inventory = started
     if not started or not Config.useInventoryForKeys then
