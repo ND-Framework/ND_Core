@@ -592,3 +592,31 @@ exports("hotwire", function(data, slot)
         exports.ox_inventory:useItem(data)
     end
 end)
+exports("keyControl", function(action, slot)
+    for item, data in pairs(exports.ox_inventory:Items()) do
+        local metadata = data.metadata
+        if data.slot == slot then
+            if metadata and not metadata.keyEnabled then
+                return lib.notify({
+                    title = "No signal",
+                    description = "Vehicle key disabled.",
+                    type = "error",
+                    position = "bottom-right",
+                    duration = 3000
+                })
+            end
+            break
+        end
+    end
+    if action == "trunk" then
+        local veh = getNearestVehicle(hasKeysForOnly)
+        if not veh then return end
+        exports.ox_inventory:closeInventory()
+        playKeyFob(veh)
+        if GetVehicleDoorAngleRatio(veh, 5) > 0.0 then
+            SetVehicleDoorShut(veh, 5)
+        else
+            SetVehicleDoorOpen(veh, 5, false)
+        end
+    end
+end)
