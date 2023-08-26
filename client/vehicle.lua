@@ -592,6 +592,7 @@ exports("hotwire", function(data, slot)
         exports.ox_inventory:useItem(data)
     end
 end)
+
 exports("keyControl", function(action, slot)
     for item, data in pairs(exports.ox_inventory:Items()) do
         local metadata = data.metadata
@@ -618,5 +619,18 @@ exports("keyControl", function(action, slot)
         else
             SetVehicleDoorOpen(veh, 5, false)
         end
+    elseif action == "disable" then
+        TriggerServerEvent("ND_Vehicles:disableKey", slot)
+        exports.ox_inventory:closeInventory()
+        lib.notify({
+            title = "Key disabled",
+            description = "This vehicle key has been disabled and cannot be used anymore.",
+            type = "inform",
+            position = "bottom-right",
+            duration = 3000
+        })
+    end
+end)
+
     end
 end)

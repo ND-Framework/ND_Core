@@ -326,6 +326,7 @@ exports("keys", function(event, item, inventory, slot, data)
             metadata = item.metadata
             break
         end
+    end
 
     if not metadata then return false end
     lockNearestVehicle(inventory.id, metadata.vehId, metadata)
@@ -389,5 +390,14 @@ RegisterNetEvent("entityCreated", function(entity)
     if state.owner or math.random(1, 100) <= Config.randomUnlockedVehicleChance then return end
     if state.locked ~= nil then return end
     state.locked = true
+end)
+
+RegisterNetEvent("ND_Vehicles:disableKey", function(slot)
+    local src = source
+    local key = ox_inventory:GetSlot(src, slot)
+    local metadata = key.metadata
+    if not metadata.keyEnabled then return end
+    metadata.keyEnabled = false
+    ox_inventory:SetMetadata(src, slot, key.metadata)
 end)
 
