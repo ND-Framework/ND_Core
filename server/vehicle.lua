@@ -44,13 +44,13 @@ local function getVehicles(characterId)
     return vehicles
 end
 
-function NDCore.transferVehicle(vehicleID, fromSource, toSource)
+function NDCore.transferVehicle(vehicleId, fromSource, toSource)
     local playerTo = NDCore.getPlayer(toSource)
     local playerFrom = NDCore.getPlayer(fromSource)
-    MySQL.query.await("UPDATE nd_vehicles SET owner = ? WHERE id = ?", {playerTo.id, vehicleID})
+    MySQL.query.await("UPDATE nd_vehicles SET owner = ? WHERE id = ?", {playerTo.id, vehicleId})
     
-    if not playerOwnedVehicles[vehicleID] then return end
-    local veh = NetworkGetEntityFromNetworkId(playerOwnedVehicles[vehicleID].netid)
+    if not playerOwnedVehicles[vehicleId] then return end
+    local veh = NetworkGetEntityFromNetworkId(playerOwnedVehicles[vehicleId].netid)
     if not veh then
         playerFrom.notify({
             title = "Ownership transfered",
@@ -75,7 +75,7 @@ function NDCore.transferVehicle(vehicleID, fromSource, toSource)
         [playerTo.id] = true
     }
 
-    playerFrom.triggerEvent("ND_Vehicles:blip", playerOwnedVehicles[vehicleID].netid, false)
+    playerFrom.triggerEvent("ND_Vehicles:blip", playerOwnedVehicles[vehicleId].netid, false)
 
     playerFrom.notify({
         title = "Ownership transfered",
@@ -162,13 +162,13 @@ local function getVehicleType(model)
     return entityType
 end
 
-function NDCore.spawnOwnedVehicle(source, vehicleID, coords, heading)
+function NDCore.spawnOwnedVehicle(source, vehicleId, coords, heading)
     local player = NDCore.getPlayer(source)
     if not player then return end
     local vehicles = getVehicles(player.id)
     for _, vehicle in pairs(vehicles) do
-        if vehicle.id == vehicleID and vehicle.owner == player.id then
-            MySQL.query.await("UPDATE nd_vehicles SET stored = ? WHERE id = ?", {0, vehicleID})
+        if vehicle.id == vehicleId and vehicle.owner == player.id then
+            MySQL.query.await("UPDATE nd_vehicles SET stored = ? WHERE id = ?", {0, vehicleId})
             vehicle.available = false
             player.triggerEvent("ND_Vehicles:returnVehicles", vehicles)
 
