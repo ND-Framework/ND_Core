@@ -102,16 +102,14 @@ end)
 AddEventHandler("playerDropped", function()
     local src = source
     local char = NDCore.players[src]
-    if char then
-        char.unload()
-    end
+    if char then char.unload() end
     PlayersInfo[src] = nil
 end)
 
 AddEventHandler("onResourceStop", function(name)
     if name ~= resourceName then return end
-    for src, player in pairs(NDCore.players) do
-        player.save()
+    for _, player in pairs(NDCore.players) do
+        player.unload()
         Wait(10)
     end
 end)

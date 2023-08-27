@@ -145,14 +145,16 @@ local function createCharacterTable(info)
                 w = heading
             })
         end
+        self.triggerEvent("ND:characterUnloaded")
         TriggerEvent("ND:characterUnloaded", self.source, self)
-        self.save()
+        local saved = self.save()
         NDCore.players[self.source] = nil
+        return saved
     end
     
     -- Save character information to database
     function self.save()
-        MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, groups = ?, metadata = ?, inventory = ? WHERE charid = ?", {
+        local affectedRows = MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, groups = ?, metadata = ?, inventory = ? WHERE charid = ?", {
             self.name,
             self.firstname,
             self.lastname,
@@ -163,8 +165,9 @@ local function createCharacterTable(info)
             json.encode(self.groups),
             json.encode(self.metadata),
             json.encode(self.inventory),
-            self.id,
+            self.id
         })
+        return affectedRows > 0
     end
     
     ---Create a license/permit for the character
