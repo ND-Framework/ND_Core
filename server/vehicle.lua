@@ -387,8 +387,15 @@ end)
 RegisterNetEvent("entityCreated", function(entity)
     if not DoesEntityExist(entity) or GetEntityType(entity) ~= 2 then return end
     local state = Entity(entity).state
-    if state.owner or math.random(1, 100) <= Config.randomUnlockedVehicleChance then return end
-    if state.locked ~= nil then return end
+    if state.owner or state.locked ~= nil then return end
+
+    local driver = GetPedInVehicleSeat(entity, -1)
+    if DoesEntityExist(driver) and IsPedAPlayer(driver) then
+        state.locked = false
+        state.hotwired = true
+    end
+
+    if math.random(1, 100) <= Config.randomUnlockedVehicleChance then return end
     state.locked = true
 end)
 
