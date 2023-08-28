@@ -189,3 +189,49 @@ lib.addCommand("character", {
     TriggerClientEvent("ND:characterMenu", args.target)
 end)
 
+lib.addCommand("pay", {
+    help = "give money to nearby player.",
+    params = {
+        {
+            name = "amount",
+            type = "number"
+        }
+    }
+}, function(source, args, raw)
+    if not source then return end
+    local targetPlayer
+    local pedCoords = GetEntityCoords(GetPlayerPed(source))
+    for targetId, targetInfo in pairs(NDCore.players) do
+        local targetCoords = GetEntityCoords(GetPlayerPed(targetId))
+        if #(pedCoords-targetCoords) < 2.0 and targetId ~= source then
+            targetPlayer = targetInfo
+            break
+        end
+    end
+
+    local player = NDCore.getPlayer(source)
+    local success = player.deductMoney("cash", args.amount)
+
+    if not success then
+        return player.notify({
+            title = "Couldn't give money",
+            type = "error",
+            duration = 5000
+        })
+    end
+    
+    if not targetPlayer or not targetPlayer.addMoney("cash", args.amount) then return end
+    targetPlayer.notify({
+        title = "Money received",
+        description = ("Received $%d in cash"):format(args.amount),
+        type = "inform",
+        duration = 10000
+    })
+    
+    player.notify({
+        title = "Money given",
+        description = ("You gave someone $%d in cash"):format(args.amount),
+        type = "inform",
+        duration = 10000
+    })
+end)
