@@ -102,3 +102,62 @@ lib.addCommand("setjob", {
     })
 end)
 
+lib.addCommand("setgroup", {
+    help = "Admin command, set a players group.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        },
+        {
+            name = "action",
+            type = "string",
+            help = "remove/add"
+        },
+        {
+            name = "group",
+            type = "string",
+            help = "group name"
+        },
+        {
+            name = "rank",
+            type = "number",
+            optional = true
+        }
+    }
+}, function(source, args, raw)
+    local player = NDCore.getPlayer(args.target)
+    if not player then return end
+
+    if args.action == "add" then
+        local groupInfo = player.addGroup(args.group, args.rank)
+        if not groupInfo then return end
+        player.notify({
+            title = "Staff action",
+            description = ("Added to group %s, rank %s."):format(groupInfo.label, groupInfo.rankName),
+            type = "inform",
+            duration = 10000
+        })
+    elseif args.action == "remove" then
+        local groupInfo = player.removeGroup(args.group)
+        if not groupInfo then return end
+        player.notify({
+            title = "Staff action",
+            description = ("Removed from group %s."):format(groupInfo.label),
+            type = "inform",
+            duration = 10000
+        })
+    else
+        return
+    end
+
+    if not source then return end
+    TriggerClientEvent("chat:addMessage", source, {
+        color = {50, 100, 235},
+        multiline = true,
+        args = {"Staff action", "success"}
+    })
+end)
+
