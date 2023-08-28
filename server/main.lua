@@ -20,10 +20,11 @@ Config = {
     randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
     disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
     useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
-    groups = json.decode(GetConvar("core:groups", "[]"))
+    groups = json.decode(GetConvar("core:groups", "[]")),
+    admins = json.decode(GetConvar("core:admins", "[]"))
 }
 
-SetConvarServerInfo("ND_Core", GetResourceMetadata(resourceName, "version", 0) or "invalid")
+SetConvarServerInfo("NDCore", GetResourceMetadata(resourceName, "version", 0) or "invalid")
 SetConvarReplicated("inventory:framework", "nd")
 
 local function getIdentifierList(src)
