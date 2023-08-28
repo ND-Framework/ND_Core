@@ -35,16 +35,16 @@ lib.addCommand("setmoney", {
         },
         {
             name = "amount",
-            type = "number",
-            help = "bank/cash"
+            type = "number"
         }
-    },
+    }
 }, function(source, args, raw)
     local action = moneyActions[args.action]
     local moneyType = args.type:lower()
     if not action or not lib.table.contains(moneyTypes, moneyType) then return end
 
     local player = NDCore.getPlayer(args.target)
+    if not player then return end
     local staffMessage, userMessage = action(player, moneyType, args.amount)
 
     player.notify({
