@@ -161,3 +161,17 @@ lib.addCommand("setgroup", {
     })
 end)
 
+lib.addCommand("skin", {
+    help = "Admin command, set player into character clothing menu.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        }
+    }
+}, function(source, args, raw)
+    TriggerClientEvent("ND:clothingMenu", args.target)
+end)
+
