@@ -61,3 +61,44 @@ lib.addCommand("setmoney", {
         args = {"Staff action", staffMessage}
     })
 end)
+
+lib.addCommand("setjob", {
+    help = "Admin command, set a players job.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        },
+        {
+            name = "job",
+            type = "string",
+            help = "Job name"
+        },
+        {
+            name = "rank",
+            type = "number",
+            optional = true
+        }
+    }
+}, function(source, args, raw)
+    local player = NDCore.getPlayer(args.target)
+    local job = args.job:lower()
+    local jobInfo = player.setJob(job, args.rank)
+    if not player or not jobInfo then return end
+    player.notify({
+        title = "Staff action",
+        description = ("Job updated to %s, rank %s"):format(jobInfo.label, jobInfo.rankName),
+        type = "inform",
+        duration = 10000
+    })
+
+    if not source then return end
+    TriggerClientEvent("chat:addMessage", source, {
+        color = {50, 100, 235},
+        multiline = true,
+        args = {"Staff action", "success"}
+    })
+end)
+
