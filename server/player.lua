@@ -261,6 +261,11 @@ local function createCharacterTable(info)
         local char = NDCore.players[self.source]
         if char and char.id == self.id then return true end
         if char then char.unload() end
+        for identifierType, identifier in pairs(self.identifiers) do
+            if lib.table.contains(Config.admins, ("%s:%s"):format(identifierType, identifier)) then
+                self.addGroup("admin")
+            end
+        end
         for name, _ in pairs(self.groups) do
             lib.addPrincipal(self.source, ("group.%s"):format(name))
         end
@@ -277,21 +282,21 @@ local function createCharacterTable(info)
     function self.addGroup(name, rank, isJob)
         local groupRank = tonumber(rank) or 1
         local groupInfo = Config.groups[name]
-        if not groupInfo then return end
+        -- if not groupInfo then return end
         if isJob then
             for _, group in pairs(self.groups) do
                 group.isJob = nil
             end
         end
         self.groups[name] = {
-            label = groupInfo.label,
-            rankName = groupInfo.ranks[groupRank] or groupRank,
+            label = groupInfo and groupInfo.label or name,
+            rankName = groupInfo and groupInfo.ranks[groupRank] or groupRank,
             rank = groupRank,
             isJob = isJob
         }
         self.triggerEvent("ND:updateCharacter", self)
         lib.addPrincipal(self.source, ("group.%s"):format(name))
-        return true
+        return self.groups[name]
     end
 
     ---@param name string
@@ -302,9 +307,11 @@ local function createCharacterTable(info)
 
     ---@param name string
     function self.removeGroup(name)
+        local group = self.groups[name]
         self.groups[name] = nil
         self.triggerEvent("ND:updateCharacter", self)
         lib.removePrincipal(self.source, ("group.%s"):format(name))
+        return group
     end
 
     ---@param name string
