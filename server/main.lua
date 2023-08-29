@@ -24,6 +24,7 @@ Config = {
     admins = json.decode(GetConvar("core:admins", "[]"))
 }
 
+SetConvarServerInfo("Discord", Config.discordInvite)
 SetConvarServerInfo("NDCore", GetResourceMetadata(resourceName, "version", 0) or "invalid")
 SetConvarReplicated("inventory:framework", "nd")
 
