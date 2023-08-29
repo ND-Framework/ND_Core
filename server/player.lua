@@ -259,7 +259,7 @@ local function createCharacterTable(info)
     -- Set the character as the players active character/currently playing character
     function self.active()
         local char = NDCore.players[self.source]
-        if char and char.id == self.id then return true end
+        if char and char.id == self.id then return end
         if char then char.unload() end
         for identifierType, identifier in pairs(self.identifiers) do
             if lib.table.contains(Config.admins, ("%s:%s"):format(identifierType, identifier)) then
@@ -272,7 +272,6 @@ local function createCharacterTable(info)
         NDCore.players[self.source] = self
         TriggerEvent("ND:characterLoaded", self)
         self.triggerEvent("ND:characterLoaded", self)
-        return true
     end
 
     ---@param name string
@@ -438,8 +437,12 @@ end
 ---@param id number
 ---@return table
 function NDCore.setActiveCharacter(src, id)
-    if not src then return end
+    local char = NDCore.players[src]
+    if not src or char and char.id == id then return end
+
     local character = NDCore.fetchCharacter(id, src)
+    if not character then return end
+    
     character.name = GetPlayerName(src)
     character.active()
     return character
