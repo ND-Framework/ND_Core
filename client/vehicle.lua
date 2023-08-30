@@ -286,7 +286,7 @@ local function playKeyFob(veh)
     local coords = GetEntityCoords(ped)
     if #(coords-GetEntityCoords(veh)) > 25.0 then return end
 
-    if GetVehiclePedIsIn(ped) == 0 then
+    if not playerVehicle then
         ClearPedTasks(ped)
         lib.requestAnimDict("anim@mp_player_intmenu@key_fob@")
         TaskPlayAnim(ped, "anim@mp_player_intmenu@key_fob@", "fob_click_fp", 8.0, 8.0, -1, 48, 1, false, false, false)
@@ -364,7 +364,7 @@ lib.callback.register("ND_Vehicles:getVehicleModelMakeLabel", function(model)
     return ("%s %s"):format(make, name)
 end)
 
-local function hasVehicleKeys(veh)
+local function hasVehicleKeys(veh, checkEngine)
     local state = Entity(veh).state
     if Config.ox_inventory and Config.useInventoryForKeys then
         local metadata = {
@@ -372,13 +372,13 @@ local function hasVehicleKeys(veh)
             keyEnabled = true
         }
         local hasKey = exports.ox_inventory:GetItemCount("keys", metadata) > 0
-        return hasKey or state.hotwired
+        return hasKey or checkEngine and state.hotwired
     end
 
     local keys = state and state.keys
     local player = NDCore.getPlayer()
     local hasKey = player and keys and keys[player.id]
-    return hasKey or state.hotwired
+    return hasKey or checkEngine and state.hotwired
 end
 
 local function hasVehicleKeysCheck(veh)
@@ -387,7 +387,7 @@ local function hasVehicleKeysCheck(veh)
         return keyCheckTime.hasKey
     end
 
-    local hasKey = hasVehicleKeys(veh)
+    local hasKey = hasVehicleKeys(veh, true)
     keyCheckTime.lastCheck = time
     keyCheckTime.hasKey = hasKey
     return hasKey
@@ -614,10 +614,10 @@ exports("keyControl", function(action, slot)
             break
         end
     end
+    exports.ox_inventory:closeInventory()
     if action == "trunk" then
-        local veh = getNearestVehicle(hasKeysForOnly)
+        local veh = getNearestVehicle(true)
         if not veh then return end
-        exports.ox_inventory:closeInventory()
         playKeyFob(veh)
         if GetVehicleDoorAngleRatio(veh, 5) > 0.0 then
             SetVehicleDoorShut(veh, 5)
@@ -626,7 +626,6 @@ exports("keyControl", function(action, slot)
         end
     elseif action == "disable" then
         TriggerServerEvent("ND_Vehicles:disableKey", slot)
-        exports.ox_inventory:closeInventory()
         lib.notify({
             title = "Key disabled",
             description = "This vehicle key has been disabled and cannot be used anymore.",
