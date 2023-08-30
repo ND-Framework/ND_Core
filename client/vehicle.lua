@@ -185,6 +185,22 @@ local vehicleClassNames = {
     [22] = "Open wheel"
 }
 
+local cruiseSpeedSet = 0
+local cruiseSpeedVehicle = 0
+local cruiseControlEnabled = false
+local playerVehicle = cache.seat == -1 and cache.vehicle
+local cloudTime = GetCloudTimeAsInt()
+
+local vehicleLockCheckTime = {
+    lastCheck = cloudTime,
+    lastUse = cloudTime
+}
+
+local keyCheckTime = {
+    lastCheck = cloudTime,
+    hasKey = false
+}
+
 local vehicleClassNotDisableAirControl = {
     [8] = true, --motorcycle
     [13] = true, --bicycles
@@ -347,17 +363,6 @@ lib.callback.register("ND_Vehicles:getVehicleModelMakeLabel", function(model)
     local name = GetLabelText(GetDisplayNameFromVehicleModel(model))
     return ("%s %s"):format(make, name)
 end)
-
-local playerVehicle = cache.seat == -1 and cache.vehicle
-local cloudTime = GetCloudTimeAsInt()
-local vehicleLockCheckTime = {
-    lastCheck = cloudTime,
-    lastUse = cloudTime
-}
-local keyCheckTime = {
-    lastCheck = cloudTime,
-    hasKey = false
-}
 
 local function hasVehicleKeys(veh)
     local state = Entity(veh).state
@@ -631,10 +636,6 @@ exports("keyControl", function(action, slot)
         })
     end
 end)
-
-local cruiseSpeedSet = 0
-local cruiseSpeedVehicle = 0
-local cruiseControlEnabled = false
 
 local function cruiseControl()
     cruiseSpeedVehicle = GetEntitySpeed(playerVehicle) * 2.236936
