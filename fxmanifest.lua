@@ -13,6 +13,7 @@ client_scripts {
     "client/main.lua",
     "shared/functions.lua",
     "client/vehicle.lua",
+    "client/peds.lua",
     "client/functions.lua",
     "client/events.lua",
     "compatibility/**/client.lua"
