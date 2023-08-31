@@ -10,6 +10,7 @@ local function createCharacterTable(info)
         name = info.name,
         firstname = info.firstname,
         lastname = info.lastname,
+        fullname = ("%s %s"):format(info.firstname, info.lastname),
         dob = info.dob,
         gender = info.gender,
         cash = info.cash,
