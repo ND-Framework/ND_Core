@@ -329,6 +329,8 @@ AddStateBagChangeHandler("locked", nil, function(bagName, key, value, reserved, 
     CreateThread(function()
         while GetVehiclePedIsEntering(cache.ped) == entity do Wait(10) end
         -- SetVehicleDoorsLockedForAllPlayers(entity, false)
+
+        if value == nil then return end
         SetVehicleDoorsLocked(entity, 0)
     end)
 end)
