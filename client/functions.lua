@@ -26,6 +26,14 @@ function NDCore.getPlayersFromCoords(distance, coords)
     return closePlayers
 end
 
+function NDCore.notify(...)
+    if GetResourceState("ModernHUD") == "started" then
+        exports["ModernHUD"]:notify(...)
+    elseif GetResourceState("ox_lib") == "started" then
+        lib.notify(...)
+    end
+end
+
 for name, func in pairs(NDCore) do
     if type(func) == "function" then
         exports(name, func)
