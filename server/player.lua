@@ -261,6 +261,14 @@ local function createCharacterTable(info)
         return true
     end
 
+    function self.revive()
+        self.triggerEvent("ND:revivePlayer")
+        self.setMetadata({
+            dead = nil,
+            deathInfo = nil,
+        })
+    end
+
     ---@param reason string
     function self.drop(reason)
         if not self.source then return end
