@@ -96,8 +96,29 @@ function NDCore.getVehicles(characterId)
 end
 
 function NDCore.giveVehicleAccess(source, vehicle, access, vehicleId, netId, plate, model, name, owner)
-    if inventoryStarted and Config.useInventoryForKeys and (not vehicleId or ox_inventory:GetItem(source, "keys", {vehId = vehicleId}, true) == 0) and (not netId or ox_inventory:GetItem(source, "keys", {vehNetId = netId}, true) == 0) then
-        if access then
+    if not vehicle or not DoesEntityExist(vehicle) then return end
+    local state = Entity(vehicle).state
+
+    if not netId then
+        netId = NetworkGetNetworkIdFromEntity(vehicle)
+    end
+    if not vehicleId then
+        vehicleId = state.id or ("temp_%s%d"):format(string.char(math.random(65, 90)), math.random(1, 999999))
+    end
+    if not plate then
+        plate = GetVehicleNumberPlateText(vehicle)
+    end
+    if not model then
+        model = GetEntityModel(vehicle)
+    end
+    if not state.id then
+        state.id = vehicleId
+    end
+
+    if inventoryStarted and Config.useInventoryForKeys then
+        local item = ox_inventory:GetItem(source, "keys", {vehId = vehicleId, vehNetId = netId}, true)
+        local hasKey = item ~= 0
+        if access and not hasKey then
             ox_inventory:AddItem(source, "keys", 1, {
                 vehOwner = owner,
                 vehId = vehicleId,
@@ -106,12 +127,13 @@ function NDCore.giveVehicleAccess(source, vehicle, access, vehicleId, netId, pla
                 keyEnabled = true,
                 vehNetId = netId
             })
-        else
+        elseif not access and hasKey then
             ox_inventory:RemoveItem(source, "keys", 1, {
                 vehOwner = owner,
                 vehId = vehicleId,
                 vehPlate = plate,
                 vehModel = name or model and lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, model) or "",
+                keyEnabled = true,
                 vehNetId = netId
             })
         end
@@ -120,7 +142,6 @@ function NDCore.giveVehicleAccess(source, vehicle, access, vehicleId, netId, pla
     local player = NDCore.getPlayer(source)
     if not player then return end
     
-    local state = Entity(vehicle).state
     if not state.keys then
         state.keys = {
             [player.id] = access
@@ -446,7 +467,7 @@ exports("keys", function(event, item, inventory, slot, data)
     local metadata
     for i=1, #inventory.items do
         local item = inventory.items[i]
-        if item.slot == slot then
+        if item and item.slot == slot then
             metadata = item.metadata
             break
         end
