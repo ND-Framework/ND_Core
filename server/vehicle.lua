@@ -8,40 +8,198 @@ NDCore.isResourceStarted("ox_inventory", function(started)
     ox_inventory = exports.ox_inventory
 end)
 
-local function isPlateAvailable(plate)
-    return not MySQL.scalar.await("SELECT 1 FROM nd_vehicles WHERE plate = ?", {plate})
+local function getVehicleType(model)
+    local tempVehicle = CreateVehicle(model, 0, 0, 0, 0, true, true)
+
+    local time = os.time()
+    while not DoesEntityExist(tempVehicle) and time-os.time() < 5 do Wait(5) end
+
+    if not DoesEntityExist(tempVehicle) then return end
+    local entityType = GetVehicleType(tempVehicle)
+    DeleteEntity(tempVehicle)
+    return entityType
 end
 
 local function generatePlate()
     local plate = {}
-    for i = 1, 8 do
+    for i=1, 8 do
         plate[i] = math.random(0, 1) == 1 and string.char(math.random(65, 90)) or math.random(0, 9)
     end
     return table.concat(plate)
 end
 
-local function generatePlateWait()
-    local plate = generatePlate()
-    while not isPlateAvailable(plate) do
+local function generateVehiclePlate(newPlate)
+    local plate = newPlate or generatePlate()
+    while MySQL.scalar.await("SELECT 1 FROM nd_vehicles WHERE plate = ?", {plate}) do
         plate = generatePlate()
     end
     return plate
 end
 
-local function getVehicles(characterId)
+local function createVehicleInfo(info)
+    local entity = info.entity
+
+    function info.delete()
+        if not DoesEntityExist(entity) then return end
+        DeleteEntity(entity)
+    end
+
+    function info.properties(props)
+        if not DoesEntityExist(entity) then return end
+        local state = Entity(entity).state
+        state.props = type(props) == "string" and json.decode(props) or props
+    end
+
+    function info.plate(plate)
+        if not DoesEntityExist(entity) or MySQL.scalar.await("SELECT 1 FROM nd_vehicles WHERE plate = ?", {plate}) then return end
+        SetVehicleNumberPlateText(entity, plate)
+        return true
+    end
+
+    return info
+end
+
+function NDCore.getVehicle(entity)
+    if not DoesEntityExist(entity) then return end
+
+    local state = Entity(entity).state
+    local vehicleId = state.id
+    if not vehicleId then return end
+    
+    return createVehicleInfo({
+        entity = entity,
+        owner = state.owner,
+        id = vehicleId,
+        properties = state.props,
+        locked = state.locked,
+        keys = state.keys,
+        hotwired = state.hotwired,
+        metadata = state.metadata
+    })
+end
+
+function NDCore.getVehicles(characterId)
     local result = MySQL.query.await("SELECT * FROM nd_vehicles WHERE owner = ?", {characterId})
     if not result then return {} end
+
     local vehicles = {}
     for _, vehicle in pairs(result) do
-        local key = #vehicles + 1
-        vehicles[key] = {}
-        vehicles[key].available = vehicle.stored == 1
-        vehicles[key].owner = vehicle.owner
-        vehicles[key].id = vehicle.id
-        vehicles[key].plate = vehicle.plate
-        vehicles[key].properties = json.decode(vehicle.properties)
+        vehicles[#vehicles+1] = {
+            available = vehicle.stored == 1,
+            owner = vehicle.owner,
+            id = vehicle.id,
+            plate = vehicle.plate,
+            properties = json.decode(vehicle.properties)
+        }
     end
     return vehicles
+end
+
+function NDCore.giveVehicleAccess(source, vehicle, access, vehicleId, netId, plate, model, name, owner)
+    if inventoryStarted and Config.useInventoryForKeys and (not vehicleId or ox_inventory:GetItem(source, "keys", {vehId = vehicleId}, true) == 0) and (not netId or ox_inventory:GetItem(source, "keys", {vehNetId = netId}, true) == 0) then
+        if access then
+            ox_inventory:AddItem(source, "keys", 1, {
+                vehOwner = owner,
+                vehId = vehicleId,
+                vehPlate = plate,
+                vehModel = name or model and lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, model) or "",
+                keyEnabled = true,
+                vehNetId = netId
+            })
+        else
+            ox_inventory:RemoveItem(source, "keys", 1, {
+                vehOwner = owner,
+                vehId = vehicleId,
+                vehPlate = plate,
+                vehModel = name or model and lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, model) or "",
+                vehNetId = netId
+            })
+        end
+    end
+
+    local player = NDCore.getPlayer(source)
+    if not player then return end
+    
+    local state = Entity(vehicle).state
+    if not state.keys then
+        state.keys = {
+            [player.id] = access
+        }
+    else
+        local keys = state.keys
+        keys[player.id] = access
+        state.keys = keys
+    end
+end
+
+function NDCore.createVehicle(info)
+    local owner = info.owner
+    local vehicleId = info.vehicleId
+    local properties = info.properties or {}
+    local coords = info.coords
+    local spawnCoords = coords
+    local coordType = type(coords)
+    if coordType == "vector3" or coordType == "table" then
+        spawnCoords = vector4(coords.x, coords.y, coords.z, coords.w or coords.h or info.heading or 0.0)
+    end
+    if not spawnCoords then return end
+
+    local model = info.model or properties.model
+    local vehType = getVehicleType(model)
+    if not vehType then return end
+
+    local veh = CreateVehicleServerSetter(model, vehType, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.w)
+    local time = os.time()
+    while not DoesEntityExist(veh) and time-os.time() < 5 do Wait(5) end
+    if not veh or not DoesEntityExist(veh) then return end
+
+    local netId = NetworkGetNetworkIdFromEntity(veh)
+    local state = Entity(veh).state
+    state.locked = true
+    local keys = info.keys or {}
+
+    if vehicleId then
+        playerOwnedVehicles[vehicleId] = {
+            netid = netId,
+            entity = veh
+        }
+    else
+        vehicleId = ("temp_%s%d"):format(string.char(math.random(65, 90)), math.random(1, 999999))
+    end
+    if not properties.plate then
+        properties.plate = generateVehiclePlate()
+    end
+    if owner then
+        keys[owner] = true
+        state.owner = owner
+        state.keys = keys
+    end
+
+    state.props = properties
+    state.id = vehicleId
+    local vehicleName
+    if inventoryStarted and Config.useInventoryForKeys then
+        for charId, _ in pairs(keys) do
+            local player = NDCore.getPlayers("id", charId, true)[1]
+            local source = player and player.source
+            if source then
+                if not vehicleName then
+                    vehicleName = lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, model) or ""
+                end
+                NDCore.giveVehicleAccess(source, veh, true, vehicleId, netId, properties and properties.plate, model, vehicleName, owner)
+            end
+        end
+    end
+    
+    return createVehicleInfo({
+        entity = veh,
+        netId = netId,
+        owner = owner,
+        id = vehicleId,
+        properties = properties,
+        locked = true,
+        keys = keys
+    })
 end
 
 function NDCore.transferVehicle(vehicleId, fromSource, toSource)
@@ -95,10 +253,10 @@ end
 
 function NDCore.setVehicleOwned(src, properties, stored)
     local player = NDCore.getPlayer(src)
-    local plate = generatePlateWait()
+    local plate = generateVehiclePlate()
     properties.plate = plate
     local id = MySQL.insert.await("INSERT INTO nd_vehicles (owner, plate, properties, stored) VALUES (?, ?, ?, ?)", {player.id, properties.plate, json.encode(properties), stored and 1 or 0})
-    local vehicles = getVehicles(player.id)
+    local vehicles = NDCore.getVehicles(player.id)
     player.triggerEvent("ND_Vehicles:returnVehicles", vehicles)
     return id
 end
@@ -134,74 +292,23 @@ function NDCore.giveVehicleKeys(vehicle, source, target)
     return true
 end
 
-function NDCore.giveVehicleAccess(source, vehicle, access)
-    local state = Entity(vehicle).state
-    if not state then return end
-
-    local player = NDCore.getPlayer(source)
-    if not player then return end
-
-    if not state.keys then
-        state.keys = {
-            [player.id] = access
-        }
-    else
-        local keys = state.keys
-        keys[player.id] = access
-        state.keys = keys
-    end
-
-    player.triggerEvent("ND_Vehicles:setOwnedIfNot", NetworkGetNetworkIdFromEntity(vehicle))
-end
-
-local function getVehicleType(model)
-    local tempVehicle = CreateVehicle(model, 0, 0, 0, 0, true, true)
-    while not DoesEntityExist(tempVehicle) do Wait(0) end
-    local entityType = GetVehicleType(tempVehicle)
-    DeleteEntity(tempVehicle)
-    return entityType
-end
-
 function NDCore.spawnOwnedVehicle(source, vehicleId, coords, heading)
     local player = NDCore.getPlayer(source)
     if not player then return end
-    local vehicles = getVehicles(player.id)
+    local vehicles = NDCore.getVehicles(player.id)
     for _, vehicle in pairs(vehicles) do
         if vehicle.id == vehicleId and vehicle.owner == player.id then
             MySQL.query.await("UPDATE nd_vehicles SET stored = ? WHERE id = ?", {0, vehicleId})
             vehicle.available = false
             player.triggerEvent("ND_Vehicles:returnVehicles", vehicles)
-
-            local model = vehicle.properties.model
-            local veh = CreateVehicleServerSetter(model, getVehicleType(model), coords.x, coords.y, coords.z, coords.w or heading)
-            while not DoesEntityExist(veh) do Wait(0) end
-
-            playerOwnedVehicles[vehicle.id] = {
-                netid = NetworkGetNetworkIdFromEntity(veh),
-                entity = veh
-            }
-
-            local state = Entity(veh).state
-            state.owner = vehicle.owner
-            state.id = vehicle.id
-            state.props = vehicle.properties
-            state.locked = true
-
-            if inventoryStarted and Config.useInventoryForKeys and ox_inventory:GetItem(source, "keys", {vehId = vehicle.id}, true) == 0 then
-                ox_inventory:AddItem(source, "keys", 1, {
-                    vehOwner = vehicle.owner,
-                    vehId = vehicle.id,
-                    vehPlate = vehicle.properties and vehicle.properties.plate,
-                    vehModel = vehicle.properties and lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, vehicle.properties.model) or "",
-                    keyEnabled = true
-                })
-            end
-
-            state.keys = {
-                [player.id] = true
-            }
-
-            return true
+            return NDCore.createVehicle({
+                owner = vehicle.owner,
+                model = vehicle.properties.model,
+                coords = vec4(coords.x, coords.y, coords.z, coords.w or heading),
+                properties = vehicle.properties,
+                vehicleId = vehicleId,
+                source = source
+            })
         end
     end
 end
@@ -211,12 +318,12 @@ function NDCore.returnVehicleToGarage(source, veh, properties)
     if not DoesEntityExist(veh) then return end
 
     local vehID = Entity(veh).state.id
-    local vehicles = getVehicles(player.id)
+    local vehicles = NDCore.getVehicles(player.id)
     
     for _, vehicle in pairs(vehicles) do
         if vehicle.owner == player.id and vehicle.id == vehID then
             MySQL.query.await("UPDATE nd_vehicles SET properties = ?, stored = ? WHERE id = ?", {json.encode(properties), 1, vehID})
-            player.triggerEvent("ND_Vehicles:returnVehicles", getVehicles(player.id))
+            player.triggerEvent("ND_Vehicles:returnVehicles", NDCore.getVehicles(player.id))
             DeleteEntity(veh)
             return true
         end
@@ -228,7 +335,7 @@ function NDCore.saveVehicleProperties(source, veh, properties)
     if not DoesEntityExist(veh) then return end
 
     local vehID = Entity(veh).state.id
-    local vehicles = getVehicles(player.id)
+    local vehicles = NDCore.getVehicles(player.id)
     
     for _, vehicle in pairs(vehicles) do
         if vehicle.owner == player.id and vehicle.id == vehID then
@@ -300,21 +407,38 @@ local function toggleVehicleLock(source, veh, nearby, metadata)
     })
 end
 
+local function getNearbyVehicles(coords, range)
+    local nearby = {}
+    local vehicles = GetAllVehicles()
+    for i=1, #vehicles do
+        local veh = vehicles[i]
+        local vehCoords = GetEntityCoords(veh)
+        if #(coords-vehCoords) < range then
+            nearby[#nearby+1] = veh
+        end
+    end
+    return nearby
+end
+
 local function lockNearestVehicle(source, vehId, metadata)
+    local ped = GetPlayerPed(source)
+    local pedCoords = GetEntityCoords(ped)
     local veh = playerOwnedVehicles[vehId] and playerOwnedVehicles[vehId].entity
+
     if veh and DoesEntityExist(veh) then
-        local ped = GetPlayerPed(source)
-        local pedCoords = GetEntityCoords(ped)
         local vehCoords = GetEntityCoords(veh)
         if not pedCoords or not vehCoords then return end
         return toggleVehicleLock(source, veh, #(pedCoords-vehCoords) < 25.0, metadata)
     end
-
-    lib.callback("ND_Vehicles:getNearbyVehicleById", source, function(netId)
-        local veh = netId and NetworkGetEntityFromNetworkId(netId)
-        if not veh then return end
-        toggleVehicleLock(source, veh, true, metadata)
-    end, vehId)
+    
+    local vehicles = getNearbyVehicles(pedCoords, 25.0)
+    for i=1, #vehicles do
+        local veh = vehicles[i]
+        local state = Entity(veh).state
+        if state and state.id == vehId then
+            return toggleVehicleLock(source, veh, true, metadata)
+        end
+    end
 end
 
 exports("keys", function(event, item, inventory, slot, data)

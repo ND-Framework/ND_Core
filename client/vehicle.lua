@@ -346,18 +346,6 @@ lib.callback.register("ND_Vehicles:getProps", function()
     return props
 end)
 
-lib.callback.register("ND_Vehicles:getNearbyVehicleById", function(vehId)
-    local coords = GetEntityCoords(cache.ped)
-    local vehicles = lib.getNearbyVehicles(coords, 25.0, true)
-    for i=1, #vehicles do
-        local veh = vehicles[i]
-        local state = Entity(veh.vehicle).state
-        if state and state.id == vehId then
-            return VehToNet(veh.vehicle)
-        end
-    end
-end)
-
 lib.callback.register("ND_Vehicles:getVehicleModelMakeLabel", function(model)
     local make = GetLabelText(GetMakeNameFromVehicleModel(model))
     local name = GetLabelText(GetDisplayNameFromVehicleModel(model))
