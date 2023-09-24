@@ -7,16 +7,22 @@ end
 ---@param metadata string
 ---@param data any
 ---@return table
-function NDCore.getPlayers(key, value)
+function NDCore.getPlayers(key, value, returnArray)
     if not key or not value then return NDCore.players end 
     
     local players = {}
-    local keyTypes = {firstname = "firstname", lastname = "lastname", gender = "gender", groups = "groups"}
+    local keyTypes = {id = "id", firstname = "firstname", lastname = "lastname", gender = "gender", groups = "groups"}
     local findBy = keyTypes[key] or "metadata"
 
-    for src, info in pairs(NDCore.players) do
-        if info[findBy][key] == value then
-            players[src] = info
+    if findBy then
+        for src, info in pairs(NDCore.players) do
+            if findBy == "metadata" and info["metadata"][key] == value or info[findBy] == value then
+                if returnArray then
+                    players[#players+1] = info
+                else
+                    players[src] = info
+                end
+            end
         end
     end
     return players
