@@ -361,6 +361,11 @@ end)
 lib.callback.register("ND_Vehicles:getVehicleModelMakeLabel", function(model)
     local make = GetLabelText(GetMakeNameFromVehicleModel(model))
     local name = GetLabelText(GetDisplayNameFromVehicleModel(model))
+    if make == "NULL" then
+        return name
+    elseif name == "NULL" then
+        return make
+    end
     return ("%s %s"):format(make, name)
 end)
 
