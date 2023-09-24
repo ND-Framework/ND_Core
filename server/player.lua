@@ -1,3 +1,13 @@
+local function removeCharacterFunctions(character)
+    local newData = {}
+    for k, v in pairs(character) do
+        if type(v) ~= "function" then
+            newData[k] = v
+        end
+    end
+    return newData
+end
+
 local function createCharacterTable(info)
     local playerInfo = PlayersInfo[info.source] or {}
 
@@ -102,7 +112,7 @@ local function createCharacterTable(info)
                 TriggerEvent("ND:moneyChange", self.source, key, value, "set", reason)
             end
         end
-        self.triggerEvent("ND:updateCharacter", self)
+        self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
     end
     
     ---@param key string|table
@@ -116,7 +126,7 @@ local function createCharacterTable(info)
         else
             self.metadata[key] = value
         end
-        self.triggerEvent("ND:updateCharacter", self)
+        self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
         return self.metadata
     end
 
@@ -197,7 +207,7 @@ local function createCharacterTable(info)
         else
             self.metadata.licenses = {license}
         end
-        self.triggerEvent("ND:updateCharacter", self)
+        self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
     end
 
     function self.getLicense(identifier)
@@ -272,7 +282,7 @@ local function createCharacterTable(info)
         end
         NDCore.players[self.source] = self
         TriggerEvent("ND:characterLoaded", self)
-        self.triggerEvent("ND:characterLoaded", self)
+        self.triggerEvent("ND:characterLoaded", removeCharacterFunctions(self))
     end
 
     ---@param name string
@@ -294,7 +304,7 @@ local function createCharacterTable(info)
             rank = groupRank,
             isJob = isJob
         }
-        self.triggerEvent("ND:updateCharacter", self)
+        self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
         lib.addPrincipal(self.source, ("group.%s"):format(name))
         return self.groups[name]
     end
@@ -309,7 +319,7 @@ local function createCharacterTable(info)
     function self.removeGroup(name)
         local group = self.groups[name]
         self.groups[name] = nil
-        self.triggerEvent("ND:updateCharacter", self)
+        self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
         lib.removePrincipal(self.source, ("group.%s"):format(name))
         return group
     end
