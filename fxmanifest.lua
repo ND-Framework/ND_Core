@@ -16,6 +16,7 @@ client_scripts {
     "client/peds.lua",
     "client/functions.lua",
     "client/events.lua",
+    "client/death.lua",
     "compatibility/**/client.lua"
 }
 server_scripts {

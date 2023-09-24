@@ -122,3 +122,13 @@ SetTimeout(500, function()
         "database/vehicles.sql"
     }, resourceName)
 end)
+
+RegisterNetEvent("ND:playerEliminated", function(info)
+    local src = source
+    local player = NDCore.getPlayer(src)
+    if not player then return end
+    player.setMetadata({
+        dead = true,
+        deathInfo = info
+    })
+end)
