@@ -235,3 +235,209 @@ lib.addCommand("pay", {
         duration = 10000
     })
 end)
+
+lib.addCommand("unlock", {
+    help = "Admin force unlock vehicles",
+    restricted = "group.admin",
+}, function(source, args, raw)
+    local ped = GetPlayerPed(source)
+    local playerVeh = GetVehiclePedIsIn(ped)
+    local coords = GetEntityCoords(ped)
+    local vehicles = GetAllVehicles()
+    local maxDistance = 2.0
+	local closestVehicle
+
+    if not playerVeh or playerVeh == 0 or not DoesEntityExist(playerVeh) then        
+        for i=1, #vehicles do
+            local vehicle = vehicles[i]
+            local vehicleCoords = GetEntityCoords(vehicle)
+            local distance = #(coords-vehicleCoords)
+    
+            if distance < maxDistance then
+                maxDistance = distance
+                closestVehicle = vehicle
+            end
+        end
+        if not closestVehicle or not DoesEntityExist(closestVehicle) then return end
+        local state = Entity(closestVehicle).state
+        state.locked = false
+    else
+        local state = Entity(playerVeh).state
+        state.hotwired = true
+    end
+end)
+
+lib.addCommand("revive", {
+    help = "Admin command, revive player.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        }
+    }
+}, function(source, args, raw)
+    local player = NDCore.getPlayer(args.target)
+    if not player then return end
+    player.revive()
+end)
+
+lib.addCommand("dv", {
+    help = "Admin command, revive player.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "range",
+            type = "number",
+            help = "The range to select vehicles for deleteion from",
+            optional = true
+        }
+    }
+}, function(source, args, raw)
+    local ped = GetPlayerPed(source)
+    local veh = GetVehiclePedIsIn(ped)
+    if veh and veh ~= 0 and DoesEntityExist(veh) then
+        DeleteEntity(veh)
+        return TriggerClientEvent("chat:addMessage", source, {
+            color = {50, 100, 235},
+            multiline = true,
+            args = {"Staff action", "deleted 1 vehicle"}
+        })
+    end
+    
+    local count = 0
+    local coords = GetEntityCoords(ped)
+    if args.range then
+        for _, veh in ipairs(GetAllVehicles()) do
+            local vehDist = #(GetEntityCoords(veh) - coords)
+            if vehDist < args.range then
+                DeleteEntity(veh)
+                count += 1
+            end
+        end
+        return TriggerClientEvent("chat:addMessage", source, {
+            color = {50, 100, 235},
+            multiline = true,
+            args = {"Staff action", ("deleted %d vehicles"):format(count)}
+        })
+    end
+
+    local closest, dist
+    for _, veh in ipairs(GetAllVehicles()) do
+        local vehDist = #(GetEntityCoords(veh) - coords)
+        if vehDist < 5.0 and not closest or (dist and dist > vehDist) then
+            closest = veh
+            dist = vehDist
+        end
+    end
+
+    if not closest then return "no vehicle found nearby" end
+    DeleteEntity(closest)
+    TriggerClientEvent("chat:addMessage", source, {
+        color = {50, 100, 235},
+        multiline = true,
+        args = {"Staff action", "deleted 1 vehicle"}
+    })
+end)
+
+lib.addCommand("goto", {
+    help = "Admin command, teleport to a player.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        }
+    }
+}, function(source, args, raw)
+    if args.target == source then return end
+    local target = GetPlayerPed(args.target)
+    local coords = GetEntityCoords(target)
+    local ped = GetPlayerPed(source)
+    SetEntityCoords(ped, coords.x, coords.y, coords.z)
+end)
+
+lib.addCommand("bring", {
+    help = "Admin command, teleport a player to you.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        }
+    }
+}, function(source, args, raw)
+    if args.target == source then return end
+    local ped = GetPlayerPed(source)
+    local coords = GetEntityCoords(ped)
+    local targetPed = GetPlayerPed(args.target)
+    SetEntityCoords(targetPed, coords.x, coords.y, coords.z)
+end)
+
+lib.addCommand("freeze", {
+    help = "Admin command, freeze a player.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        }
+    }
+}, function(source, args, raw)
+    local ped = GetPlayerPed(args.target)
+    FreezeEntityPosition(ped, true)
+end)
+
+lib.addCommand("unfreeze", {
+    help = "Admin command, unfreeze a player.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        }
+    }
+}, function(source, args, raw)
+    local ped = GetPlayerPed(args.target)
+    FreezeEntityPosition(ped, false)
+end)
+
+lib.addCommand("vehicle", {
+    help = "Admin command, unfreeze a player.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "model",
+            type = "string",
+            help = "Name of the vehicle to spawn"
+        }
+    }
+}, function(source, args, raw)
+    local player =  NDCore.getPlayer(source)
+    if not player then return end
+
+    local ped = GetPlayerPed(source)
+    local coords = GetEntityCoords(ped)
+    local heading = GetEntityHeading(ped)
+    local info = NDCore.createVehicle({
+        owner = player.id,
+        coords = coords,
+        heading = heading,
+        model = GetHashKey(args.model)
+    })
+
+    local veh = info.entity
+    for i=1, 10 do
+        if GetPedInVehicleSeat(veh, -1) ~= ped then
+            SetPedIntoVehicle(ped, veh, -1)
+        else
+            break
+        end
+        Wait(100)
+    end
+end)
