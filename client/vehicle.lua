@@ -318,9 +318,8 @@ local dontLock = {
 
 AddStateBagChangeHandler("locked", nil, function(bagName, key, value, reserved, replicated)
     local entity = GetEntityFromStateBagName(bagName)
-    if entity == 0 then return end
-    if dontLock[GetVehicleClass(entity)] then return end
-
+    if entity == 0 or value == nil or dontLock[GetVehicleClass(entity)] then return end
+    
     if value then
         -- SetVehicleDoorsLockedForAllPlayers(entity, true)
         return SetVehicleDoorsLocked(entity, 2)
@@ -330,7 +329,6 @@ AddStateBagChangeHandler("locked", nil, function(bagName, key, value, reserved, 
         while GetVehiclePedIsEntering(cache.ped) == entity do Wait(10) end
         -- SetVehicleDoorsLockedForAllPlayers(entity, false)
 
-        if value == nil then return end
         SetVehicleDoorsLocked(entity, 0)
     end)
 end)
@@ -403,7 +401,7 @@ local function getNearestVehicle(hasKeysForOnly)
     local function setNearestVehicle(veh)
         if hasKeysForOnly and not hasVehicleKeys(veh.vehicle) then return end
         local nearestDist = nearestVeh.dist
-        local dist = #(GetEntityCoords(cache.ped)-veh.coords)
+        local dist = #(coords-veh.coords)
         if not nearestDist or dist < nearestDist then
             nearestVeh.dist = dist
             nearestVeh.coords = veh.coords
