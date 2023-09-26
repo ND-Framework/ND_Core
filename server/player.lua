@@ -326,6 +326,7 @@ local function createCharacterTable(info)
     ---@param name string
     function self.removeGroup(name)
         local group = self.groups[name]
+        if not group then return end
         self.groups[name] = nil
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
         lib.removePrincipal(self.source, ("group.%s"):format(name))
@@ -336,6 +337,7 @@ local function createCharacterTable(info)
     ---@param rank number
     ---@return boolean
     function self.setJob(name, rank)
+        self.removeGroup(self.job)
         local job = self.addGroup(name, rank, true)
         local jobName, jobInfo = self.getJob()
         if jobInfo then
