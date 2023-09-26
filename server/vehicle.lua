@@ -52,7 +52,7 @@ local function getVehicleDatabaseInfo(vehicle)
         stored = stored,
         impounded = impounded,
         stolen = vehicle.stolen == 1,
-        available = not impounded and not stored
+        available = not impounded and stored
     }
 end
 
@@ -84,8 +84,12 @@ function NDCore.getVehicle(entity)
     }
 
     --- delete the vehicle
-    function self.delete()
+    function self.delete(saveProperties)
         if not DoesEntityExist(entity) then return end
+        if saveProperties and self.id and self.owner then
+            local properties = lib.callback.await("ND_Vehicles:getProps", NetworkGetEntityOwner(entity))
+            MySQL.query("UPDATE nd_vehicles SET properties = ? WHERE id = ?", {json.encode(properties), self.id})
+        end
         DeleteEntity(entity)
     end
 
@@ -107,7 +111,7 @@ function NDCore.getVehicle(entity)
     function self.setLocked(status)
         if not DoesEntityExist(entity) then return end
         local state = Entity(entity).state
-        status.locked = status
+        state.locked = status
         self.locked = status
     end
 
@@ -132,10 +136,11 @@ function NDCore.getVehicle(entity)
     ---@param status boolean
     function self.setStatus(statusType, status)
         if not lib.table.contains({"stored", "impounded", "stolen"}, statusType) then return end
-        if statusType ~= "stolen" then self.delete() end
+        if statusType ~= "stolen" then self.delete(true) end
         if not self.id or not self.owner then return end
-        local query = ("UPDATE nd_vehicles %s = ? WHERE id = ?"):format(statusType)
+        local query = ("UPDATE nd_vehicles SET %s = ? WHERE id = ?"):format(statusType)
         MySQL.query(query, {status and 1 or 0, self.id})
+        return true
     end
 
     if self.id and self.owner then
@@ -228,16 +233,22 @@ function NDCore.createVehicle(info)
     if coordType == "vector3" or coordType == "table" then
         spawnCoords = vector4(coords.x, coords.y, coords.z, coords.w or coords.h or info.heading or 0.0)
     end
-    if not spawnCoords then return end
+    if not spawnCoords then
+        return Citizen.Trace("NDCore.createVehicle", "spawnCoords not found")
+    end
 
     local model = info.model or properties.model
     local vehType = getVehicleType(model)
-    if not vehType then return end
+    if not vehType then
+        return Citizen.Trace("NDCore.createVehicle", "vehType not found")
+    end
 
     local veh = CreateVehicleServerSetter(model, vehType, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.w)
     local time = os.time()
     while not DoesEntityExist(veh) and time-os.time() < 5 do Wait(5) end
-    if not veh or not DoesEntityExist(veh) then return end
+    if not veh or not DoesEntityExist(veh) then
+        return Citizen.Trace("NDCore.createVehicle", "vehicle entity doesn't exist")
+    end
 
     local netId = NetworkGetNetworkIdFromEntity(veh)
     local state = Entity(veh).state
@@ -279,7 +290,7 @@ function NDCore.createVehicle(info)
         end
     end
 
-    return NDCore.getVehicle(entity)
+    return NDCore.getVehicle(veh)
 end
 
 --- transfer ownership of a vehicle between players
@@ -381,12 +392,12 @@ end
 ---@param coords vector4
 ---@return table
 function NDCore.spawnOwnedVehicle(source, vehicleId, coords, heading)
-    local player = NDCore.getPlayer(src)
+    local player = NDCore.getPlayer(source)
     if not player then return end
 
     local vehicle = NDCore.getVehicleById(vehicleId)
     if not vehicle or not vehicle.available or vehicle.owner ~= player.id then return end
-    
+
     MySQL.query.await("UPDATE nd_vehicles SET stored = ? WHERE id = ?", {0, vehicleId})
     return NDCore.createVehicle({
         owner = player.id,
@@ -604,16 +615,47 @@ RegisterNetEvent("ND_Vehicles:hotwire", function(netId)
     state.hotwired = true
 end)
 
--- lib.callback.await("ND_Vehicles:getProps", src)
-
-RegisterCommand("test", function(src, args, rawCommand)
-    local ped = GetPlayerPed(src)
-    local coords = GetEntityCoords(ped)
-    NDCore.spawnOwnedVehicle(src, 35, vec4(coords.x, coords.y, coords.z, GetEntityHeading(ped)))
-end, false)
-
-RegisterCommand("test2", function(source, args, rawCommand)
+RegisterNetEvent("ND_Vehicles:storeVehicle", function(netId)
     local src = source
-    local properties = lib.callback.await("ND_Vehicles:getProps", src)
-    NDCore.setVehicleOwned(src, properties, true)
-end, false)
+    local vehicle = NDCore.getVehicle(NetworkGetEntityFromNetworkId(netId))
+    if not vehicle then return end
+    
+    local player = NDCore.getPlayer(src)
+    if not vehicle.setStatus("stored", true) or not player or player.id ~= vehicle.owner then
+        return player.notify({
+            title = "Garage",
+            description = "No owned vehicle found nearby.",
+            type = "error",
+            position = "bottom",
+            duration = 3000
+        })
+    end
+    player.notify({
+        title = "Garage",
+        description = "Vehicle stored in garage.",
+        type = "success",
+        position = "bottom",
+        duration = 3000
+    })
+end)
+
+local function isParkingAvailable(locations)
+    for i=1, #locations do
+        local loc = locations[math.random(1, #locations)]
+        if #getNearbyVehicles(vec3(loc.x, loc.y, loc.z), 2.0) == 0 then
+            return loc
+        end
+    end
+end
+
+RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
+    local src = source
+    local info = NDCore.spawnOwnedVehicle(src, vehId, isParkingAvailable(locations))
+    TriggerClientEvent("ND_Vehicles:blip", src, info.netId, true)
+end)
+
+lib.callback.register("ND_Vehicles:getOwnedVehicles", function(src)
+    local player = NDCore.getPlayer(src)
+    if not player then return end
+    return NDCore.getVehicles(player.id)
+end)

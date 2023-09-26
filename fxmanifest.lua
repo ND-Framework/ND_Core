@@ -12,8 +12,9 @@ shared_script "@ox_lib/init.lua"
 client_scripts {
     "client/main.lua",
     "shared/functions.lua",
-    "client/vehicle.lua",
     "client/peds.lua",
+    "client/vehicle/main.lua",
+    "client/vehicle/garages.lua",
     "client/functions.lua",
     "client/events.lua",
     "client/death.lua",
@@ -30,6 +31,9 @@ server_scripts {
     "server/commands.lua"
 }
 
-file "init.lua"
+files {
+    "init.lua",
+    "client/vehicle/data.lua"
+}
 
 dependency "oxmysql"

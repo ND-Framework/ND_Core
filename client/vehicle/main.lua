@@ -241,14 +241,20 @@ local function getVehicleBlipSprite(entity)
     return typeBlip[model] or classBlip[class] or 225 -- 255 is default car blip
 end
 
-RegisterNetEvent("ND_Vehicles:blip", function(netid, status)
-    local veh = NetToVeh(netid)
+RegisterNetEvent("ND_Vehicles:blip", function(netId, status)
+    local time = GetCloudTimeAsInt()
+    while not NetworkDoesNetworkIdExist(netId) or not NetworkDoesEntityExistWithNetworkId(netId) and time-GetCloudTimeAsInt() < 5 do
+        Wait(100)
+    end
+
+    local veh = NetToVeh(netId)
     if not veh then return end
     if not status then
         local blip = GetBlipFromEntity(veh)
         if not blip or not DoesBlipExist(blip) then return end
         return RemoveBlip(blip)
     end
+
     local blip = AddBlipForEntity(veh)
     SetBlipSprite(blip, getVehicleBlipSprite(veh))
     SetBlipColour(blip, 0)
@@ -721,6 +727,13 @@ lib.addKeybind({
 
 lib.onCache("ped", function(value)
     SetPedConfigFlag(value, 184, true)
+end)
+
+lib.onCache("vehicle", function(value)
+    local veh = value or cache.vehicle
+    local blip = GetBlipFromEntity(veh)
+    if not blip or not DoesBlipExist(blip) then return end
+    SetBlipAlpha(blip, value and 0 or 255)
 end)
 
 SetTimeout(500, function()
