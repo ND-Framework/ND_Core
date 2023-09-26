@@ -87,8 +87,10 @@ function NDCore.getVehicle(entity)
     function self.delete(saveProperties)
         if not DoesEntityExist(entity) then return end
         if saveProperties and self.id and self.owner then
-            local properties = lib.callback.await("ND_Vehicles:getProps", NetworkGetEntityOwner(entity))
-            MySQL.query("UPDATE nd_vehicles SET properties = ? WHERE id = ?", {json.encode(properties), self.id})
+            local properties = lib.callback.await("ND_Vehicles:getProps", NetworkGetEntityOwner(entity), self.netId)
+            if properties then
+                MySQL.query("UPDATE nd_vehicles SET properties = ? WHERE id = ?", {json.encode(properties), self.id})
+            end
         end
         DeleteEntity(entity)
     end

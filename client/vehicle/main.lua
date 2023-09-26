@@ -241,13 +241,16 @@ local function getVehicleBlipSprite(entity)
     return typeBlip[model] or classBlip[class] or 225 -- 255 is default car blip
 end
 
-RegisterNetEvent("ND_Vehicles:blip", function(netId, status)
+local function getVehFromNetId(netId)
     local time = GetCloudTimeAsInt()
     while not NetworkDoesNetworkIdExist(netId) or not NetworkDoesEntityExistWithNetworkId(netId) and time-GetCloudTimeAsInt() < 5 do
         Wait(100)
     end
+    return NetToVeh(netId)
+end
 
-    local veh = NetToVeh(netId)
+RegisterNetEvent("ND_Vehicles:blip", function(netId, status)
+    local veh = getVehFromNetId(netId)
     if not veh then return end
     if not status then
         local blip = GetBlipFromEntity(veh)
@@ -265,16 +268,16 @@ RegisterNetEvent("ND_Vehicles:blip", function(netId, status)
     EndTextCommandSetBlipName(blip)
 end)
 
-RegisterNetEvent("ND_Vehicles:syncAlarm", function(netid)
-    local veh = NetToVeh(netid)
+RegisterNetEvent("ND_Vehicles:syncAlarm", function(netId)
+    local veh = getVehFromNetId(netId)
     if not veh then return end
     SetVehicleAlarmTimeLeft(veh, 1)
     SetVehicleAlarm(veh, true)
     StartVehicleAlarm(veh)
 end)
 
-RegisterNetEvent("ND_VehicleSystem:setOwnedIfNot", function(netid)
-    local veh = NetToVeh(netid)
+RegisterNetEvent("ND_VehicleSystem:setOwnedIfNot", function(netId)
+    local veh = getVehFromNetId(netId)
     if not veh then return end
     setVehicleOwned(veh, true)
     setVehicleLocked(veh, true)
@@ -312,8 +315,8 @@ local function playKeyFob(veh)
     return keyFob and DeleteEntity(keyFob)
 end
 
-RegisterNetEvent("ND_Vehicles:keyFob", function(vehicleNetId)
-    playKeyFob(NetToVeh(vehicleNetId))
+RegisterNetEvent("ND_Vehicles:keyFob", function(netId)
+    playKeyFob(getVehFromNetId(netId))
 end)
 
 local dontLock = {
@@ -339,10 +342,12 @@ AddStateBagChangeHandler("locked", nil, function(bagName, key, value, reserved, 
     end)
 end)
 
-lib.callback.register("ND_Vehicles:getProps", function()
-    local veh = GetVehiclePedIsIn(cache.ped)
+lib.callback.register("ND_Vehicles:getProps", function(netId)
+    local veh = getVehFromNetId(netId)
     local props = lib.getVehicleProperties(veh)
     local colorPrimary, colorSecondary = GetVehicleColours(veh)
+    if not props then return end
+
     props.colorNamePrimary = vehicleColorNames[colorPrimary]
     props.colorNameSecondary = vehicleColorNames[colorSecondary]
     props.colorName = props.colorNamePrimary == props.colorNameSecondary and props.colorNamePrimary or ("%s & %s"):format(props.colorNamePrimary, props.colorNameSecondary)
