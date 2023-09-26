@@ -124,14 +124,14 @@ function NDCore.createAiPed(info)
     }
 
     local found, ground = GetGroundZFor_3dCoord(coords.x, coords.y, coords.z, true)
-    lib.requestModel(model)
+    lib.requestModel(model, 500)
 
     function point:onEnter()
         ped = CreatePed(4, model, coords.x, coords.y, found and ground or coords.z, coords.w or coords.h or info.heading, false, false)
-        local timeOut = 100
-        while not DoesEntityExist(ped) and timeOut > 0 do
-            Wait(10)
-            timeOut -= 1
+
+        local time = GetCloudTimeAsInt()
+        while not DoesEntityExist(ped) and time-GetCloudTimeAsInt() < 5 do
+            Wait(100)
         end
 
         configPed(ped)
@@ -143,7 +143,7 @@ function NDCore.createAiPed(info)
             TaskPlayAnim(ped, anim.dict, anim.clip, 2.0, 8.0, -1, 1, 0, 0, 0, 0)
         end
 
-        if target and options then
+        if target and options and DoesEntityExist(ped) then
             ox_target:addLocalEntity({ped}, options)
         end
     end
