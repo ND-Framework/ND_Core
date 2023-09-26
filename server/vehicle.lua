@@ -210,14 +210,7 @@ function NDCore.giveVehicleAccess(source, vehicle, access, info)
             vehNetId = netId
         })
     elseif not access and hasKey then
-        ox_inventory:RemoveItem(source, "keys", 1, {
-            vehOwner = owner or state.owner,
-            vehId = vehicleId,
-            vehPlate = plate,
-            vehModel = modelName,
-            keyEnabled = true,
-            vehNetId = netId
-        })
+        ox_inventory:RemoveItem(source, "keys", 1, nil, hasKey)
     end
 end
 
@@ -638,6 +631,11 @@ RegisterNetEvent("ND_Vehicles:storeVehicle", function(netId)
         type = "success",
         position = "bottom",
         duration = 3000
+    })
+    NDCore.giveVehicleAccess(src, vehicle.entity, false, {
+        vehicleId = vehicle.id,
+        netId = vehicle.netId,
+        owner = vehicle.owner
     })
 end)
 
