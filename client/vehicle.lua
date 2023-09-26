@@ -276,7 +276,7 @@ end)
 
 AddStateBagChangeHandler("props", nil, function(bagName, key, value, reserved, replicated)
     local entity = GetEntityFromStateBagName(bagName)
-    if entity == 0 or not value then return end
+    if entity == 0 or not value or not NetworkGetEntityOwner(entity) == cache.playerId then return end
     lib.setVehicleProperties(entity, value)
 end)
 
