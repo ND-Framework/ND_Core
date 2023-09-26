@@ -167,12 +167,17 @@ local function createMenuOptions(vehicle, vehicleSpawns)
     local props = vehicle.properties
     local makeName = GetLabelText(GetMakeNameFromVehicleModel(props.model))
     local modelName = GetLabelText(GetDisplayNameFromVehicleModel(props.model))
+    local metadata = {}
 
-    local metadata = {
-        {label = "Plate", value = vehicle.properties.plate},
-        {label = "Fuel", value = ("%d%s"):format(vehicle.properties.fuelLevel, "%")},
-        {label = "Engine status", value = getEngineStatus(vehicle.properties.engineHealth)}
-    }
+    if vehicle.properties?.plate then
+        metadata[#metadata+1] = {label = "Plate", value = vehicle.properties.plate}
+    end
+    if vehicle.properties?.fuelLevel then
+        metadata[#metadata+1] = {label = "Fuel", value = ("%d%s"):format(vehicle.properties.fuelLevel, "%")}
+    end
+    if vehicle.properties?.engineHealth then
+        metadata[#metadata+1] = {label = "Engine status", value = getEngineStatus(vehicle.properties.engineHealth)}
+    end
 
     if not makeName or makeName == "NULL" then
         makeName = ""
