@@ -199,7 +199,7 @@ function NDCore.giveVehicleAccess(source, vehicle, access, info)
         vehId = vehicleId,
         vehNetId = netId
     })
-    
+
     if access and not hasKey then
         ox_inventory:AddItem(source, "keys", 1, {
             vehOwner = owner or state.owner,
@@ -650,7 +650,31 @@ end
 
 RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
     local src = source
-    local info = NDCore.spawnOwnedVehicle(src, vehId, isParkingAvailable(locations))
+    local vehicle = NDCore.getVehicleById(vehId)
+    local player = NDCore.getPlayer(src)
+    if not player or not vehicle or vehicle.owner ~= player.id then return end
+    if vehicle.impounded then
+        local reclaimPrice = 200
+        if player.deductMoney("bank", reclaimPrice, "Vehicle impound reclaim") then
+            MySQL.query("UPDATE nd_vehicles SET impounded = ? WHERE id = ?", {0, vehicle.id})
+            player.notify({
+                title = "Impound",
+                description = ("Paid $%d to reclaim vehicle!"):format(reclaimPrice),
+                type = "success",
+                position = "bottom"
+            })
+        else
+            player.notify({
+                title = "Impound",
+                description = ("Price to reclaim is $%d, you don't have enough!"):format(reclaimPrice),
+                type = "error",
+                position = "bottom"
+            })
+        end
+    end
+
+    local info = NDCore.spawnOwnedVehicle(src, vehicle.id, isParkingAvailable(locations))
+    if not info then return end
     TriggerClientEvent("ND_Vehicles:blip", src, info.netId, true)
 end)
 

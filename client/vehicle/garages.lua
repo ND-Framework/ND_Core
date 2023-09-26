@@ -142,11 +142,13 @@ local function parkVehicle(veh)
     TriggerServerEvent("ND_Vehicles:storeVehicle", VehToNet(veh))
 end
 
-local function isVehicleClassForGarage(class, garageType)
-    if not class then return true end
+local function isVehicleAvailable(vehicle, garageType, impound)
+    local class = vehicle.properties.class
+    local available = vehicle.available and not impound or vehicle.impounded and impound
+    if available and not garageTypes[garageType] then return true end
+    
     for garType, garClass in pairs(garageTypes) do
-        print(garType, garageType, garClass, class)
-        if garType == garageType and garClass == class then
+        if available and garType == garageType and garClass == class then
             return true
         end
     end
@@ -200,24 +202,30 @@ local function createMenuOptions(vehicle, vehicleSpawns)
     }
 end
 
-local function createMenu(vehicles, garageType, vehicleSpawns)
-    local options = {
-        {
+local function createMenu(vehicles, garageType, vehicleSpawns, impound)
+    local options = {}
+    if not impound then
+        options[#options+1] = {
             title = "Park vehicle",
             onSelect = function(args)
                 local veh = getClosestOwnedVehicle()
                 parkVehicle(veh)
             end
         }
-    }
+    end
     for _, vehicle in ipairs(vehicles) do
-        if vehicle.available and isVehicleClassForGarage(vehicle.properties.class, garageType) then
+        if isVehicleAvailable(vehicle, garageType, impound) then
             options[#options+1] = createMenuOptions(vehicle, vehicleSpawns)
         end
     end
+    if impound and #options == 0 then
+        options[#options+1] = {
+            title = "No vehicles found",
+        }
+    end
     return {
         id = ("garage_%s"):format(garageType),
-        title = "Parking garage",
+        title = impound and "Vehicle impound" or "Parking garage",
         options = options,
         onExit = function()
             garageOpen = false
@@ -233,8 +241,8 @@ for i=1, #locations do
         distance = 45.0,
         clothing = clothing[math.random(1, #clothing)],
         blip = {
-            label = ("Parking garage (%s)"):format(location.garageType),
-            sprite = sprite[location.garageType],
+            label = location.impound and ("Impound (%s)"):format(location.garageType) or ("Parking garage (%s)"):format(location.garageType),
+            sprite = location.impound and 285 or sprite[location.garageType],
             scale = 0.7,
             color = 3,
             groups = location.groups
@@ -247,7 +255,7 @@ for i=1, #locations do
             {
                 name = "nd_core:garagePed",
                 icon = "fa-solid fa-warehouse",
-                label = "View garage",
+                label = location.impound and "View impounded vehicles" or "View garage",
                 distance = 2.0,
                 canInteract = function(entity, distance, coords, name, bone)
                     if not location.groups then return true end
@@ -261,7 +269,7 @@ for i=1, #locations do
                 end,
                 onSelect = function(data)
                     local vehicles = lib.callback.await("ND_Vehicles:getOwnedVehicles") or {}
-                    local menu = createMenu(vehicles, location.garageType, location.vehicleSpawns)
+                    local menu = createMenu(vehicles, location.garageType, location.vehicleSpawns, location.impound)
                     lib.registerContext(menu)
                     lib.showContext(menu.id)
                 end
