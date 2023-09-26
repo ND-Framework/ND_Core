@@ -1,5 +1,6 @@
 local target, ox_target
 local locations = {}
+local pedBlips = {}
 local clothingComponents = {
     face = 0,
     mask = 1,
@@ -51,8 +52,28 @@ local function setClothing(ped, clothing)
     end
 end
 
-local function createBlip(coords, info)
+local function groupCheck(groups, playerGroups)
+    if not groups or #groups == 0 then return true end
+    for i=1, #groups do
+        if playerGroups and playerGroups[groups[i]] then
+            return true
+        end
+    end
+end
+
+local function createBlip(coords, info, i)
     if not info then return end
+    local groups = info.groups
+    local playerGroups = NDCore.player?.groups
+
+    local key = i or #pedBlips+1
+    pedBlips[key] = {
+        groups = groups,
+        info = info,
+        coords = coords
+    }
+
+    if not groupCheck(groups, playerGroups) then return end
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
     SetBlipSprite(blip, info.sprite or 280)
     SetBlipScale(blip, info.scale or 0.8)
@@ -63,7 +84,21 @@ local function createBlip(coords, info)
         AddTextComponentString(info.label)
         EndTextCommandSetBlipName(blip)
     end
+
+    pedBlips[key].blip = blip
     return blip
+end
+
+local function updateBlips(playerGroups)
+    for i=1, #pedBlips do
+        local blipInfo = pedBlips[i]
+        local access = groupCheck(blipInfo.groups, playerGroups)
+        if access and not blipInfo.blip or not DoesBlipExist(blipInfo.blip) then
+            createBlip(blipInfo.coords, blipInfo.info, i)
+        elseif not access and blipInfo.blip and DoesBlipExist(blipInfo.blip) then
+            RemoveBlip(blipInfo.blip)
+        end
+    end
 end
 
 function NDCore.createAiPed(info)
@@ -147,6 +182,18 @@ function NDCore.removeAiPed(id)
         DeleteEntity(ped)
     end
 end
+
+RegisterNetEvent("ND:updateCharacter", function(character)
+    Wait(3000)
+    if character.id ~= NDCore.player?.id then return end
+    updateBlips(character.groups)
+end)
+
+RegisterNetEvent("ND:characterLoaded", function(character)
+    Wait(3000)
+    if character.id ~= NDCore.player?.id then return end
+    updateBlips(character.groups)
+end)
 
 AddEventHandler("onResourceStop", function(name)
     if name == GetCurrentResourceName() then

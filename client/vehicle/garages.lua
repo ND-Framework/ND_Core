@@ -231,7 +231,8 @@ for i=1, #locations do
             label = ("Parking garage (%s)"):format(location.garageType),
             sprite = sprite[location.garageType],
             scale = 0.7,
-            color = 3
+            color = 3,
+            groups = location.groups
         },
         anim = {
             dict = "anim@amb@casino@valet_scenario@pose_d@",
