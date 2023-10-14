@@ -663,8 +663,9 @@ RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
                 type = "success",
                 position = "bottom"
             })
+            Wait(500)
         else
-            player.notify({
+            return player.notify({
                 title = "Impound",
                 description = ("Price to reclaim is $%d, you don't have enough!"):format(reclaimPrice),
                 type = "error",
