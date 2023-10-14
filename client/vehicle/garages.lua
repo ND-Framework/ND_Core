@@ -221,6 +221,7 @@ local function createMenu(vehicles, garageType, vehicleSpawns, impound)
     if impound and #options == 0 then
         options[#options+1] = {
             title = "No vehicles found",
+            readOnly = true
         }
     end
     return {
