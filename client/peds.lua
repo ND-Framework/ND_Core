@@ -178,7 +178,6 @@ function NDCore.removeAiPed(id)
         if info.options then
             ox_target:removeLocalEntity({ped})
         end
-        Wait(500)
         DeleteEntity(ped)
     end
 end
