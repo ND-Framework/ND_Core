@@ -372,7 +372,7 @@ local function hasVehicleKeys(veh, checkEngine)
     local state = Entity(veh).state
     if Config.ox_inventory and Config.useInventoryForKeys then
         local metadata = {
-            vehPlate = GetVehicleNumberPlateText(veh),
+            vehId = state.id,
             keyEnabled = true
         }
         local hasKey = exports.ox_inventory:GetItemCount("keys", metadata) > 0

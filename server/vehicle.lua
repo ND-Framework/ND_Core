@@ -196,8 +196,7 @@ function NDCore.giveVehicleAccess(source, vehicle, access, info)
     local model = info?.model or GetEntityModel(vehicle)
     local modelName = info?.modelName or model and lib.callback.await("ND_Vehicles:getVehicleModelMakeLabel", source, model) or ""
     local hasKey = ox_inventory:GetSlotIdWithItem(source, "keys", {
-        vehId = vehicleId,
-        vehNetId = netId
+        vehId = vehicleId
     })
 
     if access and not hasKey then
