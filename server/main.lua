@@ -21,7 +21,8 @@ Config = {
     disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
     useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
     groups = json.decode(GetConvar("core:groups", "[]")),
-    admins = json.decode(GetConvar("core:admins", "[]"))
+    admins = json.decode(GetConvar("core:admins", "[]")),
+    multiCharacter = false
 }
 
 SetConvarServerInfo("Discord", Config.discordInvite)
@@ -45,6 +46,23 @@ AddEventHandler("playerJoining", function(oldId)
     local src = source
     PlayersInfo[src] = tempPlayersInfo[oldId]
     tempPlayersInfo[oldId] = nil
+
+    if Config.multiCharacter then return end
+    Wait(3000)
+
+    local characters = NDCore.fetchAllCharacters(src)
+    local id = next(characters)
+    if id then
+        return NDCore.setActiveCharacter(src, id)
+    end
+
+    local player = NDCore.newCharacter(src, {
+        firstname = GetPlayerName(src),
+        lastname = "",
+        dob = "",
+        gender = ""
+    })
+    NDCore.setActiveCharacter(src, player.id)
 end)
 
 local function checkDiscordIdentifier(identifiers)

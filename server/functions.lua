@@ -88,6 +88,10 @@ function NDCore.getDiscordInfo(discordUserId)
     return data
 end
 
+function NDCore.enableMultiCharacter(enable)
+    Config.multiCharacter = enable
+end
+
 for name, func in pairs(NDCore) do
     if type(func) == "function" then
         exports(name, func)
