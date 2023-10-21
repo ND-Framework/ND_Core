@@ -59,10 +59,11 @@ setr core:disableVehicleAirControl true
 setr core:useInventoryForKeys true
 
 # You can set admins here by their identifiers, admins will receive admin group in core and have access to group.admin ace perms.
-# Admins get access to commands and more.
-set core:admins ["fivem:1459624"]
+# You can also use Discord role ids, Admins get access to commands and more.
+set core:admins ["fivem:1459624", "fivem:1152629"]
+set core:adminDiscordRoles ["944284542758449212", "93422454258349612", "93345451558145232"]
 
-# Allow ox_lib to use commands, don't remove this.
+# Allow ox_lib to use commands, don't remove this!
 add_ace resource.ox_lib command.add_ace allow
 add_ace resource.ox_lib command.remove_ace allow
 add_ace resource.ox_lib command.add_principal allow

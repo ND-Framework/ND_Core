@@ -285,6 +285,17 @@ local function createCharacterTable(info)
                 self.addGroup("admin")
             end
         end
+
+        local roles = self.discord.roles
+        if roles then            
+            for i=1, #Config.adminDiscordRoles do
+                local role = Config.adminDiscordRoles[i]
+                if lib.table.contains(roles, role) then
+                    self.addGroup("admin")
+                end
+            end
+        end
+
         for name, _ in pairs(self.groups) do
             lib.addPrincipal(self.source, ("group.%s"):format(name))
         end

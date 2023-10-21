@@ -22,6 +22,7 @@ Config = {
     useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
     groups = json.decode(GetConvar("core:groups", "[]")),
     admins = json.decode(GetConvar("core:admins", "[]")),
+    adminDiscordRoles = json.decode(GetConvar("core:adminDiscordRoles", "[]")),
     multiCharacter = false
 }
 
