@@ -255,9 +255,9 @@ function NDCore.createVehicle(info)
     if owner then
         keys[owner] = true
         state.owner = owner
-        state.keys = keys
     end
 
+    state.keys = keys
     state.props = properties
     state.id = vehicleId
     local vehicleName
