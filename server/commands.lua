@@ -284,7 +284,7 @@ lib.addCommand("revive", {
 end)
 
 lib.addCommand("dv", {
-    help = "Admin command, revive player.",
+    help = "Admin command, delete vehicles within the range.",
     restricted = "group.admin",
     params = {
         {
