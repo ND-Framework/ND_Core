@@ -1,25 +1,29 @@
 local startedResources = {}
-local callbacks = {}
+
+local function stateChanged(resourceName, state)
+    local callbacks = startedResources[resourceName]
+    if not callbacks then return end
+    for _, cb do
+        cb(state)
+    end
+end
 
 AddEventHandler("onResourceStart", function(resourceName)
-    startedResources[resourceName] = true
-    local callback = callbacks[resourceName]
-    if not callback then return end
-    callback(true)
+    stateChanged(resourceName, true)
 end)
 
 AddEventHandler("onResourceStop", function(resourceName)
-    startedResources[resourceName] = nil
-    local callback = callbacks[resourceName]
-    if not callback then return end
-    callback(false)
+    stateChanged(resourceName, false)
 end)
 
 function NDCore.isResourceStarted(resourceName, cb)
     local started = GetResourceState(resourceName) == "started"
     if cb then
-        startedResources[resourceName] = started
-        callbacks[resourceName] = cb
+        if not startedResources[resourceName] then
+            startedResources[resourceName] = {}
+        end
+        local invokingResource = GetInvokingResource()
+        startedResources[resourceName][invokingResource] = cb
         cb(started)
     end
     return started
