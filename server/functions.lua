@@ -57,6 +57,7 @@ function NDCore.loadSQL(fileLocation, resource)
 end
 
 function NDCore.getDiscordInfo(discordUserId)
+    if not discordUserId or not Config.discordBotToken or not Config.discordGuildId then return end
     local done = false
     local data
     local discordErrors = {
@@ -66,7 +67,6 @@ function NDCore.getDiscordInfo(discordUserId)
         [429] = "Discord bot rate limited"
     }
 
-    if not discordUserId then return end
     if type(discordUserId) == "string" and discordUserId:find("discord:") then discordUserId:gsub("discord:", "") end
 
     PerformHttpRequest(("https://discordapp.com/api/guilds/%s/members/%s"):format(Config.discordGuildId, discordUserId), function(errorCode, resultData, resultHeaders)
