@@ -3,7 +3,8 @@ local startedResources = {}
 local function stateChanged(resourceName, state)
     local callbacks = startedResources[resourceName]
     if not callbacks then return end
-    for _, cb do
+    for i=1, #callbacks do
+        local cb = callbacks[i]
         cb(state)
     end
 end
@@ -22,8 +23,7 @@ function NDCore.isResourceStarted(resourceName, cb)
         if not startedResources[resourceName] then
             startedResources[resourceName] = {}
         end
-        local invokingResource = GetInvokingResource()
-        startedResources[resourceName][invokingResource] = cb
+        startedResources[resourceName][#startedResources[resourceName]+1] = cb
         cb(started)
     end
     return started
