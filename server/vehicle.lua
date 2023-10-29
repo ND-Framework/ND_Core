@@ -666,17 +666,8 @@ RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
     local player = NDCore.getPlayer(src)
     if not player or not vehicle or vehicle.owner ~= player.id then return end
     if vehicle.impounded then
-        local reclaimPrice = 200
-        if player.deductMoney("bank", reclaimPrice, "Vehicle impound reclaim") then
-            MySQL.query("UPDATE nd_vehicles SET impounded = ? WHERE id = ?", {0, vehicle.id})
-            player.notify({
-                title = "Impound",
-                description = ("Paid $%d to reclaim vehicle!"):format(reclaimPrice),
-                type = "success",
-                position = "bottom"
-            })
-            Wait(500)
-        else
+        local reclaimPrice = vehicle.metadata.impoundReclaimPrice or 200
+        if not player.deductMoney("bank", reclaimPrice, "Vehicle impound reclaim") then
             return player.notify({
                 title = "Impound",
                 description = ("Price to reclaim is $%d, you don't have enough!"):format(reclaimPrice),
@@ -684,6 +675,13 @@ RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
                 position = "bottom"
             })
         end
+        player.notify({
+            title = "Impound",
+            description = ("Paid $%d to reclaim vehicle!"):format(reclaimPrice),
+            type = "success",
+            position = "bottom"
+        })
+        MySQL.query.await("UPDATE nd_vehicles SET impounded = ? WHERE id = ?", {0, vehicle.id})
     end
 
     local info = NDCore.spawnOwnedVehicle(src, vehicle.id, isParkingAvailable(locations))
