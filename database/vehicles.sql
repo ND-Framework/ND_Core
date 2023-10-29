@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `nd_vehicles` (
     `stored` INT(11) DEFAULT '1',
 	`impounded` INT(11) DEFAULT '0',
 	`stolen` INT(11) DEFAULT '0',
+    `metadata` LONGTEXT DEFAULT '[]',
 	PRIMARY KEY (`id`) USING BTREE,
 	INDEX `owner` (`owner`) USING BTREE,
 	CONSTRAINT `vehowner` FOREIGN KEY (`owner`) REFERENCES `nd_characters` (`charid`) ON UPDATE CASCADE ON DELETE CASCADE

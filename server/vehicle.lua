@@ -52,7 +52,8 @@ local function getVehicleDatabaseInfo(vehicle)
         stored = stored,
         impounded = impounded,
         stolen = vehicle.stolen == 1,
-        available = not impounded and stored
+        available = not impounded and stored,
+        metadata = json.decode(vehicle.metadata) or {}
     }
 end
 
@@ -79,7 +80,7 @@ function NDCore.getVehicle(entity)
         properties = state.props,
         locked = state.locked,
         hotwired = state.hotwired,
-        metadata = state.metadata,
+        metadata = state.metadata or {},
         netId = NetworkGetNetworkIdFromEntity(entity)
     }
 
@@ -143,6 +144,18 @@ function NDCore.getVehicle(entity)
         local query = ("UPDATE nd_vehicles SET %s = ? WHERE id = ?"):format(statusType)
         MySQL.query(query, {status and 1 or 0, self.id})
         return true
+    end
+
+    function self.setMetadata(key, value)
+        self.metadata[key] = value
+        if DoesEntityExist(entity) then
+            local state = Entity(self.entity).state
+            local metadata = state.metadata
+            metadata[key] = value
+            state.metadata = metadata
+        end
+        if not self.id or not self.owner then return end
+        MySQL.query("UPDATE nd_vehicles SET metadata = ? WHERE id = ?", {json.encode(self.metadata), self.id})
     end
 
     if self.id and self.owner then
