@@ -171,16 +171,6 @@ local function createMenuOptions(vehicle, vehicleSpawns)
     local modelName = GetLabelText(GetDisplayNameFromVehicleModel(props.model))
     local metadata = {}
 
-    if vehicle.properties?.plate then
-        metadata[#metadata+1] = {label = "Plate", value = vehicle.properties.plate}
-    end
-    if vehicle.properties?.fuelLevel then
-        metadata[#metadata+1] = {label = "Fuel", value = ("%d%s"):format(vehicle.properties.fuelLevel, "%")}
-    end
-    if vehicle.properties?.engineHealth then
-        metadata[#metadata+1] = {label = "Engine status", value = getEngineStatus(vehicle.properties.engineHealth)}
-    end
-
     if not makeName or makeName == "NULL" then
         makeName = ""
     else
@@ -193,8 +183,29 @@ local function createMenuOptions(vehicle, vehicleSpawns)
         metadata[#metadata+1] = {label = "Model", value = modelName}
     end
 
+    if props?.plate then
+        metadata[#metadata+1] = {label = "Plate", value = props.plate}
+    end
+    if props?.engineHealth then
+        metadata[#metadata+1] = {
+            label = "Engine status",
+            value = getEngineStatus(props.engineHealth),
+            progress = props.engineHealth/10,
+            colorScheme = "blue"
+        }
+    end
+
+    if props?.fuelLevel then
+        metadata[#metadata+1] = {
+            label = "Fuel",
+            value = ("%d%s"):format(props.fuelLevel, "%"),
+            progress = props.fuelLevel,
+            colorScheme = "yellow"
+        }
+    end
+
     return {
-        title = ("%s%s"):format(makeName, modelName),
+        title = ("Vehicle: %s%s\nPlate: %s"):format(makeName, modelName, props?.plate or "not found"),
         metadata = metadata,
         onSelect = function(args)
             TriggerServerEvent("ND_Vehicles:takeVehicle", vehicle.id, vehicleSpawns)
