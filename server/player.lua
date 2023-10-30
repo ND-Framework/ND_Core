@@ -152,7 +152,7 @@ local function createCharacterTable(info)
             self.setMetadata("location", {
                 x = coords.x,
                 y = coords.y,
-                x = coords.z,
+                z = coords.z,
                 w = heading
             })
         end
@@ -264,8 +264,8 @@ local function createCharacterTable(info)
     function self.revive()
         self.triggerEvent("ND:revivePlayer")
         self.setMetadata({
-            dead = nil,
-            deathInfo = nil,
+            dead = false,
+            deathInfo = false,
         })
     end
 
