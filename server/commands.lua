@@ -84,6 +84,8 @@ lib.addCommand("setjob", {
     }
 }, function(source, args, raw)
     local player = NDCore.getPlayer(args.target)
+    if not player then return end
+    
     local job = args.job:lower()
     local jobInfo = player.setJob(job, args.rank)
     if not player or not jobInfo then return end
@@ -210,6 +212,7 @@ lib.addCommand("pay", {
     end
 
     local player = NDCore.getPlayer(source)
+    if not player then return end
     local success = player.deductMoney("cash", args.amount)
 
     if not success then
