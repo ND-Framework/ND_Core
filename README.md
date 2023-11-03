@@ -4,7 +4,7 @@
 
 <p align='center'><b><a href="https://discord.gg/andys-development-857672921912836116">Discord</a></b>
 
-<p align='center'><b><a href="https://ndfw.gitbook.io/nd-framework/">Documentation</a></b>
+<p align='center'><b><a href="https://ndcore.dev/">Documentation</a></b>
 
 ## Dependency:
 * [oxmysql](https://github.com/overextended/oxmysql/releases)
