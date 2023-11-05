@@ -14,6 +14,7 @@
 * [Character selection](https://github.com/ND-Framework/ND_Characters/tree/wip-v2)
 * [Banking](https://github.com/ND-Framework/ND_Banking/tree/wip-v2)
 * [Appearance shops](https://github.com/ND-Framework/ND_AppearanceShops/tree/wip-v2)
+* [Dealership](https://github.com/ND-Framework/ND_Dealership/tree/v2)
 * [Inventory](https://github.com/overextended/ox_inventory/pull/1403)
 
 # Need support?
