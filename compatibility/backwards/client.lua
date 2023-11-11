@@ -1,3 +1,5 @@
+if not lib.table.contains(Config.compatibility, "backwards") then return end
+
 NDCore.Functions = {}
 NDCore.Functions.GetSelectedCharacter = NDCore.getPlayer
 NDCore.Functions.GetCharacters = NDCore.getCharacters

@@ -13,7 +13,8 @@ Config = {
     randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
     disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
     useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
-    groups = json.decode(GetConvar("core:groups", "[]"))
+    groups = json.decode(GetConvar("core:groups", "[]")),
+    compatibility = json.decode(GetConvar("core:compatibility", "[]"))
 }
 
 -- Discord rich presence.

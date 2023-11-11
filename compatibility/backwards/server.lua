@@ -1,3 +1,5 @@
+if not lib.table.contains(Config.compatibility, "backwards") then return end
+
 exports("GetCoreObject", function()
     return NDCore
 end)

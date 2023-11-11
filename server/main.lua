@@ -23,7 +23,8 @@ Config = {
     groups = json.decode(GetConvar("core:groups", "[]")),
     admins = json.decode(GetConvar("core:admins", "[]")),
     adminDiscordRoles = json.decode(GetConvar("core:adminDiscordRoles", "[]")),
-    multiCharacter = false
+    multiCharacter = false,
+    compatibility = json.decode(GetConvar("core:compatibility", "[]"))
 }
 
 SetConvarServerInfo("Discord", Config.discordInvite)
