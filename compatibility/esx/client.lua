@@ -8,6 +8,7 @@ NDCore.Streaming = {}
 NDCore.UI = {}
 NDCore.UI.HUD = {}
 NDCore.UI.Menu = {}
+NDCore.PlayerData = {}
 
 local uiMetatable = {
     __index = function(table, key)
@@ -35,6 +36,7 @@ end)
 
 function NDCore.GetPlayerData()
     local player = NDCore.getPlayer()
+    if not player then return {} end
 
     player.Accounts = {
         Bank = player.bank,
@@ -42,7 +44,31 @@ function NDCore.GetPlayerData()
         Black = player.Cash
     }
 
-    -- add more here
+    if player.jobInfo then        
+        player.job = {
+            id = player.job,
+            name = player.job,
+            label = player.jobInfo.label,
+            grade = player.jobInfo.rank,
+            grade_name = player.jobInfo.rankName,
+            grade_label = player.jobInfo.rankName,
+            grade_salary = 0,
+            skin_male = {},
+            skin_female = {}
+        }
+    end
+
+    player.coords = GetEntityCoords(cache.ped)
+    player.loadout = {}
+    player.maxWeight = exports.ox_inventory:GetPlayerMaxWeight()
+    player.money = player.Accounts.Money
+    player.sex = player.gender
+    player.firstName = player.firstname
+    player.lastName = player.lastname
+    player.dateofbirth = player.dob
+    player.height = 120
+    player.dead = LocalPlayer.state.dead or false
+    NDCore.PlayerData = player
 
     return player
 end
@@ -62,7 +88,7 @@ function NDCore.Progressbar(message, lenght, options)
         newOptions.anim = {}
         if options.animation.type == "anim" then            
             if options.animation.dict then
-                newOptions.anim.dict = options.animation.dict,
+                newOptions.anim.dict = options.animation.dict
             end
             if options.animation.lib then
                 newOptions.anim.clip = options.animation.lib
@@ -319,11 +345,9 @@ function NDCore.Game.SpawnLocalObject(model, coords, cb)
     end
     local entity = CreateObject(model, coords.x, coords.y, coords.z, false, false, false)
     entity = lib.waitFor(function()
-        if DoesEntityExist(entity) end
+        if DoesEntityExist(entity) then return entity end
     end)
-    if cb then
-        cb(entity)
-    end
+    if cb then cb(entity) end
     return entity
 end
 
@@ -333,11 +357,9 @@ function NDCore.Game.SpawnLocalVehicle(model, coords, heading, cb)
     end
     local entity = CreateVehicle(model, coords.x, coords.y, coords.z, heading, false, false, false)
     entity = lib.waitFor(function()
-        if DoesEntityExist(entity) end
+        if DoesEntityExist(entity) then return entity end
     end)
-    if cb then
-        cb(entity)
-    end
+    if cb then cb(entity) end
     return entity
 end
 
@@ -347,11 +369,9 @@ function NDCore.Game.SpawnObject(model, coords, cb)
     end
     local entity = CreateObject(model, coords.x, coords.y, coords.z, true, false, false)
     entity = lib.waitFor(function()
-        if DoesEntityExist(entity) end
+        if DoesEntityExist(entity) then return entity end
     end)
-    if cb then
-        cb(entity)
-    end
+    if cb then cb(entity) end
     return entity
 end
 
@@ -361,11 +381,9 @@ function NDCore.Game.SpawnVehicle(model, coords, heading, cb)
     end
     local entity = CreateVehicle(model, coords.x, coords.y, coords.z, heading, true, false, false)
     entity = lib.waitFor(function()
-        if DoesEntityExist(entity) end
+        if DoesEntityExist(entity) then return entity end
     end)
-    if cb then
-        cb(entity)
-    end
+    if cb then cb(entity) end
     return entity
 end
 
@@ -384,3 +402,11 @@ function NDCore.Game.Teleport(entity, coords, cb)
         cb()
     end
 end
+
+AddEventHandler("ND:characterLoaded", function()
+    NDCore.GetPlayerData()
+end)
+
+AddEventHandler("ND:updateCharacter", function()
+    NDCore.GetPlayerData()
+end)

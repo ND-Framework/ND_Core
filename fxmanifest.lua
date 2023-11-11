@@ -33,7 +33,9 @@ server_scripts {
 
 files {
     "init.lua",
-    "client/vehicle/data.lua"
+    "client/vehicle/data.lua",
+    "compatibility/**/locale.lua"
 }
 
 dependency "oxmysql"
+provide "es_extended"

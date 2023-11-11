@@ -4,14 +4,50 @@ local itemNames
 local registeredItems = {}
 
 local function getAmmoFromWeapon(weapon)
+    if not weapon then return end
     for item, data in pairs(exports.ox_inventory:Items()) do
-        if data.weapon and data.model:lower() == weapon:lower then
+        if data.weapon and data.model and data.model:lower() == weapon:lower() then
             return data.ammoname
         end
     end
 end
 
 local function createPlayerFunctions(self)
+    self.Accounts = {
+        Bank = self.bank,
+        Money = self.Cash,
+        Black = self.Cash
+    }
+
+    if self.jobInfo then        
+        self.job = {
+            id = self.job,
+            name = self.job,
+            label = self.jobInfo.label,
+            grade = self.jobInfo.rank,
+            grade_name = self.jobInfo.rankName,
+            grade_label = self.jobInfo.rankName,
+            grade_salary = 0,
+            skin_male = {},
+            skin_female = {}
+        }
+    end
+
+    local ped = GetPlayerPed(self.source)
+    if DoesEntityExist(ped) then
+        self.coords = GetEntityCoords()
+    end
+
+    self.loadout = {}
+    self.maxWeight = 30000
+    self.money = self.Accounts.Money
+    self.sex = self.gender
+    self.firstName = self.firstname
+    self.lastName = self.lastname
+    self.dateofbirth = self.dob
+    self.height = 120
+    self.dead = self.getMetadata("dead")
+
     function self.addAccountMoney(account, amount)
         local amount = tonumber(amount)
         if not amount or amount <= 0 or account ~= "bank" and account ~= "cash" then return end
@@ -326,20 +362,10 @@ function NDCore.OneSync.SpawnPedInVehicle(model, vehicle, seat, cb)
     cb(value)
 end
 
-AddEventHandler("esx:playerDropped", function(src)
-    TriggerEvent("ND:characterUnloaded", src, NDCore.getPlayer(src))
-end
-
-AddEventHandler("esx:playerLoaded", function(src)
-    TriggerEvent("ND:characterLoaded", NDCore.getPlayer(src))
-end
-
 AddEventHandler("ND:characterUnloaded", function(src, character)
     TriggerEvent("esx:playerDropped", src, "")
-end
+end)
 
 AddEventHandler("ND:characterLoaded", function(character)
     TriggerEvent("esx:playerLoaded", character.source, createPlayerFunctions(character))
-end
-
-
+end)
