@@ -286,7 +286,11 @@ end)
 AddStateBagChangeHandler("props", nil, function(bagName, key, value, reserved, replicated)
     local entity = GetEntityFromStateBagName(bagName)
     if not value or not DoesEntityExist(entity) or NetworkGetEntityOwner(entity) ~= cache.playerId then return end
-    lib.setVehicleProperties(entity, json.decode(value))
+    local props = value
+    if type(value) == "string" then
+        props = json.decode(value)
+    end
+    lib.setVehicleProperties(entity, props)
 end)
 
 local function playKeyFob(veh)
