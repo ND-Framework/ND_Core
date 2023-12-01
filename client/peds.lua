@@ -120,7 +120,7 @@ function NDCore.createAiPed(info)
         point = point,
         blip = blip,
         options = info.options,
-        resource = GetInvokingResource()
+        resource = info.resource or GetInvokingResource()
     }
 
     function point:onEnter()
