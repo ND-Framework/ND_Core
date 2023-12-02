@@ -146,9 +146,16 @@ function NDCore.createAiPed(info)
             Wait(500)
             ox_target:addLocalEntity({ped}, options)
         end
+
+        if blip and blipInfo and blipInfo.showWhenNear and DoesBlipExist(blip) then
+            SetBlipAlpha(blip, 255)
+        end
     end
 
     function point:onExit()
+        if blip and blipInfo and blipInfo.showWhenNear and DoesBlipExist(blip) then
+            SetBlipAlpha(blip, 0)
+        end
         if ped and DoesEntityExist(ped) then
             if target and options then
                 ox_target:removeLocalEntity({ped})
