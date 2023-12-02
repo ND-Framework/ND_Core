@@ -38,5 +38,5 @@ files {
 }
 
 dependency "oxmysql"
-provide "es_extended"
-provide "qb-Core"
+-- provide "es_extended"
+-- provide "qb-Core"
