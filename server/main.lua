@@ -15,8 +15,8 @@ Config = {
     discordActionText2 = GetConvar("core:discordActionText2", "STORE"),
     discordActionLink2 = GetConvar("core:discordActionLink2", "https://andyyy.tebex.io/category/fivem-scripts"),
     characterIdentifier = GetConvar("core:characterIdentifier", "license"),
-    discordGuildId = GetConvar("core:discordGuildId"),
-    discordBotToken = GetConvar("core:discordBotToken"),
+    discordGuildId = GetConvar("core:discordGuildId", 'false'),
+    discordBotToken = GetConvar("core:discordBotToken", 'false'),
     randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
     disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
     useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
@@ -68,7 +68,7 @@ AddEventHandler("playerJoining", function(oldId)
 end)
 
 local function checkDiscordIdentifier(identifiers)
-    if not Config.discordBotToken or not Config.discordGuildId then return end
+    if Config.discordBotToken == 'false'or Config.discordGuildId == 'false' then return end
 
     local discordIdentifier = identifiers["discord"]
     if not discordIdentifier then return end
@@ -77,7 +77,7 @@ local function checkDiscordIdentifier(identifiers)
 end
 
 AddEventHandler("onResourceStart", function(name)
-    if name ~= resourceName or not Config.discordBotToken or not Config.discordGuildId then return end
+    if name ~= resourceName or Config.discordBotToken == 'false' or Config.discordGuildId == 'false' then return end
     for _, playerId in ipairs(GetPlayers()) do
         local src = tonumber(playerId)
         local identifiers = getIdentifierList(src)
@@ -98,7 +98,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
     deferrals.defer()
     Wait(0)
 
-    if mainIdentifier then        
+    if mainIdentifier and Config.discordBotToken == 'false' and Config.discordGuildId == 'false' and not discordInfo then
         discordInfo = checkDiscordIdentifier(identifiers)
         if not discordInfo then
             deferrals.done(("Your discord was not found, join our discord here: %s."):format(Config.discordInvite))
