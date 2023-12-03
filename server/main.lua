@@ -77,13 +77,13 @@ local function checkDiscordIdentifier(identifiers)
 end
 
 AddEventHandler("onResourceStart", function(name)
-    if name ~= resourceName or Config.discordBotToken == "false" or Config.discordGuildId == "false" then return end
+    if name ~= resourceName then return end
     for _, playerId in ipairs(GetPlayers()) do
         local src = tonumber(playerId)
         local identifiers = getIdentifierList(src)
         PlayersInfo[src] = {
             identifiers = identifiers,
-            discord = checkDiscordIdentifier(identifiers)
+            discord = checkDiscordIdentifier(identifiers) or {}
         }
         Wait(65)
     end
