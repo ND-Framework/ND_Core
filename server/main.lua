@@ -68,7 +68,7 @@ AddEventHandler("playerJoining", function(oldId)
 end)
 
 local function checkDiscordIdentifier(identifiers)
-    if Config.discordBotToken == "false"or Config.discordGuildId == "false" then return end
+    if Config.discordBotToken == "false" or Config.discordGuildId == "false" then return end
 
     local discordIdentifier = identifiers["discord"]
     if not discordIdentifier then return end
