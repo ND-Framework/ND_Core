@@ -219,8 +219,8 @@ RegisterNetEvent("ND:newCharacter", function(newCharacter)
         lastname = newCharacter.lastName,
         dob = newCharacter.dob,
         gender = newCharacter.gender,
-        cash = newCharacter.cash,
-        bank = newCharacter.bank,
+        cash = 0,
+        bank = 0,
     })
 end)
 
