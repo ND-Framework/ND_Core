@@ -165,7 +165,7 @@ local function createCharacterTable(info)
     
     -- Save character information to database
     function self.save()
-        local affectedRows = MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, groups = ?, metadata = ?, inventory = ? WHERE charid = ?", {
+        local affectedRows = MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, groups = ?, metadata = ? WHERE charid = ?", {
             self.name,
             self.firstname,
             self.lastname,
@@ -175,7 +175,6 @@ local function createCharacterTable(info)
             self.bank,
             json.encode(self.groups),
             json.encode(self.metadata),
-            json.encode(self.inventory),
             self.id
         })
         return affectedRows > 0
