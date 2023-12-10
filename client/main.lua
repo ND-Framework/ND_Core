@@ -1,54 +1,69 @@
--- For support join my discord: https://discord.gg/Z9Mxu72zZ6
-
 NDCore = {}
-NDCore.SelectedCharacter = nil
-NDCore.Characters = {}
-NDCore.Functions = {}
-NDCore.Config = config
 
--- discord rich precense will show on a users profile.
-if config.enableRichPresence then
-    Citizen.CreateThread(function()
-        while true do
-            if NDCore.SelectedCharacter then
-                SetDiscordAppId(config.appId)
-                SetRichPresence(" Playing : " .. config.serverName .. " as " .. NDCore.SelectedCharacter.firstName .. " " .. NDCore.SelectedCharacter.lastName)
-                SetDiscordRichPresenceAsset(config.largeLogo)
-                SetDiscordRichPresenceAssetText("Playing: " .. config.serverName)
-                SetDiscordRichPresenceAssetSmall(config.smallLogo)
-                SetDiscordRichPresenceAssetSmallText("Playing as: " .. NDCore.SelectedCharacter.firstName .. " " .. NDCore.SelectedCharacter.lastName)
-                SetDiscordRichPresenceAction(0, config.firstButtonName, config.firstButtonLink)
-                SetDiscordRichPresenceAction(1, config.secondButtonName, config.secondButtonLink)
-            end
-            Citizen.Wait(config.updateIntervall * 1000)
+Config = {
+    serverName = GetConvar("core:serverName", "Unconfigured ND-Core Server"),
+    discordInvite = GetConvar("core:discordInvite", "https://discord.gg/Z9Mxu72zZ6"),
+    discordAppId = GetConvar("core:discordAppId", "858146067018416128"),
+    discordAsset = GetConvar("core:discordAsset", "andyyy"),
+    discordAssetSmall = GetConvar("core:discordAssetSmall", "andyyy"),
+    discordActionText = GetConvar("core:discordActionText", "DISCORD"),
+    discordActionLink = GetConvar("discordActionLink", "https://discord.gg/Z9Mxu72zZ6"),
+    discordActionText2 = GetConvar("core:discordActionText2", "STORE"),
+    discordActionLink2 = GetConvar("core:discordActionLink2", "https://andyyy.tebex.io/category/fivem-scripts"),
+    randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
+    disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
+    useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
+    groups = json.decode(GetConvar("core:groups", "[]")),
+    compatibility = json.decode(GetConvar("core:compatibility", "[]"))
+}
+
+-- Discord rich presence.
+CreateThread(function()
+    SetDiscordAppId(Config.discordAppId)
+    SetDiscordRichPresenceAsset(Config.discordAsset)
+    SetDiscordRichPresenceAssetSmall(Config.discordAssetSmall)
+    SetDiscordRichPresenceAction(0, Config.discordActionText, Config.discordActionLink)
+    SetDiscordRichPresenceAction(1, Config.discordActionText2, Config.discordActionLink2)
+    local presenceText = ("Playing: %s"):format(Config.serverName)
+    while true do
+        if NDCore.player then
+            local presence = ("Playing: %s as %s %s"):format(Config.serverName, NDCore.player.firstname, NDCore.player.lastname)
+            local presenceTextSmall = ("Playing as: %s %s"):format(NDCore.player.firstname, NDCore.player.lastname)
+            SetRichPresence(presence)
+            SetDiscordRichPresenceAssetText(presenceText)
+            SetDiscordRichPresenceAssetSmallText(presenceTextSmall)
         end
-    end)
-end
-
--- show server name, first name, last name, and the amount of money the character has in the pause menu.
-if config.customPauseMenu then
-    Citizen.CreateThread(function()
-        while true do
-            Citizen.Wait(0)
-            if NDCore.SelectedCharacter then
-                if IsPauseMenuActive() then
-                    BeginScaleformMovieMethodOnFrontendHeader("SET_HEADING_DETAILS")
-                    AddTextEntry("FE_THDR_GTAO", config.serverName) 
-                    ScaleformMovieMethodAddParamPlayerNameString(NDCore.SelectedCharacter.firstName .. " " .. NDCore.SelectedCharacter.lastName)
-                    PushScaleformMovieFunctionParameterString("Cash: $" .. tostring(NDCore.SelectedCharacter.cash))
-                    PushScaleformMovieFunctionParameterString("Bank: $" .. tostring(NDCore.SelectedCharacter.bank))
-                    EndScaleformMovieMethod()
-                end
-            end
-        end
-    end)
-end
-
--- Enables pvp if it's selected in the config.
-AddEventHandler("playerSpawned", function()
-    if config.enablePVP then
-        SetCanAttackFriendly(PlayerPedId(), true, false)
-        NetworkSetFriendlyFireOption(true)
+        Wait(60000)
     end
-    print("^0This framework is created by ^5Andyyy#7666 ^0for support you can join the ^5discord: ^0https://discord.gg/Z9Mxu72zZ6")
+end)
+
+-- Pause menu information.
+CreateThread(function()
+    AddTextEntry("FE_THDR_GTAO", Config.serverName)
+    local sleep = 500
+    while true do
+        Wait(sleep)
+        if NDCore.player and IsPauseMenuActive() then
+            sleep = 0
+            BeginScaleformMovieMethodOnFrontendHeader("SET_HEADING_DETAILS")
+            ScaleformMovieMethodAddParamPlayerNameString(("%s %s"):format(NDCore.player.firstname, NDCore.player.lastname))
+            ScaleformMovieMethodAddParamTextureNameString(("Cash: $%d"):format(NDCore.player.cash))
+            ScaleformMovieMethodAddParamTextureNameString(("Bank: $%d"):format(NDCore.player.bank))
+            EndScaleformMovieMethod()
+        elseif sleep == 0 then
+            sleep = 500
+        end
+    end
+end)
+
+AddEventHandler("playerSpawned", function()
+    print("^0ND Framework support discord: ^5https://discord.gg/Z9Mxu72zZ6")
+    SetCanAttackFriendly(PlayerPedId(), true, false)
+    NetworkSetFriendlyFireOption(true)
+end)
+
+AddEventHandler("onResourceStart", function(resourceName)
+    if resourceName ~= GetCurrentResourceName() then return end
+    SetCanAttackFriendly(PlayerPedId(), true, false)
+    NetworkSetFriendlyFireOption(true)
 end)

@@ -1,39 +1,42 @@
 -- For support join my discord: https://discord.gg/Z9Mxu72zZ6
 
-author "Andyyy#7666, N1K0#0001"
+author "Andyyy#7666"
 description "ND Framework Core"
-version "1.0.3"
+version "2.0.0"
 
 fx_version "cerulean"
 game "gta5"
 lua54 "yes"
 
-shared_scripts {
-    "config_client.lua",
-    "shared/main.lua"
-}
+shared_script "@ox_lib/init.lua"
 client_scripts {
     "client/main.lua",
+    "shared/functions.lua",
+    "client/peds.lua",
+    "client/vehicle/main.lua",
+    "client/vehicle/garages.lua",
     "client/functions.lua",
     "client/events.lua",
-    "shared/import.lua"
+    "client/death.lua",
+    "compatibility/**/client.lua"
 }
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
-    "config_server.lua",
     "server/main.lua",
+    "shared/functions.lua",
+    "server/player.lua",
+    "server/vehicle.lua",
     "server/functions.lua",
-    "server/events.lua",
-    "server/commands.lua",
-    "shared/import.lua"
+    "compatibility/**/server.lua",
+    "server/commands.lua"
 }
 
-exports {
-    "GetCoreObject"
-}
-
-server_exports {
-    "GetCoreObject"
+files {
+    "init.lua",
+    "client/vehicle/data.lua",
+    "compatibility/**/locale.lua"
 }
 
 dependency "oxmysql"
+-- provide "es_extended"
+-- provide "qb-Core"

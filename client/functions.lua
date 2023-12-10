@@ -1,19 +1,14 @@
-function GetCoreObject()
-    return NDCore
+function NDCore.getPlayer()
+    return NDCore.player
 end
 
-function NDCore.Functions.GetSelectedCharacter()
-    return NDCore.SelectedCharacter
+function NDCore.getCharacters()
+    return NDCore.characters
 end
 
-function NDCore.Functions.GetCharacters()
-    return NDCore.Characters
-end
-
-
-function NDCore.Functions.GetPlayersFromCoords(distance, coords)
+function NDCore.getPlayersFromCoords(distance, coords)
     if coords then
-        coords = type(coords) == 'table' and vec3(coords.x, coords.y, coords.z) or coords
+        coords = type(coords) == "table" and vec3(coords.x, coords.y, coords.z) or coords
     else
         coords = GetEntityCoords(PlayerPedId())
     end
@@ -31,50 +26,60 @@ function NDCore.Functions.GetPlayersFromCoords(distance, coords)
     return closePlayers
 end
 
--- Callbacks are licensed under LGPL v3.0
--- <https://github.com/overextended/ox_lib>
-NDCore.callback = {}
-local events = {}
-
-RegisterNetEvent("ND:callbacks", function(key, ...)
-	local cb = events[key]
-	return cb and cb(...)
-end)
-
-local function triggerCallback(_, name, cb, ...)
-    local key = ("%s:%s"):format(name, math.random(0, 100000))
-	TriggerServerEvent(("ND:%s_cb"):format(name), key, ...)
-    
-    local promise = not cb and promise.new()
-
-	events[key] = function(response, ...)
-        response = { response, ... }
-		events[key] = nil
-
-		if promise then
-			return promise:resolve(response)
-		end
-
-        if cb then
-            cb(table.unpack(response))
+function NDCore.revivePlayer(reset, keepDead)
+    local usingAmbulance = GetResourceState("ND_Ambulance") == "started"
+    if not keepDead then
+        LocalPlayer.state.dead = false
+        if usingAmbulance then
+            local state = Player(cache.serverId).state
+            state:set("isDead", false, true)
         end
-	end
+    end
 
-	if promise then
-		return table.unpack(Citizen.Await(promise))
-	end
+    local veh = GetVehiclePedIsIn(cache.ped)
+    local seat = cache.seat
+    local coords = GetEntityCoords(cache.ped)
+    NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, GetEntityHeading(cache.ped), true, true, false)
+
+    local ped = PlayerPedId()
+    if cache.ped ~= ped then
+        DeleteEntity(cache.ped)
+        ClearAreaOfPeds(coords.x, coords.y, coords.z, 0.2, false)
+    end
+
+    SetEntityInvincible(ped, false)
+    FreezeEntityPosition(ped, false)
+    SetEntityVisible(ped, true)
+    SetEveryoneIgnorePlayer(ped, false)
+    SetPedCanBeTargetted(ped, true)
+    SetEntityCanBeDamaged(ped, true)
+    SetBlockingOfNonTemporaryEvents(ped, false)
+    SetPedCanRagdollFromPlayerImpact(ped, true)
+    ClearPedTasksImmediately(ped)
+
+    if veh and veh ~= 0 then
+        SetPedIntoVehicle(ped, veh, seat)
+    end
+    if reset and GetPedMovementClipset(ped) == `move_m@injured` then
+        ClearEntityLastDamageEntity(ped)
+        SetPedMoveRateOverride(ped, 1.0)
+        ResetPedMovementClipset(ped, 0)
+    end
+    if reset and usingAmbulance then
+        exports["ND_Ambulance"]:resetBodyDamage()
+    end
 end
 
-setmetatable(NDCore.callback, {
-	__call = triggerCallback
-})
-
-function NDCore.callback.await(name, ...)
-    return triggerCallback(nil, name, false, ...)
+function NDCore.notify(...)
+    if GetResourceState("ModernHUD") == "started" then
+        exports["ModernHUD"]:notify(...)
+    elseif GetResourceState("ox_lib") == "started" then
+        lib.notify(...)
+    end
 end
 
-function NDCore.callback.register(name, callback)
-    RegisterNetEvent(("ND:%s_cb"):format(name), function(key, ...)
-        TriggerServerEvent("ND:callbacks", key, callback(...))
-    end)
+for name, func in pairs(NDCore) do
+    if type(func) == "function" then
+        exports(name, func)
+    end
 end
