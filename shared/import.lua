@@ -1,1 +1,0 @@
-NDCore = exports["ND_Core"]:GetCoreObject()
