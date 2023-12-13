@@ -165,7 +165,7 @@ local function createCharacterTable(info)
     
     -- Save character information to database
     function self.save()
-        local affectedRows = MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, groups = ?, metadata = ? WHERE charid = ?", {
+        local affectedRows = MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, `groups` = ?, metadata = ? WHERE charid = ?", {
             self.name,
             self.firstname,
             self.lastname,
@@ -398,7 +398,7 @@ function NDCore.newCharacter(src, info)
         inventory = info.inventory or {},
     }
 
-    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, groups, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
+    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, `groups`, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
         identifier,
         charInfo.name,
         charInfo.firstname,
