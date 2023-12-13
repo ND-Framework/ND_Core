@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS `nd_characters` (
 	`gender` VARCHAR(50) DEFAULT NULL,
 	`cash` INT(10) DEFAULT '0',
 	`bank` INT(10) DEFAULT '0',
-	`groups` LONGTEXT DEFAULT '[]',
-	`metadata` LONGTEXT DEFAULT '[]',
-	`inventory` LONGTEXT DEFAULT '[]',
+	`groups` LONGTEXT DEFAULT ('[]'),
+	`metadata` LONGTEXT DEFAULT ('[]'),
+	`inventory` LONGTEXT DEFAULT ('[]'),
 	PRIMARY KEY (`charid`) USING BTREE
 );
