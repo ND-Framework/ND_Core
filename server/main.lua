@@ -46,8 +46,9 @@ end
 
 AddEventHandler("playerJoining", function(oldId)
     local src = source
-    PlayersInfo[src] = tempPlayersInfo[oldId]
-    tempPlayersInfo[oldId] = nil
+    local oldTempId = tonumber(oldId)
+    PlayersInfo[src] = tempPlayersInfo[oldTempId]
+    tempPlayersInfo[oldTempId] = nil
 
     if Config.multiCharacter then return end
     Wait(3000)
