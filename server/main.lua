@@ -99,7 +99,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
     deferrals.defer()
     Wait(0)
 
-    if mainIdentifier and Config.discordBotToken ~= "false" and Config.discordGuildId ~= "false" and not discordInfo then
+    if mainIdentifier and Config.discordBotToken ~= "false" and Config.discordGuildId ~= "false" and next(discordInfo) == nil then
         discordInfo = checkDiscordIdentifier(identifiers)
         if not discordInfo then
             deferrals.done(("Your discord was not found, join our discord here: %s."):format(Config.discordInvite))
