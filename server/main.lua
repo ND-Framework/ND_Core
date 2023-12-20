@@ -3,6 +3,7 @@ NDCore.players = {}
 PlayersInfo = {}
 local resourceName = GetCurrentResourceName()
 local tempPlayersInfo = {}
+local next = next
 
 Config = {
     serverName = GetConvar("core:serverName", "Unconfigured ND-Core Server"),
