@@ -3,7 +3,6 @@ NDCore.players = {}
 PlayersInfo = {}
 local resourceName = GetCurrentResourceName()
 local tempPlayersInfo = {}
-local next = next
 
 Config = {
     serverName = GetConvar("core:serverName", "Unconfigured ND-Core Server"),
@@ -95,12 +94,12 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
     local tempSrc = source
     local identifiers = getIdentifierList(tempSrc)
     local mainIdentifier = identifiers[Config.characterIdentifier]
-    local discordInfo = {}
+    local discordInfo = nil
 
     deferrals.defer()
     Wait(0)
 
-    if mainIdentifier and Config.discordBotToken ~= "false" and Config.discordGuildId ~= "false" and next(discordInfo) == nil then
+    if mainIdentifier and Config.discordBotToken ~= "false" and Config.discordGuildId ~= "false" then
         discordInfo = checkDiscordIdentifier(identifiers)
         if not discordInfo then
             deferrals.done(("Your discord was not found, join our discord here: %s."):format(Config.discordInvite))
