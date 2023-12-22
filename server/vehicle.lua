@@ -567,8 +567,12 @@ RegisterNetEvent("ND_Vehicles:toggleVehicleLock", function(netId)
 end)
 
 -- locking of npc vehicles, if the players spawns inside a vehicle it won't be locked.
-RegisterNetEvent("entityCreated", function(entity)
+AddEventHandler("entityCreated", function(entity)
+    local time = os.time()
+    while not DoesEntityExist(entity) and os.time()-time < 5 do Wait(50) end
+
     if not DoesEntityExist(entity) or GetEntityType(entity) ~= 2 then return end
+
     local state = Entity(entity).state
     if state.owner or state.locked ~= nil then return end
 
