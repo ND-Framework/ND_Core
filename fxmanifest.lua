@@ -2,7 +2,7 @@
 
 author "Andyyy#7666"
 description "ND Framework Core"
-version "2.0.0"
+version "2.0.1"
 
 fx_version "cerulean"
 game "gta5"
@@ -38,5 +38,7 @@ files {
 }
 
 dependency "oxmysql"
+
+-- below were used with backwards compatibility but could interfere with resources checking if the resources are started.
 -- provide "es_extended"
 -- provide "qb-Core"
