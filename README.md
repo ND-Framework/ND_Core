@@ -16,9 +16,14 @@
 * [oxmysql](https://github.com/overextended/oxmysql/releases)
 * [ox_lib](https://github.com/overextended/ox_lib/releases)
 
-## v2 Addons
-* [Character selection](https://github.com/ND-Framework/ND_Characters/tree/wip-v2)
-* [Banking](https://github.com/ND-Framework/ND_Banking/tree/wip-v2)
-* [Appearance shops](https://github.com/ND-Framework/ND_AppearanceShops/tree/wip-v2)
-* [Dealership](https://github.com/ND-Framework/ND_Dealership/tree/v2)
-* [Inventory](https://github.com/overextended/ox_inventory/pull/1403)
+## Addons
+[Core](https://github.com/ND-Framework/ND_Core/releases)
+[Character selection](https://github.com/ND-Framework/ND_Characters/releases)
+[Banking](https://github.com/ND-Framework/ND_Banking/releases)
+[Appearance shops](https://github.com/ND-Framework/ND_AppearanceShops/releases)
+[Dealership](https://github.com/ND-Framework/ND_Dealership/releases)
+[Inventory](https://github.com/overextended/ox_inventory/releases)
+[Ambulance job](https://github.com/ND-Framework/ND_Ambulance/releases)
+[Casino](https://github.com/ND-Framework/ND_Casino/releases)
+[blackjack](https://github.com/ND-Framework/ND_Blackjack/releases)
+[Nitro](https://github.com/ND-Framework/ND_Nitro/releases)
