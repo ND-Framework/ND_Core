@@ -576,7 +576,15 @@ AddEventHandler("entityCreated", function(entity)
     local state = Entity(entity).state
     if state.owner or state.locked ~= nil then return end
 
+    time = os.time()
     local driver = GetPedInVehicleSeat(entity, -1)
+    while DoesEntityExist(entity) and driver == 0 and os.time()-time < 2 do
+        driver = GetPedInVehicleSeat(entity, -1)
+        Wait(100)
+    end
+
+    if not DoesEntityExist(entity) then return end
+
     if DoesEntityExist(driver) and IsPedAPlayer(driver) then
         state.locked = false
         state.hotwired = true
