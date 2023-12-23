@@ -309,7 +309,7 @@ local function createCharacterTable(info)
     ---@return boolean
     function self.addGroup(name, rank, isJob)
         local groupRank = tonumber(rank) or 1
-        local groupInfo = Config.groups[name]
+        local groupInfo = Config.groups?[name]
         -- if not groupInfo then return end
         if isJob then
             for _, group in pairs(self.groups) do
