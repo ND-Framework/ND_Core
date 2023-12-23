@@ -26,6 +26,13 @@ function NDCore.getPlayersFromCoords(distance, coords)
     return closePlayers
 end
 
+function NDCore.getConfig(info)
+    if not info then
+        return Config
+    end
+    return Config[info]
+end
+
 function NDCore.revivePlayer(reset, keepDead)
     local usingAmbulance = GetResourceState("ND_Ambulance") == "started"
     if not keepDead then

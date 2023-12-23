@@ -34,6 +34,13 @@ function NDCore.getPlayerServerInfo(source)
     return PlayersInfo[source]
 end
 
+function NDCore.getConfig(info)
+    if not info then
+        return Config
+    end
+    return Config[info]
+end
+
 ---@param fileLocation string|tabale
 ---@return boolean
 function NDCore.loadSQL(fileLocation, resource)
