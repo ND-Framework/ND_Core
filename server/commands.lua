@@ -195,26 +195,49 @@ lib.addCommand("pay", {
     help = "give money to nearby player.",
     params = {
         {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        },
+        {
             name = "amount",
-            type = "number"
+            type = "number",
+            help = "Amount of cash to give"
         }
     }
 }, function(source, args, raw)
     if not source then return end
-    local targetPlayer
-    local pedCoords = GetEntityCoords(GetPlayerPed(source))
-    for targetId, targetInfo in pairs(NDCore.players) do
-        local targetCoords = GetEntityCoords(GetPlayerPed(targetId))
-        if #(pedCoords-targetCoords) < 2.0 and targetId ~= source then
-            targetPlayer = targetInfo
-            break
-        end
-    end
 
     local player = NDCore.getPlayer(source)
-    if not player then return end
-    local success = player.deductMoney("cash", args.amount)
+    local targetPlayer = NDCore.getPlayer(args.target)
 
+    if not player or not targetPlayer then
+        return player.notify({
+            title = "Error",
+            description = "No player found",
+            type = "error"
+        })
+    end
+
+    if player.cash < args.amount then
+        return player.notify({
+            title = "Error",
+            description = "You don't have enough cash",
+            type = "error"
+        })
+    end
+
+    local playerCoords = GetEntityCoords(GetPlayerPed(player.source))
+    local targetCoords = GetEntityCoords(GetPlayerPed(targetPlayer.source))
+    if #(playerCoords-targetCoords) > 2.0 then
+        return player.notify({
+            title = "Error",
+            description = "Player is not nearby",
+            type = "error"
+        })
+    end
+
+    local success = player.deductMoney("cash", args.amount) and targetPlayer.addMoney("cash", args.amount)
     if not success then
         return player.notify({
             title = "Couldn't give money",
@@ -223,19 +246,18 @@ lib.addCommand("pay", {
         })
     end
     
-    if not targetPlayer or not targetPlayer.addMoney("cash", args.amount) then return end
     targetPlayer.notify({
         title = "Money received",
         description = ("Received $%d in cash"):format(args.amount),
         type = "inform",
-        duration = 10000
+        duration = 5000
     })
     
     player.notify({
         title = "Money given",
-        description = ("You gave someone $%d in cash"):format(args.amount),
+        description = ("You gave $%d in cash"):format(args.amount),
         type = "inform",
-        duration = 10000
+        duration = 5000
     })
 end)
 
