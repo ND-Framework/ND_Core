@@ -5,12 +5,31 @@ exports("GetCoreObject", function()
 end)
 
 NDCore.Functions = {}
-NDCore.Functions.GetPlayer = NDCore.getPlayer
 NDCore.Functions.GetPlayers = NDCore.getPlayers
 NDCore.Functions.GetUserDiscordInfo = NDCore.getDiscordInfo
 NDCore.Functions.SetActiveCharacter = NDCore.setActiveCharacter
 NDCore.Functions.GetPlayerCharacters = NDCore.fetchAllCharacters
 NDCore.Functions.GetPlayerByCharacterId = NDCore.fetchCharacter
+
+function NDCore.Functions.GetPlayer(src)
+    local player = NDCore.getPlayer(src)
+    return {
+        source = player.source,
+        id = player.id,
+        firstName = player.firstname,
+        lastName = player.lastname,
+        dob = player.dob,
+        gender = player.gender,
+        cash = player.cash,
+        bank = player.bank,
+        phoneNumber = player.metadata.phone,
+        lastLocation = player.metadata.lastLocation,
+        inventory = player.inventory,
+        discordInfo = player.discordInfo,
+        data = player.metadata,
+        job = player.job
+    }
+end
 
 function NDCore.Functions.GetPlayerIdentifierFromType(identifierType, src)
     return GetPlayerIdentifierByType(src, identifierType)
