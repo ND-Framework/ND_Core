@@ -60,7 +60,7 @@ function NDCore.GetPlayerData()
 
     player.coords = GetEntityCoords(cache.ped)
     player.loadout = {}
-    player.maxWeight = exports.ox_inventory:GetPlayerMaxWeight()
+    player.maxWeight = GetResourceState("ox_inventory") == "started" and exports.ox_inventory:GetPlayerMaxWeight() or 0
     player.money = player.Accounts.Money
     player.sex = player.gender
     player.firstName = player.firstname
@@ -112,7 +112,7 @@ function NDCore.Progressbar(message, lenght, options)
 end
 
 function NDCore.SearchInventory(item, count)
-    local itemCount = exports.ox_inventory:Search(item)
+    local itemCount =  GetResourceState("ox_inventory") == "started" and exports.ox_inventory:Search(item) or 0
     return itemCount >= count and itemCount
 end
 
@@ -133,7 +133,7 @@ function NDCore.ShowHelpNotification()
 end
 
 function NDCore.ShowInventory()
-    exports.ox_inventory:openInventory("player", cache.serverId)
+    return GetResourceState("ox_inventory") == "started" and exports.ox_inventory:openInventory("player", cache.serverId)
 end
 
 function NDCore.ShowNotification(msg, type, time)

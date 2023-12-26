@@ -5,7 +5,8 @@ local registeredItems = {}
 
 local function getAmmoFromWeapon(weapon)
     if not weapon then return end
-    for item, data in pairs(exports.ox_inventory:Items()) do
+    local items = GetResourceState("ox_inventory") == "started" and exports.ox_inventory:Items() or {}
+    for item, data in pairs(items) do
         if data.weapon and data.model and data.model:lower() == weapon:lower() then
             return data.ammoname
         end
@@ -60,7 +61,7 @@ local function createPlayerFunctions(self)
     end
 
     function self.addInventoryItem(item, count)
-        exports.ox_inventory:AddItem(self.source, item, count)
+        return GetResourceState("ox_inventory") == "started" and exports.ox_inventory:AddItem(self.source, item, count)
     end
 
     function self.addMoney(amount)
@@ -100,11 +101,11 @@ local function createPlayerFunctions(self)
     end
 
     function self.canCarryItem(item, count)
-        return exports.ox_inventory:CanCarryItem(self.source, item, count)
+        return GetResourceState("ox_inventory") == "started" and exports.ox_inventory:CanCarryItem(self.source, item, count)
     end
 
     function self.canSwapItem(firstItem, firstItemCount, testItem, testItemCount)
-        exports.ox_inventory:CanSwapItem(self.source, firstItem, firstItemCount, testItem, testItemCount)
+        return GetResourceState("ox_inventory") == "started" and exports.ox_inventory:CanSwapItem(self.source, firstItem, firstItemCount, testItem, testItemCount)
     end
 
     function self.clearMeta(index)
@@ -137,7 +138,7 @@ local function createPlayerFunctions(self)
     end
 
     function self.getInventory(minimal)
-        local playerItems = exports.ox_inventory:GetInventoryItems(self.source)
+        local playerItems = GetResourceState("ox_inventory") == "started" and exports.ox_inventory:GetInventoryItems(self.source) or {}
         if not minimal then
             return playerItems
         end
@@ -145,7 +146,7 @@ local function createPlayerFunctions(self)
     end
 
     function self.getInventoryItem(item)
-        local playerItems = exports.ox_inventory:GetInventoryItems(self.source)
+        local playerItems = GetResourceState("ox_inventory") == "started" and exports.ox_inventory:GetInventoryItems(self.source) or {}
         for name, data in pairs(playerItems) do
             if name == item then
                 return data
@@ -162,11 +163,11 @@ local function createPlayerFunctions(self)
     end
     
     function self.hasItem(item, metadata)
-        return exports.ox_inventory:GetItem(self.source, item, metadata)
+        return GetResourceState("ox_inventory") == "started" and exports.ox_inventory:GetItem(self.source, item, metadata)
     end
 
     function self.removeInventoryItem(item, count)
-        exports.ox_inventory:RemoveItem(self.source, item, count)
+        return GetResourceState("ox_inventory") == "started" and exports.ox_inventory:RemoveItem(self.source, item, count)
     end
 
     function self.removeMoney(amount)
@@ -304,7 +305,8 @@ end
 function NDCore.GetItemLabel(item)
     if not itemNames then
         itemNames = {}
-        for item, data in pairs(exports.ox_inventory:Items()) do
+        local items = GetResourceState("ox_inventory") == "started" and exports.ox_inventory:Items() or {}
+        for item, data in pairs(items) do
             itemNames[item] = data.label
         end
     end
