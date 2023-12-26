@@ -29,7 +29,7 @@ AddEventHandler("gameEventTriggered", function(name, args)
 	local victim = args[1]
 	if not IsPedAPlayer(victim) or NetworkGetPlayerIndexFromPed(victim) ~= cache.playerId then return end
 
-    if not IsPedDeadOrDying(victim, true) and GetEntityHealth(victim) > 0 then
+    if not IsPedDeadOrDying(victim, true) then
         local hit, bone = GetPedLastDamageBone(victim)
         if hit and usingAmbulance then
             local damageWeapon = ambulance:getLastDamagingWeapon(victim)
