@@ -310,18 +310,23 @@ local function createCharacterTable(info)
     function self.addGroup(name, rank, isJob)
         local groupRank = tonumber(rank) or 1
         local groupInfo = Config.groups?[name]
+        local bossRank = groupInfo and groupInfo.minimumBossRank
+
         -- if not groupInfo then return end
         if isJob then
             for _, group in pairs(self.groups) do
                 group.isJob = nil
             end
         end
+
         self.groups[name] = {
             label = groupInfo and groupInfo.label or name,
             rankName = groupInfo and groupInfo.ranks[groupRank] or groupRank,
             rank = groupRank,
-            isJob = isJob
+            isJob = isJob,
+            isBoss = bossRank and rank >= bossRank
         }
+        
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
         lib.addPrincipal(self.source, ("group.%s"):format(name))
         return self.groups[name]
