@@ -324,7 +324,7 @@ local function createCharacterTable(info)
             rankName = groupInfo and groupInfo.ranks[groupRank] or groupRank,
             rank = groupRank,
             isJob = isJob,
-            isBoss = bossRank and rank >= bossRank
+            isBoss = bossRank and groupRank >= bossRank
         }
         
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
