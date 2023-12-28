@@ -697,9 +697,14 @@ lib.addKeybind({
             })
         end
         if not playerVehicle then return end
+
+        local speed = math.floor(GetEntitySpeed(playerVehicle) * 2.236936)
+        if speed < 10 then return end
+
         cruiseControlEnabled = true
-        cruiseSpeedVehicle = math.floor(GetEntitySpeed(playerVehicle) * 2.236936)
+        cruiseSpeedVehicle = speed
         cruiseSpeedSet = cruiseSpeedVehicle
+        
         lib.notify({
             title = "Cruise control",
             description = ("Set to %d mph."):format(math.floor(cruiseSpeedSet)),
