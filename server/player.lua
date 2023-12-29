@@ -320,6 +320,7 @@ local function createCharacterTable(info)
         end
 
         self.groups[name] = {
+            name = name,
             label = groupInfo and groupInfo.label or name,
             rankName = groupInfo and groupInfo.ranks[groupRank] or groupRank,
             rank = groupRank,
@@ -327,7 +328,9 @@ local function createCharacterTable(info)
             isBoss = bossRank and groupRank >= bossRank
         }
         
-        self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
+        if not isJob then
+            self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
+        end
         lib.addPrincipal(self.source, ("group.%s"):format(name))
         return self.groups[name]
     end
@@ -360,11 +363,11 @@ local function createCharacterTable(info)
     function self.setJob(name, rank)
         self.removeGroup(self.job)
         local job = self.addGroup(name, rank, true)
-        local jobName, jobInfo = self.getJob()
-        if jobInfo then
-            self.job = jobName
-            self.jobInfo = jobInfo
+        if job then
+            self.job = job.name
+            self.jobInfo = job
         end
+        self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
         return job
     end
 
