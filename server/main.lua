@@ -24,7 +24,8 @@ Config = {
     admins = json.decode(GetConvar("core:admins", "[]")),
     adminDiscordRoles = json.decode(GetConvar("core:adminDiscordRoles", "[]")),
     multiCharacter = false,
-    compatibility = json.decode(GetConvar("core:compatibility", "[]"))
+    compatibility = json.decode(GetConvar("core:compatibility", "[]")),
+    RequireKeys = true -- Added this line to make a configurable option to disable starting NON-Owned Vehicles.
 }
 
 SetConvarServerInfo("Discord", Config.discordInvite)

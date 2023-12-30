@@ -480,7 +480,9 @@ CreateThread(function()
                 wait = 0
                 DisableControlAction(0, 59)
                 if DoesEntityExist(playerVehicle) and IsVehicleEngineStarting(playerVehicle) then
-                    SetVehicleEngineOn(playerVehicle, false, true, true) -- don't turn on engine if no keys.
+                    if Config.RequireKeys then
+                        SetVehicleEngineOn(playerVehicle, false, true, true) -- don't turn on engine if no keys.
+                    end
                 end
             else
                 wait = 500
