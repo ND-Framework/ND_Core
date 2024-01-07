@@ -25,6 +25,7 @@ local function createCharacterTable(info)
         gender = info.gender,
         cash = info.cash,
         bank = info.bank,
+        phonenumber = info.phonenumber,
         groups = info.groups,
         metadata = info.metadata,
         inventory = info.inventory
@@ -165,7 +166,7 @@ local function createCharacterTable(info)
     
     -- Save character information to database
     function self.save()
-        local affectedRows = MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, `groups` = ?, metadata = ? WHERE charid = ?", {
+        local affectedRows = MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, phonenumber = ?, `groups` = ?, metadata = ? WHERE charid = ?", {
             self.name,
             self.firstname,
             self.lastname,
@@ -173,6 +174,7 @@ local function createCharacterTable(info)
             self.gender,
             self.cash,
             self.bank,
+            self.phonenumber,
             json.encode(self.groups),
             json.encode(self.metadata),
             self.id
@@ -407,12 +409,13 @@ function NDCore.newCharacter(src, info)
         gender = info.gender or "",
         cash = info.cash or 0,
         bank = info.bank or 0,
+        phonenumber = info.phonenumber,
         groups = info.groups or {},
         metadata = info.metadata or {},
-        inventory = info.inventory or {},
+        inventory = info.inventory or {}
     }
 
-    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, `groups`, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
+    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, phonenumber, `groups`, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
         identifier,
         charInfo.name,
         charInfo.firstname,
@@ -421,6 +424,7 @@ function NDCore.newCharacter(src, info)
         charInfo.gender,
         charInfo.cash,
         charInfo.bank,
+        charInfo.phonenumber,
         json.encode(charInfo.groups),
         json.encode(charInfo.metadata)
     })
@@ -451,6 +455,7 @@ function NDCore.fetchCharacter(id, src)
         gender = info.gender,
         cash = info.cash,
         bank = info.bank,
+        phonenumber = info.phonenumber,
         groups = json.decode(info.groups),
         metadata = json.decode(info.metadata),
         inventory = json.decode(info.inventory)
@@ -476,9 +481,10 @@ function NDCore.fetchAllCharacters(src)
             gender = info.gender,
             cash = info.cash,
             bank = info.bank,
+            phonenumber = info.phonenumber,
             groups = json.decode(info.groups),
             metadata = json.decode(info.metadata),
-            inventory = json.decode(info.inventory),
+            inventory = json.decode(info.inventory)
         })
     end
     return characters
