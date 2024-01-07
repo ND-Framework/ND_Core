@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `nd_characters` (
     `gender` VARCHAR(50) DEFAULT NULL,
     `cash` INT(10) DEFAULT '0',
     `bank` INT(10) DEFAULT '0',
-    `phone_number` VARCHAR(20) DEFAULT NULL,
+    `phonenumber` VARCHAR(20) DEFAULT NULL,
     `groups` LONGTEXT DEFAULT ('[]'),
     `metadata` LONGTEXT DEFAULT ('[]'),
     `inventory` LONGTEXT DEFAULT ('[]'),
