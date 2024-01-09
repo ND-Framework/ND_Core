@@ -293,6 +293,7 @@ AddStateBagChangeHandler("props", nil, function(bagName, key, value, reserved, r
     lib.setVehicleProperties(entity, props)
 end)
 
+local playingKey = 0
 local function playKeyFob(veh)
     local keyFob
     local ped = cache.ped
@@ -300,12 +301,21 @@ local function playKeyFob(veh)
     if #(coords-GetEntityCoords(veh)) > 25.0 then return end
 
     if not playerVehicle then
+        playingKey += 1
+        SetPedCurrentWeaponVisible(ped, false, false)
         ClearPedTasks(ped)
         lib.requestAnimDict("anim@mp_player_intmenu@key_fob@")
         TaskPlayAnim(ped, "anim@mp_player_intmenu@key_fob@", "fob_click_fp", 8.0, 8.0, -1, 48, 1, false, false, false)
         keyFob = CreateObject(`lr_prop_carkey_fob`, 0, 0, 0, true, true, true)
         AttachEntityToEntity(keyFob, ped, GetPedBoneIndex(ped, 0xDEAD), 0.12, 0.04, -0.025, -100.0, 100.0, 0.0, true, true, false, true, 1, true)
         Wait(700)
+        SetTimeout(400, function()
+            playingKey -= 1
+        end)
+        SetTimeout(1200, function()
+            if playingKey > 0 then return end
+            SetPedCurrentWeaponVisible(ped, true, false)
+        end)
     end
 
     PlaySoundFromEntity(-1, "Remote_Control_Fob", ped, "PI_Menu_Sounds", true, 0)
