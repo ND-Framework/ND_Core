@@ -165,7 +165,22 @@ local function createCharacterTable(info)
     end
     
     -- Save character information to database
-    function self.save()
+    function self.save(key)
+        if key then
+            local charData = self[key]
+            if not charData or type(charData) == "function" then
+                return lib.print.error(key, "Is not valid character data.")
+            end
+
+            if type(charData) == "table" then
+                charData = json.encode(charData)
+            end
+
+            local query = ("UPDATE nd_characters SET `%s` = ? WHERE charid = ?"):format(key)
+            local affectedRows = MySQL.update.await(query, {charData, self.id})
+            return affectedRows > 0
+        end
+
         local affectedRows = MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, phonenumber = ?, `groups` = ?, metadata = ? WHERE charid = ?", {
             self.name,
             self.firstname,
