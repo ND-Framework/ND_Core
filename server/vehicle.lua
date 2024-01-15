@@ -90,6 +90,9 @@ function NDCore.getVehicle(entity)
         if saveProperties and self.id and self.owner then
             local properties = lib.callback.await("ND_Vehicles:getProps", NetworkGetEntityOwner(entity), self.netId)
             if properties then
+                if self.properties?.callsign then
+                    properties.callsign = true
+                end
                 MySQL.query("UPDATE nd_vehicles SET properties = ? WHERE id = ?", {json.encode(properties), self.id})
             end
         end
@@ -102,6 +105,11 @@ function NDCore.getVehicle(entity)
         if not DoesEntityExist(entity) then return end
         local properties = type(props) == "string" and json.decode(props) or props
         local state = Entity(entity).state
+
+        if self.properties?.callsign then
+            properties.callsign = true
+        end
+
         state.props = properties
         self.properties = properties
         
@@ -406,11 +414,27 @@ function NDCore.spawnOwnedVehicle(source, vehicleId, coords, heading)
     if not vehicle or not vehicle.available or vehicle.owner ~= player.id then return end
 
     MySQL.query.await("UPDATE nd_vehicles SET stored = ? WHERE id = ?", {0, vehicleId})
+
+    local properties = vehicle.properties
+    if properties.callsign then
+        local callsign = player.getMetadata("callsign")
+        if not callsign or callsign == "" then goto skip end
+        
+        callsign = tostring(callsign)
+        if not callsign or callsign:len() ~= 3 then goto skip end
+
+        properties.modFender = tonumber(callsign:sub(1, 1))
+        properties.modRightFender = tonumber(callsign:sub(2, 2))
+        properties.modRoof = tonumber(callsign:sub(3, 3))
+    end
+
+    ::skip::
+
     return NDCore.createVehicle({
         owner = player.id,
-        model = vehicle.properties.model,
+        model = properties.model,
         coords = vec4(coords.x, coords.y, coords.z, coords.w or coords.heading or heading),
-        properties = vehicle.properties,
+        properties = properties,
         vehicleId = vehicleId,
         source = source
     })
