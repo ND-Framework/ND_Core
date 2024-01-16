@@ -480,22 +480,35 @@ CreateThread(function()
     local wait = 500
     while true do
         Wait(wait)
+
+        local reset = true
         playerVehicle = cache.seat == -1 and cache.vehicle
-        if playerVehicle then
-            if Config.disableVehicleAirControl and not vehicleClassNotDisableAirControl[GetVehicleClass(playerVehicle)] and (IsEntityInAir(playerVehicle) or IsEntityUpsidedown(playerVehicle)) then
-                wait = 0
-                DisableControlAction(0, 59) -- disable vehicle air control.
-                DisableControlAction(0, 60)
-            elseif not GetIsVehicleEngineRunning(playerVehicle) and not hasVehicleKeysCheck(playerVehicle) then
-                wait = 0
-                DisableControlAction(0, 59)
-                if DoesEntityExist(playerVehicle) and IsVehicleEngineStarting(playerVehicle) then
-                    SetVehicleEngineOn(playerVehicle, false, true, true) -- don't turn on engine if no keys.
-                end
-            else
-                wait = 500
+
+        local entering = GetVehiclePedIsEntering(cache.ped)
+        if entering and DoesEntityExist(entering) and IsVehicleNeedsToBeHotwired(entering) then
+            SetVehicleNeedsToBeHotwired(entering, false)
+        end
+        
+        if not playerVehicle then goto skip end
+
+        if Config.disableVehicleAirControl and not vehicleClassNotDisableAirControl[GetVehicleClass(playerVehicle)] and (IsEntityInAir(playerVehicle) or IsEntityUpsidedown(playerVehicle)) then
+            wait = 0
+            reset = false
+            DisableControlAction(0, 59) -- disable vehicle air control.
+            DisableControlAction(0, 60)
+        end
+        if Config.requireKeys and not GetIsVehicleEngineRunning(playerVehicle) and not hasVehicleKeysCheck(playerVehicle) then
+            wait = 0
+            reset = false
+            DisableControlAction(0, 59)
+            DisableControlAction(0, 71)
+            if DoesEntityExist(playerVehicle) and IsVehicleEngineStarting(playerVehicle) then
+                SetVehicleEngineOn(playerVehicle, false, true, true) -- don't turn on engine if no keys.
             end
-        elseif wait ~= 500 then
+        end
+
+        ::skip::
+        if (reset or not playerVehicle) and wait ~= 500 then
             wait = 500
         end
     end
