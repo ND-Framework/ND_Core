@@ -10,8 +10,9 @@ Config = {
     discordActionLink = GetConvar("discordActionLink", "https://discord.gg/Z9Mxu72zZ6"),
     discordActionText2 = GetConvar("core:discordActionText2", "STORE"),
     discordActionLink2 = GetConvar("core:discordActionLink2", "https://andyyy.tebex.io/category/fivem-scripts"),
-    randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
     disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
+    randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
+    requireKeys = GetConvarInt("core:requireKeys", 1) == 1,
     useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
     groups = json.decode(GetConvar("core:groups", "[]")),
     compatibility = json.decode(GetConvar("core:compatibility", "[]"))
