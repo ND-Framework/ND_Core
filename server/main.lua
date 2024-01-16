@@ -7,6 +7,7 @@ local tempPlayersInfo = {}
 Config = {
     serverName = GetConvar("core:serverName", "Unconfigured ND-Core Server"),
     discordInvite = GetConvar("core:discordInvite", "https://discord.gg/Z9Mxu72zZ6"),
+    discordMemeberRequired = GetConvarInt("core:discordMemeberRequired", 1) == 1,
     discordAppId = GetConvar("core:discordAppId", "858146067018416128"),
     discordAsset = GetConvar("core:discordAsset", "andyyy"),
     discordAssetSmall = GetConvar("core:discordAssetSmall", "andyyy"),
@@ -101,7 +102,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
 
     if mainIdentifier and Config.discordBotToken ~= "false" and Config.discordGuildId ~= "false" then
         discordInfo = checkDiscordIdentifier(identifiers)
-        if not discordInfo then
+        if not discordInfo and Config.discordMemeberRequired then
             deferrals.done(("Your discord was not found, join our discord here: %s."):format(Config.discordInvite))
             Wait(0)
         end
