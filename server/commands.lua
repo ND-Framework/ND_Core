@@ -262,7 +262,7 @@ lib.addCommand("pay", {
 end)
 
 lib.addCommand("unlock", {
-    help = "Admin force unlock vehicles",
+    help = "Admin Command, force unlock vehicle.",
     restricted = "group.admin",
 }, function(source, args, raw)
     local ped = GetPlayerPed(source)
@@ -309,13 +309,13 @@ lib.addCommand("revive", {
 end)
 
 lib.addCommand("dv", {
-    help = "Admin command, delete vehicles within the range.",
+    help = "Admin command, delete vehicles within the range or the closest.",
     restricted = "group.admin",
     params = {
         {
             name = "range",
             type = "number",
-            help = "The range to select vehicles for deleteion from",
+            help = "Range to delete vehicles in",
             optional = true
         }
     }
