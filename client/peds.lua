@@ -218,10 +218,10 @@ end)
 RegisterCommand("getclothing", function(source, args, rawCommand)
     local info = ""
     for k, v in pairs(clothingComponents) do
-        info = ("%s\n%s = {\n    drawable = %s,\n    texture = %s\n},"):format(info, k, GetPedDrawableVariation(cache.ped, v), GetPedTextureVariation(cache.ped, v))
+        info = ("%s\n%s = { drawable = %s, texture = %s },"):format(info, k, GetPedDrawableVariation(cache.ped, v), GetPedTextureVariation(cache.ped, v))
     end
     for k, v in pairs(clothingProps) do
-        info = ("%s\n%s = {\n    drawable = %s,\n    texture = %s\n},"):format(info, k, GetPedPropIndex(cache.ped, v), GetPedPropTextureIndex(cache.ped, v))
+        info = ("%s\n%s = { drawable = %s, texture = %s },"):format(info, k, GetPedPropIndex(cache.ped, v), GetPedPropTextureIndex(cache.ped, v))
     end
     lib.setClipboard(info)
 end, false)
