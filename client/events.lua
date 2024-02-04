@@ -24,3 +24,5 @@ end)
 RegisterNetEvent("ND:revivePlayer", function()
     NDCore.revivePlayer(true)
 end)
+
+RegisterNetEvent("ND:characterUnloaded")
