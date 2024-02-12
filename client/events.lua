@@ -22,7 +22,31 @@ RegisterNetEvent("ND:updateLastLocation", function(location)
 end)
 
 RegisterNetEvent("ND:revivePlayer", function()
-    NDCore.revivePlayer(true)
+    if source == "" then return end
+    local veh = GetVehiclePedIsIn(cache.ped)
+    local seat = cache.seat
+    local coords = GetEntityCoords(cache.ped)
+    NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, GetEntityHeading(cache.ped), true, true, false)
+
+    local ped = PlayerPedId()
+    if cache.ped ~= ped then
+        DeleteEntity(cache.ped)
+        ClearAreaOfPeds(coords.x, coords.y, coords.z, 0.2, false)
+    end
+
+    SetEntityInvincible(ped, false)
+    FreezeEntityPosition(ped, false)
+    SetEntityVisible(ped, true)
+    SetEveryoneIgnorePlayer(ped, false)
+    SetPedCanBeTargetted(ped, true)
+    SetEntityCanBeDamaged(ped, true)
+    SetBlockingOfNonTemporaryEvents(ped, false)
+    SetPedCanRagdollFromPlayerImpact(ped, true)
+    ClearPedTasksImmediately(ped)
+
+    if veh and veh ~= 0 then
+        SetPedIntoVehicle(ped, veh, seat)
+    end
 end)
 
 RegisterNetEvent("ND:characterUnloaded")
