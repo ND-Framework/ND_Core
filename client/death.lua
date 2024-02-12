@@ -30,12 +30,16 @@ AddEventHandler("gameEventTriggered", function(name, args)
 	if not IsPedAPlayer(victim) or NetworkGetPlayerIndexFromPed(victim) ~= cache.playerId then return end
 
     if not IsPedDeadOrDying(victim, true) then
+        Wait(100)
         local hit, bone = GetPedLastDamageBone(victim)
-        if hit and usingAmbulance then
+        local alive = GetEntityHealth(victim) >= 100
+
+        if hit and usingAmbulance and alive then
             local damageWeapon = ambulance:getLastDamagingWeapon(victim)
             return damageWeapon and ambulance:updateBodyDamage(bone, damageWeapon)
         end
-        return
+
+        return not alive and PlayerEliminated(GetPedCauseOfDeath(cache.ped))
     end
 
     local killerEntity, deathCause = GetPedSourceOfDeath(cache.ped), GetPedCauseOfDeath(cache.ped)
