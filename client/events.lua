@@ -50,3 +50,22 @@ RegisterNetEvent("ND:revivePlayer", function()
 end)
 
 RegisterNetEvent("ND:characterUnloaded")
+
+RegisterNetEvent("ND:clothingMenu", function()
+    if GetResourceState("fivem-appearance") ~= "started" then return end
+    
+    local function customize(appearance)
+        if not appearance then return end
+        TriggerServerEvent("ND:updateClothing", appearance)
+    end
+    
+    exports["fivem-appearance"]:startPlayerCustomization(customize, {
+        ped = false,
+        headBlend = true,
+        faceFeatures = true,
+        headOverlays = true,
+        components = true,
+        props = true,
+        tattoos = true
+    })
+end)
