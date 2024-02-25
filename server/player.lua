@@ -426,7 +426,7 @@ function NDCore.newCharacter(src, info)
         inventory = info.inventory or {}
     }
 
-    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, phonenumber, `groups`, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
+    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, phonenumber, `groups`, metadata, inventory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
         identifier,
         charInfo.name,
         charInfo.firstname,
@@ -437,7 +437,8 @@ function NDCore.newCharacter(src, info)
         charInfo.bank,
         charInfo.phonenumber,
         json.encode(charInfo.groups),
-        json.encode(charInfo.metadata)
+        json.encode(charInfo.metadata),
+        json.encode(charInfo.inventory)
     })
 
     return createCharacterTable(charInfo)
