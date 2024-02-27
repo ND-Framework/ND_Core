@@ -7,7 +7,7 @@ Config = {
     discordAsset = GetConvar("core:discordAsset", "andyyy"),
     discordAssetSmall = GetConvar("core:discordAssetSmall", "andyyy"),
     discordActionText = GetConvar("core:discordActionText", "DISCORD"),
-    discordActionLink = GetConvar("discordActionLink", "https://discord.gg/Z9Mxu72zZ6"),
+    discordActionLink = GetConvar("core:discordActionLink", "https://discord.gg/Z9Mxu72zZ6"),
     discordActionText2 = GetConvar("core:discordActionText2", "STORE"),
     discordActionLink2 = GetConvar("core:discordActionLink2", "https://andyyy.tebex.io/category/fivem-scripts"),
     disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
