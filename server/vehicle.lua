@@ -730,3 +730,30 @@ lib.callback.register("ND_Vehicles:getOwnedVehicles", function(src)
     if not player then return end
     return NDCore.getVehicles(player.id)
 end)
+
+AddEventHandler("ND:characterLoaded", function(player)
+    local ownedExistingVehicles = {}
+    local ownedVehicles = NDCore.getVehicles(player.id)
+    local vehicles = GetAllVehicles()
+    local vehiclesToImpound = {}
+    
+    for i=1, #vehicles do
+        local veh = vehicles[i]
+        local state = Entity(veh).state
+        if state.owner == player.id then
+            ownedExistingVehicles[#ownedExistingVehicles+1] = state.id
+        end
+    end
+
+    for i=1, #ownedVehicles do
+        local veh = ownedVehicles[i]
+        if veh and not veh.stored and not veh.impounded and not lib.table.contains(ownedExistingVehicles, veh.id) then
+            vehiclesToImpound[#vehiclesToImpound+1] = veh.id
+        end
+    end
+
+    if #vehiclesToImpound == 0 then return end
+
+    local query = ("UPDATE nd_vehicles SET impounded = ? WHERE owner = ? AND id IN (%s)"):format(table.concat(vehiclesToImpound, ", "))
+    MySQL.rawExecute(query, {1, player.id})
+end)
