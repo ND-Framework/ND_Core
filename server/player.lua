@@ -114,6 +114,7 @@ local function createCharacterTable(info)
             end
         end
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
+        TriggerEvent("ND:updateCharacter", self)
     end
     
     ---@param key string|table
@@ -128,6 +129,7 @@ local function createCharacterTable(info)
             self.metadata[key] = value
         end
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
+        TriggerEvent("ND:updateCharacter", self)
         return self.metadata
     end
 
@@ -224,6 +226,7 @@ local function createCharacterTable(info)
             self.metadata.licenses = {license}
         end
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
+        TriggerEvent("ND:updateCharacter", self)
     end
 
     function self.getLicense(identifier)
@@ -343,8 +346,11 @@ local function createCharacterTable(info)
         
         if not isJob then
             self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
+            TriggerEvent("ND:updateCharacter", self)
         end
+
         lib.addPrincipal(self.source, ("group.%s"):format(name))
+
         return self.groups[name]
     end
 
@@ -366,6 +372,7 @@ local function createCharacterTable(info)
 
         self.groups[name] = nil
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
+        TriggerEvent("ND:updateCharacter", self)
         lib.removePrincipal(self.source, ("group.%s"):format(name))
         return group
     end
@@ -381,6 +388,7 @@ local function createCharacterTable(info)
             self.jobInfo = job
         end
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self))
+        TriggerEvent("ND:updateCharacter", self)
         return job
     end
 
