@@ -24,6 +24,7 @@ Config = {
     groups = json.decode(GetConvar("core:groups", "[]")),
     admins = json.decode(GetConvar("core:admins", "[]")),
     adminDiscordRoles = json.decode(GetConvar("core:adminDiscordRoles", "[]")),
+    groupRoles = json.decode(GetConvar("core:groupRoles", "[]")),
     multiCharacter = false,
     compatibility = json.decode(GetConvar("core:compatibility", "[]"))
 }
