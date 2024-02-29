@@ -309,6 +309,12 @@ local function createCharacterTable(info)
                     self.addGroup("admin")
                 end
             end
+            
+            for group, role in pairs(Config.groupRoles)
+                if lib.table.contains(roles, role) then
+                    self.addGroup(group)
+                end
+            end
         end
 
         for name, _ in pairs(self.groups) do
