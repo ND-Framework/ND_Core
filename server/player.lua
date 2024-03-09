@@ -329,10 +329,10 @@ local function createCharacterTable(info)
     ---@param rank number
     ---@param isJob boolean
     ---@return boolean
-    function self.addGroup(name, rank, isJob)
+    function self.addGroup(name, rank, info, isJob)
         local groupRank = tonumber(rank) or 1
-        local groupInfo = Config.groups?[name]
-        local bossRank = groupInfo and groupInfo.minimumBossRank
+        local groupInfo = info or Config.groups?[name]
+        local bossRank = groupInfo?.minimumBossRank
 
         -- if not groupInfo then return end
         if isJob then
@@ -343,8 +343,8 @@ local function createCharacterTable(info)
 
         self.groups[name] = {
             name = name,
-            label = groupInfo and groupInfo.label or name,
-            rankName = groupInfo and groupInfo.ranks[groupRank] or groupRank,
+            label = groupInfo?.label or name,
+            rankName = groupInfo?.ranks?[groupRank] or groupRank,
             rank = groupRank,
             isJob = isJob,
             isBoss = bossRank and groupRank >= bossRank
@@ -388,7 +388,7 @@ local function createCharacterTable(info)
     ---@return boolean
     function self.setJob(name, rank)
         self.removeGroup(self.job)
-        local job = self.addGroup(name, rank, true)
+        local job = self.addGroup(name, rank, nil, true)
         if job then
             self.job = job.name
             self.jobInfo = job
