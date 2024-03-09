@@ -329,10 +329,14 @@ local function createCharacterTable(info)
     ---@param rank number
     ---@param isJob boolean
     ---@return boolean
-    function self.addGroup(name, rank, info, isJob)
+    function self.addGroup(name, rank, customGroup, isJob)
         local groupRank = tonumber(rank) or 1
-        local groupInfo = info or Config.groups?[name]
+        local groupInfo = lib.table.deepclone(Config.groups?[name] or {})
         local bossRank = groupInfo?.minimumBossRank
+
+        for k, v in pairs(customGroup or {}) do
+            groupInfo[k] = v
+        end
 
         -- if not groupInfo then return end
         if isJob then
