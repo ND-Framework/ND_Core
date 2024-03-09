@@ -338,7 +338,6 @@ local function createCharacterTable(info)
             groupInfo[k] = v
         end
 
-        -- if not groupInfo then return end
         if isJob then
             for _, group in pairs(self.groups) do
                 group.isJob = nil
@@ -351,7 +350,8 @@ local function createCharacterTable(info)
             rankName = groupInfo?.ranks?[groupRank] or groupRank,
             rank = groupRank,
             isJob = isJob,
-            isBoss = bossRank and groupRank >= bossRank
+            isBoss = bossRank and groupRank >= bossRank,
+            metadata = groupInfo.metadata
         }
         
         if not isJob then
