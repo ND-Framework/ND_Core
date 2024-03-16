@@ -351,7 +351,7 @@ local function createCharacterTable(info)
             rank = groupRank,
             isJob = isJob,
             isBoss = bossRank and groupRank >= bossRank,
-            metadata = groupInfo.metadata
+            metadata = groupInfo.metadata or {}
         }
         
         if not isJob then
