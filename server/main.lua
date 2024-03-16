@@ -156,7 +156,7 @@ RegisterNetEvent("ND:playerEliminated", function(info)
     })
 end)
 
-RegisterNetEvent("ND::updateClothing", function(clothing)
+RegisterNetEvent("ND:updateClothing", function(clothing)
     local src = source
     local player = NDCore.getPlayer(src)
     if not player or not clothing or type(clothing) ~= "table" then return end
