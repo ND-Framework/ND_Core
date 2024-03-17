@@ -12,7 +12,7 @@ local function getVehicleType(model)
     local tempVehicle = CreateVehicle(model, 0, 0, 0, 0, true, true)
 
     local time = os.time()
-    while not DoesEntityExist(tempVehicle) and time-os.time() < 5 do Wait(5) end
+    while not DoesEntityExist(tempVehicle) and os.time()-time < 5 do Wait(5) end
 
     if not DoesEntityExist(tempVehicle) then return end
     local entityType = GetVehicleType(tempVehicle)
@@ -260,7 +260,7 @@ function NDCore.createVehicle(info)
 
     local veh = CreateVehicleServerSetter(model, vehType, spawnCoords.x, spawnCoords.y, spawnCoords.z, spawnCoords.w)
     local time = os.time()
-    while not DoesEntityExist(veh) and time-os.time() < 5 do Wait(5) end
+    while not DoesEntityExist(veh) and os.time()-time < 5 do Wait(5) end
     if not veh or not DoesEntityExist(veh) then
         return Citizen.Trace("NDCore.createVehicle", "vehicle entity doesn't exist")
     end
