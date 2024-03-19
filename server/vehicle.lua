@@ -1,6 +1,7 @@
 local ox_inventory
 local inventoryStarted = false
 local spawnedPlayerVehicles = {}
+local vehicleTypes = json.decode(GetResourceKvpString("ND_Core:vehTypes") or "[]")
 
 NDCore.isResourceStarted("ox_inventory", function(started)
     inventoryStarted = started
@@ -8,16 +9,24 @@ NDCore.isResourceStarted("ox_inventory", function(started)
     ox_inventory = exports.ox_inventory
 end)
 
-local function getVehicleType(model)
-    local tempVehicle = CreateVehicle(model, 0, 0, 0, 0, true, true)
+local function getVehicleType(coords, model)
+    if vehicleTypes[model] then
+        return vehicleTypes[model]
+    end
 
+    local tempVehicle = CreateVehicle(model, coords.x, coords.y, coords.z-5.0, coords.w, true, false)
     local time = os.time()
-    while not DoesEntityExist(tempVehicle) and os.time()-time < 5 do Wait(5) end
-
+    
+    while not DoesEntityExist(tempVehicle) and os.time()-time < 5 do Wait(0) end
     if not DoesEntityExist(tempVehicle) then return end
-    local entityType = GetVehicleType(tempVehicle)
+
+    local vehType = GetVehicleType(tempVehicle)
     DeleteEntity(tempVehicle)
-    return entityType
+
+    vehicleTypes[model] = vehType
+    SetResourceKvp("ND_Core:vehTypes", json.encode(vehicleTypes))
+
+    return vehType
 end
 
 local function generatePlate()
@@ -253,7 +262,7 @@ function NDCore.createVehicle(info)
     end
 
     local model = info.model or properties.model
-    local vehType = getVehicleType(model)
+    local vehType = getVehicleType(spawnCoords, model)
     if not vehType then
         return Citizen.Trace("NDCore.createVehicle", "vehType not found")
     end
