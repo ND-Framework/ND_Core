@@ -411,7 +411,8 @@ function NDCore.spawnOwnedVehicle(source, vehicleId, coords, heading)
     if not player then return end
 
     local vehicle = NDCore.getVehicleById(vehicleId)
-    if not vehicle or not vehicle.available or vehicle.owner ~= player.id then return end
+    if not vehicle or vehicle.owner ~= player.id then return end
+    if not vehicle.available and not vehicle.impounded then return end
 
     MySQL.query.await("UPDATE nd_vehicles SET stored = ? WHERE id = ?", {0, vehicleId})
 
@@ -701,6 +702,11 @@ RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
     local vehicle = NDCore.getVehicleById(vehId)
     local player = NDCore.getPlayer(src)
     if not player or not vehicle or vehicle.owner ~= player.id then return end
+
+    local info = NDCore.spawnOwnedVehicle(src, vehicle.id, isParkingAvailable(locations))
+    if not info then return end
+    TriggerClientEvent("ND_Vehicles:blip", src, info.netId, true)
+
     if vehicle.impounded then
         local reclaimPrice = vehicle.metadata.impoundReclaimPrice or 200
         if not player.deductMoney("bank", reclaimPrice, "Vehicle impound reclaim") then
@@ -719,10 +725,6 @@ RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
         })
         MySQL.query.await("UPDATE nd_vehicles SET impounded = ? WHERE id = ?", {0, vehicle.id})
     end
-
-    local info = NDCore.spawnOwnedVehicle(src, vehicle.id, isParkingAvailable(locations))
-    if not info then return end
-    TriggerClientEvent("ND_Vehicles:blip", src, info.netId, true)
 end)
 
 lib.callback.register("ND_Vehicles:getOwnedVehicles", function(src)
