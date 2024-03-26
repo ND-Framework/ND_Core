@@ -108,6 +108,15 @@ function NDCore.getVehicle(entity)
         DeleteEntity(entity)
     end
 
+
+    -- remvoe vehicle from db.
+    function self.remove(keepEntity)
+        if not keepEntity and DoesEntityExist(entity) then
+            DeleteEntity(entity)
+        end
+        MySQL.query("DELETE FROM nd_vehicles WHERE id = ?", {self.id})
+    end
+
     --- set vehicle properties
     ---@param props table
     function self.setProperties(props)
