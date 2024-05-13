@@ -15,7 +15,7 @@ local moneyActions = {
 }
 
 lib.addCommand("setmoney", {
-    help = "Admin command, manage player money.",
+    help = "Admin command, set a players money.",
     restricted = "group.admin",
     params = {
         {
@@ -164,7 +164,7 @@ lib.addCommand("setgroup", {
 end)
 
 lib.addCommand("skin", {
-    help = "Admin command, set player into character clothing menu.",
+    help = "Admin command, show character clothing menu for player.",
     restricted = "group.admin",
     params = {
         {
@@ -178,7 +178,7 @@ lib.addCommand("skin", {
 end)
 
 lib.addCommand("character", {
-    help = "Admin command, set player into character selection menu.",
+    help = "Admin command, show character selection menu for player.",
     restricted = "group.admin",
     params = {
         {
@@ -262,7 +262,7 @@ lib.addCommand("pay", {
 end)
 
 lib.addCommand("unlock", {
-    help = "Admin Command, force unlock vehicle.",
+    help = "Admin Command, force unlock a vehicle.",
     restricted = "group.admin",
 }, function(source, args, raw)
     local ped = GetPlayerPed(source)
@@ -293,7 +293,7 @@ lib.addCommand("unlock", {
 end)
 
 lib.addCommand("revive", {
-    help = "Admin command, revive player.",
+    help = "Admin command, revive a player.",
     restricted = "group.admin",
     params = {
         {
@@ -433,7 +433,7 @@ lib.addCommand("unfreeze", {
 end)
 
 lib.addCommand("vehicle", {
-    help = "Admin command, unfreeze a player.",
+    help = "Admin command, spawn a vehicle.",
     restricted = "group.admin",
     params = {
         {

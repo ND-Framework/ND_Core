@@ -1,6 +1,7 @@
 local ox_inventory
 local inventoryStarted = false
 local spawnedPlayerVehicles = {}
+local vehicleTypes = json.decode(GetResourceKvpString("ND_Core:vehTypes") or "[]")
 
 NDCore.isResourceStarted("ox_inventory", function(started)
     inventoryStarted = started
@@ -8,16 +9,24 @@ NDCore.isResourceStarted("ox_inventory", function(started)
     ox_inventory = exports.ox_inventory
 end)
 
-local function getVehicleType(model)
-    local tempVehicle = CreateVehicle(model, 0, 0, 0, 0, true, true)
+local function getVehicleType(coords, model)
+    if vehicleTypes[model] then
+        return vehicleTypes[model]
+    end
 
+    local tempVehicle = CreateVehicle(model, coords.x, coords.y, coords.z-5.0, coords.w, true, false)
     local time = os.time()
-    while not DoesEntityExist(tempVehicle) and os.time()-time < 5 do Wait(5) end
-
+    
+    while not DoesEntityExist(tempVehicle) and os.time()-time < 5 do Wait(0) end
     if not DoesEntityExist(tempVehicle) then return end
-    local entityType = GetVehicleType(tempVehicle)
+
+    local vehType = GetVehicleType(tempVehicle)
     DeleteEntity(tempVehicle)
-    return entityType
+
+    vehicleTypes[model] = vehType
+    SetResourceKvp("ND_Core:vehTypes", json.encode(vehicleTypes))
+
+    return vehType
 end
 
 local function generatePlate()
@@ -97,6 +106,15 @@ function NDCore.getVehicle(entity)
             end
         end
         DeleteEntity(entity)
+    end
+
+
+    -- remvoe vehicle from db.
+    function self.remove(keepEntity)
+        if not keepEntity and DoesEntityExist(entity) then
+            DeleteEntity(entity)
+        end
+        MySQL.query("DELETE FROM nd_vehicles WHERE id = ?", {self.id})
     end
 
     --- set vehicle properties
@@ -262,7 +280,7 @@ function NDCore.createVehicle(info)
     end
 
     local model = info.model or properties.model
-    local vehType = getVehicleType(model)
+    local vehType = getVehicleType(spawnCoords, model)
     if not vehType then
         return Citizen.Trace("NDCore.createVehicle", "vehType not found")
     end
@@ -420,7 +438,8 @@ function NDCore.spawnOwnedVehicle(source, vehicleId, coords, heading)
     if not player then return end
 
     local vehicle = NDCore.getVehicleById(vehicleId)
-    if not vehicle or not vehicle.available or vehicle.owner ~= player.id then return end
+    if not vehicle or vehicle.owner ~= player.id then return end
+    if not vehicle.available and not vehicle.impounded then return end
 
     MySQL.query.await("UPDATE nd_vehicles SET stored = ? WHERE id = ?", {0, vehicleId})
 
@@ -710,6 +729,11 @@ RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
     local vehicle = NDCore.getVehicleById(vehId)
     local player = NDCore.getPlayer(src)
     if not player or not vehicle or vehicle.owner ~= player.id then return end
+
+    local info = NDCore.spawnOwnedVehicle(src, vehicle.id, isParkingAvailable(locations))
+    if not info then return end
+    TriggerClientEvent("ND_Vehicles:blip", src, info.netId, true)
+
     if vehicle.impounded then
         local reclaimPrice = vehicle.metadata.impoundReclaimPrice or 200
         if not player.deductMoney("bank", reclaimPrice, "Vehicle impound reclaim") then
@@ -728,10 +752,6 @@ RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
         })
         MySQL.query.await("UPDATE nd_vehicles SET impounded = ? WHERE id = ?", {0, vehicle.id})
     end
-
-    local info = NDCore.spawnOwnedVehicle(src, vehicle.id, isParkingAvailable(locations))
-    if not info then return end
-    TriggerClientEvent("ND_Vehicles:blip", src, info.netId, true)
 end)
 
 lib.callback.register("ND_Vehicles:getOwnedVehicles", function(src)

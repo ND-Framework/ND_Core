@@ -383,6 +383,7 @@ local function createCharacterTable(info)
         self.groups[name] = nil
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self), "groups")
         TriggerEvent("ND:updateCharacter", self, "groups")
+        TriggerEvent("ND:groupRemoved", self, group)
         lib.removePrincipal(self.source, ("group.%s"):format(name))
         return group
     end
