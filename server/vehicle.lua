@@ -174,13 +174,22 @@ function NDCore.getVehicle(entity)
 
     function self.setMetadata(key, value)
         self.metadata[key] = value
+
         if DoesEntityExist(entity) then
             local state = Entity(self.entity).state
-            local metadata = state.metadata
-            metadata[key] = value
-            state.metadata = metadata
+
+            if not state.metadata then
+                state.metadata = self.metadata
+            else
+                state.metadata[key] = value
+            end
         end
-        if not self.id or not self.owner then return end
+
+        if not self.id or not self.owner then
+            lib.print.debug(('Skipped storing metadata for vehicle %s as it does not have an id/owner associated with it.'):format(self.entity))
+            return
+        end
+
         MySQL.query("UPDATE nd_vehicles SET metadata = ? WHERE id = ?", {json.encode(self.metadata), self.id})
     end
 
