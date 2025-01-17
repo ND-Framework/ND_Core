@@ -2,7 +2,7 @@
 
 author "Andyyy#7666"
 description "ND Framework Core"
-version "2.2.9"
+version "2.3.0"
 
 fx_version "cerulean"
 game "gta5"
