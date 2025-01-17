@@ -597,7 +597,7 @@ local function lockpickVehicle()
     }
 
     lib.requestAnimDict("veh@break_in@0h@p_m_one@")
-    for i=1, 7 do
+    for i=1, Config.lockpickTries do
         TaskPlayAnimAdvanced(cache.ped, "veh@break_in@0h@p_m_one@", "std_force_entry_ds", pos.x, pos.y, pos.z+0.025, rot.x, rot.y, rot.z, 8.0, 8.0, 1800, 28, 0.1)
         local dificulty = dificulties[math.random(1, #dificulties)]
         local success = lib.skillCheck(dificulty)
