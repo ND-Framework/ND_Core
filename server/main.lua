@@ -26,7 +26,8 @@ Config = {
     adminDiscordRoles = json.decode(GetConvar("core:adminDiscordRoles", "[]")),
     groupRoles = json.decode(GetConvar("core:groupRoles", "[]")),
     multiCharacter = false,
-    compatibility = json.decode(GetConvar("core:compatibility", "[]"))
+    compatibility = json.decode(GetConvar("core:compatibility", "[]")),
+    sv_lan = GetConvar("sv_lan", "false") == "true",
 }
 
 SetConvarServerInfo("Discord", Config.discordInvite)
@@ -43,6 +44,11 @@ local function getIdentifierList(src)
             list[identifierType] = identifier
         end
     end
+
+    if Config.sv_lan then
+        list[Config.characterIdentifier] = NDCore.getPlayerIdentifierByType(src, Config.characterIdentifier)
+    end
+
     return list
 end
 
@@ -51,6 +57,10 @@ AddEventHandler("playerJoining", function(oldId)
     local oldTempId = tonumber(oldId)
     PlayersInfo[src] = tempPlayersInfo[oldTempId]
     tempPlayersInfo[oldTempId] = nil
+
+    if Config.sv_lan then
+        lib.addPrincipal(("player.%s"):format(src), "group.admin")
+    end
 
     if Config.multiCharacter then return end
     Wait(3000)
@@ -103,7 +113,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
 
     if mainIdentifier and Config.discordBotToken ~= "false" and Config.discordGuildId ~= "false" then
         discordInfo = checkDiscordIdentifier(identifiers)
-        if not discordInfo and Config.discordMemeberRequired then
+        if not discordInfo and Config.discordMemeberRequired and not Config.sv_lan then
             deferrals.done(("Your discord was not found, join our discord here: %s."):format(Config.discordInvite))
             Wait(0)
         end
@@ -111,6 +121,17 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
 
     deferrals.update("Connecting...")
     Wait(0)
+
+    if Config.sv_lan then
+        tempPlayersInfo[tempSrc] = {
+            identifiers = {
+                [Config.characterIdentifier] = "sv_lan"
+            },
+            discord = discordInfo
+        }
+        deferrals.done()
+        return
+    end
 
     if mainIdentifier then
         tempPlayersInfo[tempSrc] = {

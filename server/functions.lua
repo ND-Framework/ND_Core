@@ -1,3 +1,10 @@
+function NDCore.getPlayerIdentifierByType(src, indentifierType)
+    if Config.sv_lan then
+        return ("%s:sv_lan"):format(indentifierType)
+    end
+    return GetPlayerIdentifierByType(src, indentifierType)
+end
+
 ---@param src number
 ---@return table
 function NDCore.getPlayer(src)
