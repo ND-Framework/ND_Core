@@ -15,7 +15,8 @@ Config = {
     requireKeys = GetConvarInt("core:requireKeys", 1) == 1,
     useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
     groups = json.decode(GetConvar("core:groups", "[]")),
-    compatibility = json.decode(GetConvar("core:compatibility", "[]"))
+    compatibility = json.decode(GetConvar("core:compatibility", "[]")),
+    lockpickTries = GetConvarInt("core:lockpickTries", 3)
 }
 
 -- Discord rich presence.
