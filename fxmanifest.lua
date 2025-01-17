@@ -37,7 +37,10 @@ files {
     "compatibility/**/locale.lua"
 }
 
-dependency "oxmysql"
+dependenies {
+    "ox_lib",
+    "oxmysql"
+}
 
 -- below were used with backwards compatibility but could interfere with resources checking if the resources are started.
 -- provide "es_extended"
