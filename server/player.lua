@@ -426,7 +426,7 @@ end
 ---@param info table
 ---@return table
 function NDCore.newCharacter(src, info)
-    local identifier = GetPlayerIdentifierByType(src, Config.characterIdentifier)
+    local identifier = NDCore.getPlayerIdentifierByType(src, Config.characterIdentifier)
     if not identifier then return end
 
     local charInfo = {
@@ -468,7 +468,7 @@ end
 function NDCore.fetchCharacter(id, src)
     local result
     if src then
-        result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ? and identifier = ?", {id, GetPlayerIdentifierByType(src, Config.characterIdentifier)})
+        result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ? and identifier = ?", {id, NDCore.getPlayerIdentifierByType(src, Config.characterIdentifier)})
     else
         result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ?", {id})
     end
@@ -497,7 +497,7 @@ end
 ---@return table
 function NDCore.fetchAllCharacters(src)
     local characters = {}
-    local result = MySQL.query.await("SELECT * FROM nd_characters WHERE identifier = ?", {GetPlayerIdentifierByType(src, Config.characterIdentifier)})
+    local result = MySQL.query.await("SELECT * FROM nd_characters WHERE identifier = ?", {NDCore.getPlayerIdentifierByType(src, Config.characterIdentifier)})
 
     for i=1, #result do
         local info = result[i]
