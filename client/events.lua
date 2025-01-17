@@ -23,14 +23,17 @@ end)
 
 RegisterNetEvent("ND:revivePlayer", function()
     if source == "" then return end
-    local veh = GetVehiclePedIsIn(cache.ped)
+    local oldPed = cache.ped
+    local veh = GetVehiclePedIsIn(oldPed)
     local seat = cache.seat
-    local coords = GetEntityCoords(cache.ped)
-    NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, GetEntityHeading(cache.ped), true, true, false)
+    local coords = GetEntityCoords(oldPed)
+    local armor = GetPedArmour(oldPed)
+
+    NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, GetEntityHeading(oldPed), true, true, false)
 
     local ped = PlayerPedId()
-    if cache.ped ~= ped then
-        DeleteEntity(cache.ped)
+    if oldPed ~= ped then
+        DeleteEntity(oldPed)
         ClearAreaOfPeds(coords.x, coords.y, coords.z, 0.2, false)
     end
 
@@ -43,6 +46,7 @@ RegisterNetEvent("ND:revivePlayer", function()
     SetBlockingOfNonTemporaryEvents(ped, false)
     SetPedCanRagdollFromPlayerImpact(ped, true)
     ClearPedTasksImmediately(ped)
+    SetPedArmour(ped, armor)
 
     if veh and veh ~= 0 then
         SetPedIntoVehicle(ped, veh, seat)
