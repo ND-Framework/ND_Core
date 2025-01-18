@@ -305,48 +305,36 @@ lib.addCommand("dv", {
     }
 }, function(source, args, raw)
     local ped = GetPlayerPed(source)
-    local veh = GetVehiclePedIsIn(ped)
-    if veh and veh ~= 0 and DoesEntityExist(veh) then
-        DeleteEntity(veh)
-        return TriggerClientEvent("chat:addMessage", source, {
-            color = {50, 100, 235},
-            multiline = true,
-            args = {"Staff action", "deleted 1 vehicle"}
-        })
-    end
-    
-    local count = 0
     local coords = GetEntityCoords(ped)
+    local count = 0
+    local message = nil
+    local veh = lib.getClosestVehicle(coords, 3.0)
+
     if args.range then
-        for _, veh in ipairs(GetAllVehicles()) do
-            local vehDist = #(GetEntityCoords(veh) - coords)
-            if vehDist < args.range then
-                DeleteEntity(veh)
-                count += 1
-            end
+        local vehicles = lib.getNearbyVehicles(coords, args.range)
+        count = #vehicles
+
+        for i=1, count do
+            local veh = vehicles[i]
+            DeleteEntity(veh.vehicle)
         end
-        return TriggerClientEvent("chat:addMessage", source, {
-            color = {50, 100, 235},
-            multiline = true,
-            args = {"Staff action", ("deleted %d vehicles"):format(count)}
-        })
+    elseif veh then
+        DeleteEntity(veh)
+        count = 1
     end
 
-    local closest, dist
-    for _, veh in ipairs(GetAllVehicles()) do
-        local vehDist = #(GetEntityCoords(veh) - coords)
-        if vehDist < 5.0 and not closest or (dist and dist > vehDist) then
-            closest = veh
-            dist = vehDist
-        end
+    if count == 0 then
+        message = {"Staff action [dv]", "no vehicles found"}
+    elseif count == 1 then
+        message = {"Staff action [dv]", "deleted 1 vehicle"}
+    else
+        message = {"Staff action [dv]", ("deleted %d vehicles"):format(count)}
     end
 
-    if not closest then return "no vehicle found nearby" end
-    DeleteEntity(closest)
     TriggerClientEvent("chat:addMessage", source, {
         color = {50, 100, 235},
         multiline = true,
-        args = {"Staff action", "deleted 1 vehicle"}
+        args = message
     })
 end)
 
