@@ -356,8 +356,9 @@ AddStateBagChangeHandler("locked", nil, function(bagName, key, value, reserved, 
     end)
 end)
 
-lib.callback.register("ND_Vehicles:getProps", function(netId)
-    local veh = getVehFromNetId(netId)
+local function getProps(veh)
+    if not veh or not DoesEntityExist(veh) then return end
+    
     local props = lib.getVehicleProperties(veh)
     local colorPrimary, colorSecondary = GetVehicleColours(veh)
     if not props then return end
@@ -368,7 +369,18 @@ lib.callback.register("ND_Vehicles:getProps", function(netId)
     props.className = vehicleClassNames[GetVehicleClass(veh)]
     props.makeName = GetLabelText(GetMakeNameFromVehicleModel(props.model))
     props.modelName = GetLabelText(GetDisplayNameFromVehicleModel(props.model))
+
     return props
+end
+
+lib.callback.register("ND_Vehicles:getProps", function(netId)
+    local veh = getVehFromNetId(netId)
+    return getProps(veh)
+end)
+
+lib.callback.register("ND_Vehicles:getPropsFromCurrentVeh", function()
+    local veh = GetVehiclePedIsIn(cache.ped)
+    return getProps(veh)
 end)
 
 lib.callback.register("ND_Vehicles:getVehicleModelMakeLabel", function(model)

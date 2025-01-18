@@ -450,3 +450,45 @@ lib.addCommand("vehicle", {
         Wait(100)
     end
 end)
+
+lib.addCommand("claim-veh", {
+    help = "Admin command, add a copy of the vehicle you're inside to players garage.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "target",
+            type = "playerId",
+            help = "Target player's server id"
+        }
+    }
+}, function(source, args, raw)
+    local player = NDCore.getPlayer(source)
+    if not player then return end
+
+    local targetPlayer = NDCore.getPlayer(args.target)
+    if not targetPlayer then
+        return player.notify({
+            title = "Player not found!",
+            description = "Target player not found, make sure they select a charcter!",
+            type = "error"
+        })
+    end
+
+
+    local properties = lib.callback.await("ND_Vehicles:getPropsFromCurrentVeh", source)
+    if not properties then
+        return player.notify({
+            title = "Vehicle data not found!",
+            description = "The vehicle properties data was not found!",
+            type = "error"
+        })
+    end
+    
+    NDCore.setVehicleOwned(targetPlayer.id, properties, true)
+
+    player.notify({
+        title = "Vehicle added!",
+        description = ("The vehicle has now been added to %s's garage!"):format(targetPlayer.name),
+        type = "success"
+    })
+end)
