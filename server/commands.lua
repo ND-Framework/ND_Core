@@ -266,30 +266,14 @@ lib.addCommand("unlock", {
     restricted = "group.admin",
 }, function(source, args, raw)
     local ped = GetPlayerPed(source)
-    local playerVeh = GetVehiclePedIsIn(ped)
     local coords = GetEntityCoords(ped)
-    local vehicles = GetAllVehicles()
-    local maxDistance = 2.0
-	local closestVehicle
+    local veh = lib.getClosestVehicle(coords, 2.5, true)
 
-    if not playerVeh or playerVeh == 0 or not DoesEntityExist(playerVeh) then        
-        for i=1, #vehicles do
-            local vehicle = vehicles[i]
-            local vehicleCoords = GetEntityCoords(vehicle)
-            local distance = #(coords-vehicleCoords)
-    
-            if distance < maxDistance then
-                maxDistance = distance
-                closestVehicle = vehicle
-            end
-        end
-        if not closestVehicle or not DoesEntityExist(closestVehicle) then return end
-        local state = Entity(closestVehicle).state
-        state.locked = false
-    else
-        local state = Entity(playerVeh).state
-        state.hotwired = true
-    end
+    if not veh then return end
+
+    local state = Entity(veh).state
+    state.hotwired = true
+    state.locked = false
 end)
 
 lib.addCommand("revive", {
