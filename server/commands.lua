@@ -54,7 +54,7 @@ lib.addCommand("setmoney", {
         duration = 10000
     })
 
-    if not source then return end
+    if not source or source == 0 then return end
     TriggerClientEvent("chat:addMessage", source, {
         color = {50, 100, 235},
         multiline = true,
@@ -96,7 +96,7 @@ lib.addCommand("setjob", {
         duration = 10000
     })
 
-    if not source then return end
+    if not source or source == 0 then return end
     TriggerClientEvent("chat:addMessage", source, {
         color = {50, 100, 235},
         multiline = true,
@@ -155,7 +155,7 @@ lib.addCommand("setgroup", {
         return
     end
 
-    if not source then return end
+    if not source or source == 0 then return end
     TriggerClientEvent("chat:addMessage", source, {
         color = {50, 100, 235},
         multiline = true,
@@ -206,7 +206,7 @@ lib.addCommand("pay", {
         }
     }
 }, function(source, args, raw)
-    if not source then return end
+    if not source or source == 0 then return end
 
     local player = NDCore.getPlayer(source)
     local targetPlayer = NDCore.getPlayer(args.target)
