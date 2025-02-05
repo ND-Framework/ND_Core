@@ -160,7 +160,7 @@ AddEventHandler("onResourceStop", function(name)
     end
 end)
 
-SetTimeout(500, function()
+MySQL.ready(function()
     NDCore.loadSQL({
         "database/characters.sql",
         "database/vehicles.sql"
