@@ -301,6 +301,12 @@ lib.addCommand("dv", {
             type = "number",
             help = "Range to delete vehicles in",
             optional = true
+        },
+        {
+            name = "playervehicle",
+            type = "string",
+            help = "Include player vehicles: true/false",
+            optional = true
         }
     }
 }, function(source, args, raw)
@@ -308,6 +314,7 @@ lib.addCommand("dv", {
     local coords = GetEntityCoords(ped)
     local count = 0
     local message = nil
+    local includePlayerVeh = args.playervehicle or false
     local veh = lib.getClosestVehicle(coords, 3.0)
 
     if args.range then
@@ -316,7 +323,15 @@ lib.addCommand("dv", {
 
         for i=1, count do
             local veh = vehicles[i]
-            DeleteEntity(veh.vehicle)
+
+            if includePlayerVeh == "false" then
+                local driver = GetPedInVehicleSeat(veh.vehicle, -1)
+                if not IsPedAPlayer(driver) then
+                   DeleteEntity(veh.vehicle)
+                end
+            else
+                DeleteEntity(veh.vehicle)
+            end
         end
     elseif veh then
         DeleteEntity(veh)
