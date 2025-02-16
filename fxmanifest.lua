@@ -37,7 +37,7 @@ files {
     "compatibility/**/locale.lua"
 }
 
-dependenies {
+dependencies {
     "ox_lib",
     "oxmysql"
 }
