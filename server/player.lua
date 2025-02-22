@@ -221,7 +221,19 @@ local function createCharacterTable(info)
         }
     
         if licenses then
-            self.metadata.licenses[#licenses+1] = license
+            local found = false
+
+            for i=1, #licenses do
+                if licenses[i].type == licenseType then
+                    self.metadata.licenses[i] = license
+                    found = true
+                    break
+                end
+            end
+
+            if not found then
+                self.metadata.licenses[#licenses+1] = license
+            end
         else
             self.metadata.licenses = {license}
         end
