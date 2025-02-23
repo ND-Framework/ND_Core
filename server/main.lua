@@ -34,6 +34,8 @@ SetConvarServerInfo("Discord", Config.discordInvite)
 SetConvarServerInfo("NDCore", GetResourceMetadata(resourceName, "version", 0) or "invalid")
 SetConvarReplicated("inventory:framework", "nd")
 
+lib.versionCheck('ND-Framework/ND_Core')
+
 local function getIdentifierList(src)
     local list = {}
     for i=0, GetNumPlayerIdentifiers(src) do
