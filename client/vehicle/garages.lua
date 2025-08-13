@@ -119,8 +119,8 @@ end
 local function parkVehicle(veh)
     if not veh or not DoesEntityExist(veh) then
         return NDCore.notify({
-            title = "Garage",
-            description = "No owned vehicle found nearby.",
+            title = locale("garage"),
+            description = locale("no_owned_veh_nearby"),
             type = "error",
             position = "bottom",
             duration = 3000
@@ -128,8 +128,8 @@ local function parkVehicle(veh)
     end
     if GetPedInVehicleSeat(veh, -1) ~= 0 then
         NDCore.notify({
-            title = "Garage",
-            description = "Player in vehicle!",
+            title = locale("garage"),
+            description = locale("player_in_veh"),
             type = "error",
             position = "bottom",
             duration = 3000
@@ -156,13 +156,13 @@ end
 
 local function getEngineStatus(health)
     if health > 950 then
-        return "Perfect"
+        return locale("perfect")
     elseif health > 750 then
-        return "Good"
+        return locale("good")
     elseif health > 500 then
-        return "Bad"
+        return locale("bad")
     end
-    return "Very bad"
+    return locale("very_bad")
 end
 
 local function createMenuOptions(vehicle, vehicleSpawns)
@@ -174,21 +174,21 @@ local function createMenuOptions(vehicle, vehicleSpawns)
     if not makeName or makeName == "NULL" then
         makeName = ""
     else
-        metadata[#metadata+1] = {label = "Make", value = makeName}
+        metadata[#metadata+1] = {label = locale("veh_make_brand"), value = makeName}
         makeName = makeName .. " " 
     end
     if not modelName or modelName == "NULL" then
         modelName = ""
     else
-        metadata[#metadata+1] = {label = "Model", value = modelName}
+        metadata[#metadata+1] = {label = locale("veh_model"), value = modelName}
     end
 
     if props?.plate then
-        metadata[#metadata+1] = {label = "Plate", value = props.plate}
+        metadata[#metadata+1] = {label = locale("veh_plate"), value = props.plate}
     end
     if props?.engineHealth then
         metadata[#metadata+1] = {
-            label = "Engine status",
+            label = locale("engine_status"),
             value = getEngineStatus(props.engineHealth),
             progress = props.engineHealth/10,
             colorScheme = "blue"
@@ -205,7 +205,7 @@ local function createMenuOptions(vehicle, vehicleSpawns)
     end
 
     return {
-        title = ("Vehicle: %s%s\nPlate: %s"):format(makeName, modelName, props?.plate or "not found"),
+        title = ("%s: %s%s\n%s: %s"):format(locale("vehicle"), makeName, modelName, locale("veh_plate"), props?.plate or locale("not_found")),
         metadata = metadata,
         onSelect = function(args)
             TriggerServerEvent("ND_Vehicles:takeVehicle", vehicle.id, vehicleSpawns)
@@ -217,7 +217,7 @@ local function createMenu(vehicles, garageType, vehicleSpawns, impound)
     local options = {}
     if not impound then
         options[#options+1] = {
-            title = "Park vehicle",
+            title = locale("park_veh"),
             onSelect = function(args)
                 local veh = getClosestOwnedVehicle()
                 parkVehicle(veh)
@@ -231,13 +231,13 @@ local function createMenu(vehicles, garageType, vehicleSpawns, impound)
     end
     if impound and #options == 0 then
         options[#options+1] = {
-            title = "No vehicles found",
+            title = locale("no_vehs_found"),
             readOnly = true
         }
     end
     return {
         id = ("garage_%s"):format(garageType),
-        title = impound and "Vehicle impound" or "Parking garage",
+        title = impound and locale("vehicle_impound") or locale("parking_garage"),
         options = options,
         onExit = function()
             garageOpen = false
@@ -253,7 +253,7 @@ for i=1, #locations do
         distance = 45.0,
         clothing = clothing[math.random(1, #clothing)],
         blip = {
-            label = location.impound and ("Impound (%s)"):format(location.garageType) or ("Parking garage (%s)"):format(location.garageType),
+            label = location.impound and locale("impound_w_location", location.garageType) or locale("garage_w_location", location.garageType),
             sprite = location.impound and 285 or sprite[location.garageType],
             scale = 0.7,
             color = 3,
@@ -267,7 +267,7 @@ for i=1, #locations do
             {
                 name = "nd_core:garagePed",
                 icon = "fa-solid fa-warehouse",
-                label = location.impound and "View impounded vehicles" or "View garage",
+                label = location.impound and locale("view_impounded_vehs") or locale("view_garage"),
                 distance = 2.0,
                 canInteract = function(entity, distance, coords, name, bone)
                     if not location.groups then return true end

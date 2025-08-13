@@ -405,14 +405,14 @@ function NDCore.transferVehicleOwnership(vehicleId, fromSource, toSource)
     end
 
     playerFrom.notify({
-        title = "Ownership transfered",
-        description = ("Vehicle ownership of %s has been transfered."):format(vehicle.plate),
+        title = locale("vehicle_ownership_transfered"),
+        description = locale("vehicle_ownership_transfered2", vehicle.plate),
         position = "bottom-right",
         type = "success"
     })
     playerTo.notify({
-        title = "Ownership received",
-        description = ("Received vehicle ownership of %s."):format(vehicle.plate),
+        title = locale("vehicle_ownership_received"),
+        description = locale("vehicle_ownership_received2", vehicle.plate),
         position = "bottom-right"
     })
     return true
@@ -446,15 +446,15 @@ function NDCore.shareVehicleKeys(source, target, vehicle)
     local plate = GetVehicleNumberPlateText(vehicle)
 
     player.notify({
-        title = "Keys shared",
-        description = ("You've shared vehicle keys to %s."):format(plate),
+        title = locale("keys_shared"),
+        description = locale("keys_shared2", plate),
         position = "bottom-right",
-        type = "success",
+        type = "success"
     })
     targetPlayer.notify({
-        title = "Keys received",
-        description = ("Received vehicle keys to %s."):format(plate),
-        position = "bottom-right",
+        title = locale("keys_received"),
+        description = locale("keys_received2", plate),
+        position = "bottom-right"
     })
     return true
 end
@@ -504,16 +504,16 @@ local function toggleVehicleLock(source, entity, nearby, metadata)
 
     if metadata and not metadata.keyEnabled then
         return player.notify({
-            title = "No signal",
-            description = "Vehicle key disabled.",
+            title = locale("no_signal"),
+            description = locale("veh_key_disabled"),
             type = "error",
             position = "bottom-right",
             duration = 3000
         })
     elseif not nearby then
         return player.notify({
-            title = "No signal",
-            description = "Vehicle to far away.",
+            title = locale("no_signal"),
+            description = locale("veh_far_away"),
             type = "error",
             position = "bottom-right",
             duration = 3000
@@ -527,16 +527,16 @@ local function toggleVehicleLock(source, entity, nearby, metadata)
     player.triggerEvent("ND_Vehicles:keyFob", vehicle.netId)
     if locked then
         return player.notify({
-            title = "LOCKED",
-            description = "Your vehicle has now been locked.",
+            title = locale("veh_locked"),
+            description = locale("veh_locked2"),
             type = "success",
             position = "bottom-right",
             duration = 3000
         })
     end
     player.notify({
-        title = "UNLOCKED",
-        description = "Your vehicle has now been unlocked.",
+        title = locale("veh_unlocked"),
+        description = locale("veh_unlocked2"),
         type = "inform",
         position = "bottom-right",
         duration = 3000
@@ -725,16 +725,16 @@ RegisterNetEvent("ND_Vehicles:storeVehicle", function(netId)
     local player = NDCore.getPlayer(src)
     if not vehicle.setStatus("stored", true) or not player or player.id ~= vehicle.owner then
         return player.notify({
-            title = "Garage",
-            description = "No owned vehicle found nearby.",
+            title = locale("garage"),
+            description = locale("no_owned_veh_nearby"),
             type = "error",
             position = "bottom",
             duration = 3000
         })
     end
     player.notify({
-        title = "Garage",
-        description = "Vehicle stored in garage.",
+        title = locale("garage"),
+        description = locale("veh_stored_in_garage"),
         type = "success",
         position = "bottom",
         duration = 3000
@@ -767,17 +767,17 @@ RegisterNetEvent("ND_Vehicles:takeVehicle", function(vehId, locations)
 
     if vehicle.impounded then
         local reclaimPrice = vehicle.metadata.impoundReclaimPrice or 200
-        if not player.deductMoney("bank", reclaimPrice, "Vehicle impound reclaim") then
+        if not player.deductMoney("bank", reclaimPrice, locale("impound_reclaim")) then
             return player.notify({
-                title = "Impound",
-                description = ("Price to reclaim is $%d, you don't have enough!"):format(reclaimPrice),
+                title = locale("impound"),
+                description = locale("impound_not_enough", reclaimPrice),
                 type = "error",
                 position = "bottom"
             })
         end
         player.notify({
-            title = "Impound",
-            description = ("Paid $%d to reclaim vehicle!"):format(reclaimPrice),
+            title = locale("impound"),
+            description = locale("impound_paid", reclaimPrice),
             type = "success",
             position = "bottom"
         })

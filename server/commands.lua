@@ -1,16 +1,16 @@
 local moneyTypes = {"bank", "cash"}
 local moneyActions = {
     remove = function(player, account, amount)
-        player.deductMoney(account, amount, "Staff action")
-        return ("Removed $%d (%s) to %s"):format(amount, account, player.name), ("removed $%d from %s"):format(amount, account)
+        player.deductMoney(account, amount, locale("staff_action"))
+        return locale("staff_money_removed", amount, account, player.name), locale("user_money_removed", amount, account)
     end,
     add = function(player, account, amount)
-        player.addMoney(account, amount, "Staff action")
-        return ("Added $%d (%s) to %s"):format(amount, account, player.name), ("added $%d to %s"):format(amount, account)
+        player.addMoney(account, amount, locale("staff_action"))
+        return locale("staff_money_added", amount, account, player.name), locale("user_money_added", amount, account)
     end,
     set = function(player, account, amount)
-        player.setData(account, amount, "Staff action")
-        return ("Set %s's (%s) to $%d"):format(player.name, account, amount), ("set %s to $%d"):format(account, amount)
+        player.setData(account, amount, locale("staff_action"))
+        return locale("staff_money_set", player.name, account, amount), locale("user_money_set", account, amount)
     end
 }
 
@@ -48,7 +48,7 @@ lib.addCommand("setmoney", {
     local staffMessage, userMessage = action(player, moneyType, args.amount)
 
     player.notify({
-        title = "Staff action",
+        title = locale("staff_action"),
         description = userMessage,
         type = "inform",
         duration = 10000
@@ -58,7 +58,7 @@ lib.addCommand("setmoney", {
     TriggerClientEvent("chat:addMessage", source, {
         color = {50, 100, 235},
         multiline = true,
-        args = {"Staff action", staffMessage}
+        args = {locale("staff_action"), staffMessage}
     })
 end)
 
@@ -90,8 +90,8 @@ lib.addCommand("setjob", {
     local jobInfo = player.setJob(job, args.rank)
     if not player or not jobInfo then return end
     player.notify({
-        title = "Staff action",
-        description = ("Job updated to %s, rank %s"):format(jobInfo.label, jobInfo.rankName),
+        title = locale("staff_action"),
+        description = locale("job_updated_noti", jobInfo.label, jobInfo.rankName),
         type = "inform",
         duration = 10000
     })
@@ -100,7 +100,7 @@ lib.addCommand("setjob", {
     TriggerClientEvent("chat:addMessage", source, {
         color = {50, 100, 235},
         multiline = true,
-        args = {"Staff action", "success"}
+        args = {locale("staff_action"), locale("success")}
     })
 end)
 
@@ -137,8 +137,8 @@ lib.addCommand("setgroup", {
         local groupInfo = player.addGroup(args.group, args.rank)
         if not groupInfo then return end
         player.notify({
-            title = "Staff action",
-            description = ("Added to group %s, rank %s."):format(groupInfo.label, groupInfo.rankName),
+            title = locale("staff_action"),
+            description = locale("group_added_noti", groupInfo.label, groupInfo.rankName),
             type = "inform",
             duration = 10000
         })
@@ -146,8 +146,8 @@ lib.addCommand("setgroup", {
         local groupInfo = player.removeGroup(args.group)
         if not groupInfo then return end
         player.notify({
-            title = "Staff action",
-            description = ("Removed from group %s."):format(groupInfo.label),
+            title = locale("staff_action"),
+            description = locale("group_removed_noti", groupInfo.label),
             type = "inform",
             duration = 10000
         })
@@ -159,7 +159,7 @@ lib.addCommand("setgroup", {
     TriggerClientEvent("chat:addMessage", source, {
         color = {50, 100, 235},
         multiline = true,
-        args = {"Staff action", "success"}
+        args = {locale("staff_action"), locale("success")}
     })
 end)
 
@@ -214,7 +214,7 @@ lib.addCommand("pay", {
     if not player or not targetPlayer then
         return player.notify({
             title = "Error",
-            description = "No player found",
+            description = locale("no_player_found"),
             type = "error"
         })
     end
@@ -222,7 +222,7 @@ lib.addCommand("pay", {
     if player.cash < args.amount then
         return player.notify({
             title = "Error",
-            description = "You don't have enough cash",
+            description = locale("not_enough_cash"),
             type = "error"
         })
     end
@@ -232,7 +232,7 @@ lib.addCommand("pay", {
     if #(playerCoords-targetCoords) > 2.0 then
         return player.notify({
             title = "Error",
-            description = "Player is not nearby",
+            description = locale("player_not_nearby"),
             type = "error"
         })
     end
@@ -240,22 +240,22 @@ lib.addCommand("pay", {
     local success = player.deductMoney("cash", args.amount) and targetPlayer.addMoney("cash", args.amount)
     if not success then
         return player.notify({
-            title = "Couldn't give money",
+            title = locale("cant_give_money"),
             type = "error",
             duration = 5000
         })
     end
     
     targetPlayer.notify({
-        title = "Money received",
-        description = ("Received $%d in cash"):format(args.amount),
+        title = locale("money_received"),
+        description = locale("money_received2", args.amount),
         type = "inform",
         duration = 5000
     })
     
     player.notify({
-        title = "Money given",
-        description = ("You gave $%d in cash"):format(args.amount),
+        title = locale("money_given"),
+        description = locale("money_given2", args.amount),
         type = "inform",
         duration = 5000
     })
@@ -323,12 +323,13 @@ lib.addCommand("dv", {
         count = 1
     end
 
+    local messageLabel = ("%s [dv]"):format(locale("staff_action"))
     if count == 0 then
-        message = {"Staff action [dv]", "no vehicles found"}
+        message = {messageLabel, "no vehicles found"}
     elseif count == 1 then
-        message = {"Staff action [dv]", "deleted 1 vehicle"}
+        message = {messageLabel, "deleted 1 vehicle"}
     else
-        message = {"Staff action [dv]", ("deleted %d vehicles"):format(count)}
+        message = {messageLabel, ("deleted %d vehicles"):format(count)}
     end
 
     TriggerClientEvent("chat:addMessage", source, {

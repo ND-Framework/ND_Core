@@ -66,7 +66,7 @@ local function createCharacterTable(info)
     function self.depositMoney(amount)
         local amount = tonumber(amount)
         if not amount or self.cash < amount or amount <= 0 then return end
-        return self.deductMoney("cash", amount, "Deposit") and self.addMoney("bank", amount, "Deposit")
+        return self.deductMoney("cash", amount, locale("deposit")) and self.addMoney("bank", amount, locale("deposit"))
     end
     
     ---@param amount number
@@ -74,7 +74,7 @@ local function createCharacterTable(info)
     function self.withdrawMoney(amount)
         local amount = tonumber(amount)
         if not amount or self.bank < amount or amount <= 0 then return end
-        return self.deductMoney("bank", amount, "Withdraw") and self.addMoney("cash", amount, "Withdraw")
+        return self.deductMoney("bank", amount, locale("withdraw")) and self.addMoney("cash", amount, locale("withdraw"))
     end
 
     ---@param data string

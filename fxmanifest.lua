@@ -34,7 +34,8 @@ server_scripts {
 files {
     "init.lua",
     "client/vehicle/data.lua",
-    "compatibility/**/locale.lua"
+    "compatibility/**/locale.lua",
+    "locales/*.json"
 }
 
 dependencies {

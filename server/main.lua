@@ -1,3 +1,4 @@
+lib.locale()
 NDCore = {}
 NDCore.players = {}
 PlayersInfo = {}
@@ -117,12 +118,12 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
     if mainIdentifier and Config.discordBotToken ~= "false" and Config.discordGuildId ~= "false" then
         discordInfo = checkDiscordIdentifier(identifiers)
         if not discordInfo and Config.discordMemeberRequired and not Config.sv_lan then
-            deferrals.done(("Your discord was not found, join our discord here: %s."):format(Config.discordInvite))
+            deferrals.done(locale("not_in_discord", Config.discordInvite))
             Wait(0)
         end
     end
 
-    deferrals.update("Connecting...")
+    deferrals.update(locale("connecting"))
     Wait(0)
 
     if Config.sv_lan then
@@ -143,7 +144,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
         }
         deferrals.done()
     else
-        deferrals.done(("Your %s was not found."):format(Config.characterIdentifier))
+        deferrals.done(locale("identifier_not_found", Config.characterIdentifier))
         Wait(0)
     end
 end)
@@ -164,6 +165,7 @@ AddEventHandler("onResourceStop", function(name)
 end)
 
 MySQL.ready(function()
+    Wait(100)
     NDCore.loadSQL({
         "database/characters.sql",
         "database/vehicles.sql"
