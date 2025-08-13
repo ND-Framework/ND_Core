@@ -9,3 +9,5 @@ NDCore = setmetatable({}, {
         return self[index]
     end
 })
+
+return NDCore
