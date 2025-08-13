@@ -31,9 +31,40 @@ end
 
 local function generatePlate()
     local plate = {}
-    for i=1, 8 do
-        plate[i] = math.random(0, 1) == 1 and string.char(math.random(65, 90)) or math.random(0, 9)
+    local i = 1
+    local p = 1
+
+    -- ensure pattern exists and pad to 8 chars
+    local pattern = Config.platePattern
+    if #pattern < 8 then
+        pattern = pattern .. string.rep(" ", 8 - #pattern)
     end
+
+    while i <= 8 do
+        local char = pattern:sub(p, p)
+
+        if char == "^" then
+            -- literal next character
+            p = p + 1
+            plate[i] = pattern:sub(p, p)
+        elseif char == "1" then
+            plate[i] = tostring(math.random(0, 9))
+        elseif char == "A" then
+            plate[i] = string.char(math.random(65, 90)) -- A–Z
+        elseif char == "." then
+            if math.random(0, 1) == 0 then
+                plate[i] = tostring(math.random(0, 9))
+            else
+                plate[i] = string.char(math.random(65, 90))
+            end
+        else
+            plate[i] = char
+        end
+
+        i = i + 1
+        p = p + 1
+    end
+
     return table.concat(plate)
 end
 

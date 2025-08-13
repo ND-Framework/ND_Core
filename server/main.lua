@@ -28,6 +28,7 @@ Config = {
     multiCharacter = false,
     compatibility = json.decode(GetConvar("core:compatibility", "[]")),
     sv_lan = GetConvar("sv_lan", "false") == "true",
+    platePattern = GetConvar("core:platePattern", "11AAA111")
 }
 
 SetConvarServerInfo("Discord", Config.discordInvite)
