@@ -111,7 +111,7 @@ function NDCore.createAiPed(info)
     local options = info.options
     local blip = createBlip(coords, blipInfo)
     local point = lib.points.new({
-        coords = vec3(coords.x, coords.y, coords.z),
+        coords = coords.xyz,
         distance = info.distance or 25.0
     })
     
@@ -122,6 +122,10 @@ function NDCore.createAiPed(info)
         options = info.options,
         resource = info.resource or GetInvokingResource()
     }
+
+    if blip and blipInfo and blipInfo.showWhenNear and DoesBlipExist(blip) and #(GetEntityCoords(cache.ped)-coords.xyz) > point.distance then
+        SetBlipAlpha(blip, 0)
+    end
 
     function point:onEnter()
         local found, ground = GetGroundZFor_3dCoord(coords.x, coords.y, coords.z, true)
