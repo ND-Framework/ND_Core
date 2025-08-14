@@ -24,6 +24,7 @@ server_scripts {
     "@oxmysql/lib/MySQL.lua",
     "server/main.lua",
     "shared/functions.lua",
+    "shared/items.lua",
     "server/player.lua",
     "server/vehicle.lua",
     "server/functions.lua",
