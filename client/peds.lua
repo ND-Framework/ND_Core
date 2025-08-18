@@ -101,6 +101,16 @@ local function updateBlips(playerGroups)
     end
 end
 
+local function disableCollisionWithModels(ped, models)
+    local coords = GetEntityCoords(ped)
+    for i=1, #models do
+        local m = models[i]
+        local model = type(m) == "number" and m or GetHashKey(m)
+        local obj = GetClosestObjectOfType(coords.x, coords.y, coords.z, 5.0, model, false, false, false)
+        SetEntityNoCollisionEntity(ped, obj, false)
+    end
+end
+
 function NDCore.createAiPed(info)
     local ped
     local model = type(info.model) == "string" and GetHashKey(info.model) or info.model
@@ -137,6 +147,7 @@ function NDCore.createAiPed(info)
             Wait(100)
         end
 
+        disableCollisionWithModels(ped, info.disableCollisionWithModels)
         configPed(ped)
         setClothing(ped, clothing)
         locations[id].ped = ped
