@@ -102,6 +102,7 @@ local function updateBlips(playerGroups)
 end
 
 local function disableCollisionWithModels(ped, models)
+    if not models then return end
     local coords = GetEntityCoords(ped)
     for i=1, #models do
         local m = models[i]
