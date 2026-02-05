@@ -79,37 +79,107 @@ function NDCore.loadSQL(fileLocation, resource)
     return true
 end
 
-function NDCore.getDiscordInfo(discordUserId)
-    if not discordUserId or not Config.discordBotToken or not Config.discordGuildId then return end
+local DiscordCache = {}
+local CacheRefreshInterval = 30 * 60 * 1000 
+
+local discordErrors = {
+    [400] = "Improper HTTP request",
+    [401] = "Discord bot token might be missing or incorrect",
+    [404] = "User might not be in the server",
+    [429] = "Discord bot rate limited"
+}
+
+function NDCore.buildDiscordCache()
     local done = false
-    local data
-    local discordErrors = {
-        [400] = "Improper HTTP request",
-        [401] = "Discord bot token might be missing or incorrect",
-        [404] = "User might not be in the server",
-        [429] = "Discord bot rate limited"
-    }
 
-    if type(discordUserId) == "string" and discordUserId:find("discord:") then discordUserId:gsub("discord:", "") end
-
-    PerformHttpRequest(("https://discordapp.com/api/guilds/%s/members/%s"):format(Config.discordGuildId, discordUserId), function(errorCode, resultData, resultHeaders)
+    PerformHttpRequest(("https://discordapp.com/api/guilds/%s/members?limit=500"):format(Config.discordGuildId), function(errorCode, resultData, resultHeaders)
         if errorCode ~= 200 then
             done = true
-            return print(("^3Warning: %d %s"):format(errorCode, discordErrors[errorCode]))
+            return print(("^3[Warning]: %d %s"):format(errorCode, discordErrors[errorCode] or "Unknown Error"))
         end
 
-        local result = json.decode(resultData)
-        data = {
+        local working, members = pcall(function() return json.decode(resultData) end)
+        if not working or not members then
+            done = true
+            return print("^1[Error]: Failed to decode Discord cache response.")
+        end
+
+        DiscordCache = {}
+        local count = 0
+        for _, member in ipairs(members) do
+            local name = member.nick or member.user.username
+            if name and name:sub(1, 1) == "[" then
+                DiscordCache[member.user.id] = member
+                count = count + 1
+            end
+        end
+
+        print(("^2[DEBUG] Cached %d Discord members successfully."):format(count))
+        done = true
+    end, "GET", "", {["Authorization"] = "Bot " .. Config.discordBotToken})
+
+    while not done do Wait(50) end
+end
+
+
+function NDCore.getDiscordInfo(discordUserId)
+    if not discordUserId or not Config.discordBotToken or not Config.discordGuildId then return end
+    if type(discordUserId) == "string" and discordUserId:find("discord:") then
+        discordUserId = discordUserId:gsub("discord:", "")
+    end
+
+    if DiscordCache[discordUserId] then
+        local result = DiscordCache[discordUserId]
+        return {
             nickname = result.nick or result.user.username,
             user = result.user,
             roles = result.roles
         }
+    end
+
+    local done = false
+
+    PerformHttpRequest(("https://discordapp.com/api/guilds/%s/members/%s"):format(Config.discordGuildId, discordUserId), function(errorCode, resultData, resultHeaders)
+        if errorCode ~= 200 then
+            done = true
+            return print(("^3[Warning]: %d %s"):format(errorCode, discordErrors[errorCode] or "Unknown Error"))
+        end
+
+        local result = json.decode(resultData)
+        local data = {
+            nickname = result.nick or result.user.username,
+            user = result.user,
+            roles = result.roles
+        }
+
+        if result.nick and result.nick:sub(1, 1) == "[" then
+            DiscordCache[discordUserId] = result
+        end
+
         done = true
-    end, "GET", "", {["Content-Type"] = "application/json", ["Authorization"] = ("Bot %s"):format(Config.discordBotToken)})
+    end, "GET", "", {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bot " .. Config.discordBotToken
+    })
 
     while not done do Wait(50) end
     return data
 end
+
+CreateThread(function()
+    while true do
+        NDCore.buildDiscordCache()
+        Wait(CacheRefreshInterval)
+    end
+end)
+
+RegisterCommand("reloaddiscordcache", function(src, args, raw)
+    if src == 0 then
+        print("^3[NDCore]^7 Reloading Discord cache manually...")
+        NDCore.buildDiscordCache()
+    end
+end, true)
+
 
 function NDCore.enableMultiCharacter(enable)
     Config.multiCharacter = enable
