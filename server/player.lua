@@ -399,7 +399,6 @@ local function createCharacterTable(info)
 
         TriggerEvent("ND:groupAdded", self, self.groups[name])
         lib.addPrincipal(self.source, ("group.%s"):format(name))
-
         return self.groups[name]
     end
 
@@ -430,13 +429,18 @@ local function createCharacterTable(info)
     ---@param name string
     ---@param rank number
     ---@return boolean
-    function self.setJob(name, rank, customGroup)
-        self.removeGroup(self.job)
+    function self.setJob(name, rank, customGroup, keepGroup)
+        if not keepGroup then
+            self.removeGroup(self.job)
+        end
+
         local job = self.addGroup(name, rank, customGroup, true)
+
         if job then
             self.job = job.name
             self.jobInfo = job
         end
+        
         self.triggerEvent("ND:updateCharacter", removeCharacterFunctions(self), "job")
         TriggerEvent("ND:updateCharacter", self, "job")
         return job
