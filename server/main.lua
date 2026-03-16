@@ -253,6 +253,7 @@ MySQL.ready(function()
         "database/users.sql",
         "database/characters.sql",
         "database/vehicles.sql",
+        "database/moneylogs.sql"
     }, resourceName)
 end)
 

@@ -1,4 +1,5 @@
 local avoidSavingLastLocations = {}
+local moneyLogs = {}
 
 local function removeCharacterFunctions(character)
     local newData = {}
@@ -8,6 +9,13 @@ local function removeCharacterFunctions(character)
         end
     end
     return newData
+end
+
+local function logMoney(charId, action, account, amount, reason, trace)
+    if not trace or (action == "set" and not reason) then return end
+    local traceText = trace:match("%((.-)%)")
+    traceText = traceText and traceText:gsub("%^%d", "") or traceText or ""
+    table.insert(moneyLogs, { charId, action, account, amount, reason or "[NO REASON GIVEN]", traceText })
 end
 
 local function createCharacterTable(info)
@@ -46,6 +54,9 @@ local function createCharacterTable(info)
             self.triggerEvent("ND:updateMoney", self.cash, self.bank)
             TriggerEvent("ND:moneyChange", self.source, account, amount, "remove", reason)
         end
+
+        logMoney(self.id, "deduct", account, amount, reason, Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()))
+
         return true
     end
     
@@ -61,6 +72,9 @@ local function createCharacterTable(info)
             self.triggerEvent("ND:updateMoney", self.cash, self.bank)
             TriggerEvent("ND:moneyChange", self.source, account, amount, "add", reason)
         end
+
+        logMoney(self.id, "add", account, amount, reason, Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()))
+
         return true
     end
 
@@ -667,3 +681,30 @@ function NDCore.setActiveCharacter(src, id)
     character.active()
     return character
 end
+
+-- runs every 10 minutes, saves all characters and money logs.
+lib.cron.new("*/10 * * * *", function()
+    local players = NDCore.getPlayers()
+    for _, player in pairs(players) do
+        player.saveLastLocation()
+        player.save()
+    end
+
+    if #moneyLogs == 0 then return end
+
+    local placeholders = {}
+    local params = {}
+    local logs = moneyLogs
+    moneyLogs = {}
+
+    for i=1, #logs do
+        local row = logs[i]
+        for j = 1, 6 do
+            table.insert(params, row[j])
+        end
+        table.insert(placeholders, "(?, ?, ?, ?, ?, ?)")
+    end
+
+    local query = "INSERT INTO nd_money_log (character_id, action, account, amount, reason, trace) VALUES " .. table.concat(placeholders, ",")
+    MySQL.prepare(query, params)
+end)
