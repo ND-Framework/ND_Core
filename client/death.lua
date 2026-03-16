@@ -15,7 +15,8 @@ local function PlayerEliminated(deathCause, killerServerId, killerClientId)
         deathCause = deathCause,
         killerServerId = killerServerId,
         killerClientId = killerClientId,
-        damagedBones = usingAmbulance and ambulance:getBodyDamage() or {}
+        damagedBones = usingAmbulance and ambulance:getBodyDamage() or {},
+        timestamp = GetCloudTimeAsInt()
     }
     TriggerEvent("ND:playerEliminated", info)
     TriggerServerEvent("ND:playerEliminated", info)
