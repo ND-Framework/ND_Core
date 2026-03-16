@@ -13,6 +13,9 @@ local moneyActions = {
         return locale("staff_money_set", player.name, account, amount), locale("user_money_set", account, amount)
     end
 }
+local validWeather = {
+    "clear", "extrasunny", "clouds", "overcast", "rain", "clearing", "thunder", "smog", "foggy", "xmas", "snow", "snowlight", "blizzard", "halloween", "neutral"
+}
 
 lib.addCommand("setmoney", {
     help = "Admin command, set a players money.",
@@ -85,7 +88,7 @@ lib.addCommand("setjob", {
 }, function(source, args, raw)
     local player = NDCore.getPlayer(args.target)
     if not player then return end
-    
+
     local job = args.job:lower()
     local jobInfo = player.setJob(job, args.rank)
     if not player or not jobInfo then return end
@@ -245,14 +248,14 @@ lib.addCommand("pay", {
             duration = 5000
         })
     end
-    
+
     targetPlayer.notify({
         title = locale("money_received"),
         description = locale("money_received2", args.amount),
         type = "inform",
         duration = 5000
     })
-    
+
     player.notify({
         title = locale("money_given"),
         description = locale("money_given2", args.amount),
@@ -472,12 +475,150 @@ lib.addCommand("claim-veh", {
             type = "error"
         })
     end
-    
+
     NDCore.setVehicleOwned(targetPlayer.id, properties, true)
 
     player.notify({
         title = "Vehicle added!",
         description = ("The vehicle has now been added to %s's garage!"):format(targetPlayer.name),
         type = "success"
+    })
+end)
+
+lib.addCommand("tpm", {
+    help = "Admin command, teleport to marked location.",
+    restricted = "group.admin"
+}, function(source, args, raw)
+    TriggerClientEvent("ND:teleportToMarker", source)
+end)
+
+lib.addCommand("tp", {
+    help = "Admin command, teleport to coordinates.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "x",
+            type = "number",
+            help = "X coordinate"
+        },
+        {
+            name = "y",
+            type = "number",
+            help = "Y coordinate"
+        },
+        {
+            name = "z",
+            type = "number",
+            help = "Z coordinate"
+        }
+    }
+}, function(source, args, raw)
+    if not args or not args.x or not args.y or not args.z then
+        local player = NDCore.getPlayer(source)
+        return player.notify({
+            title = "Error",
+            description = "No coordinates provided! /tp <x> <y> <z>",
+            type = "error"
+        })
+    end
+    local ped = GetPlayerPed(source)
+    SetEntityCoords(ped, tonumber(args.x) + 0.0, tonumber(args.y) + 0.0, tonumber(args.z) + 0.0)
+end)
+
+lib.addCommand("weather", {
+    help = "Admin command, change the weather.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "weather",
+            type = "string",
+            help = ("Weather Type (%s)"):format(table.concat(validWeather, ", "))
+        }
+    }
+}, function(source, args, raw)
+    if not args or not args.weather then
+        local player = NDCore.getPlayer(source)
+        return player.notify({
+            title = "Error",
+            description = "No weather type provided! /weather <type>",
+            type = "error"
+        })
+    end
+    local weather = args.weather:lower()
+
+    if not lib.table.contains(validWeather, weather) then
+        local player = NDCore.getPlayer(source)
+        return player.notify({
+            title = "Invalid Weather",
+            description = ("Format: %s"):format(table.concat(validWeather, ", ")),
+            type = "error"
+        })
+    end
+
+    TriggerClientEvent("ND:changeWeather", -1, weather)
+end)
+
+lib.addCommand("time", {
+    help = "Admin command, change the time.",
+    restricted = "group.admin",
+    params = {
+        {
+            name = "hours",
+            type = "number",
+            help = "Hours"
+        },
+        {
+            name = "minutes",
+            type = "number",
+            help = "Minutes"
+        },
+        {
+            name = "seconds",
+            type = "number",
+            help = "Seconds",
+            optional = true
+        }
+    }
+}, function(source, args, raw)
+    if not args or not args.hours or not args.minutes then
+        local player = NDCore.getPlayer(source)
+        return player.notify({
+            title = "Error",
+            description = "No time provided! /time <hour> <minute>",
+            type = "error"
+        })
+    else
+        local hours = tonumber(args.hours)
+        local minutes = tonumber(args.minutes)
+        local seconds = args.seconds and tonumber(args.seconds) or 0
+
+        if not hours or hours < 0 or hours > 23 or
+            not minutes or minutes < 0 or minutes > 59 or
+            seconds < 0 or seconds > 59 then
+            local player = NDCore.getPlayer(source)
+            return player.notify({
+                title = "Invalid Time",
+                description = "Format: /time <hour 0-23> <minute 0-59>",
+                type = "error"
+            })
+        end
+
+        TriggerClientEvent("ND:changeTime", -1, hours, minutes, seconds)
+    end
+end)
+
+lib.addCommand("coords", {
+    help = "Admin command, get your current coordinates.",
+    restricted = "group.admin"
+}, function(source, args, raw)
+    local ped = GetPlayerPed(source)
+    local coords = GetEntityCoords(ped)
+    local heading = GetEntityHeading(ped)
+    local message = ("Your current coordinates are: x: %.2f, y: %.2f, z: %.2f, w: %.2f"):format(coords.x, coords.y, coords.z, heading)
+
+    TriggerClientEvent("chat:addMessage", source, {
+        color = {65, 105, 225},
+        multiline = true,
+        args = {"Coordinates", message}
     })
 end)
