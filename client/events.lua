@@ -4,25 +4,33 @@ end)
 
 -- updates the money on the client.
 RegisterNetEvent("ND:updateMoney", function(cash, bank)
-    if not NDCore.player then return end
+    if source == "" or not NDCore.player then return end
     NDCore.player.cash = cash
     NDCore.player.bank = bank
 end)
 
 -- Sets main character.
 RegisterNetEvent("ND:characterLoaded", function(character)
+    if source == "" then return end
     NDCore.player = character
 end)
 
 -- Update main character info.
 RegisterNetEvent("ND:updateCharacter", function(character)
+    if source == "" or not NDCore.player then return end
     NDCore.player = character
 end)
 
 -- Updates last lcoation.
 RegisterNetEvent("ND:updateLastLocation", function(location)
-    if not NDCore.player then return end
+    if source == "" or not NDCore.player then return end
     NDCore.player.lastLocation = location
+end)
+
+-- Unsets main character.
+RegisterNetEvent("ND:characterUnloaded", function()
+    if source == "" or not NDCore.player then return end
+    NDCore.player = nil
 end)
 
 RegisterNetEvent("ND:revivePlayer", function()
@@ -56,8 +64,6 @@ RegisterNetEvent("ND:revivePlayer", function()
         SetPedIntoVehicle(ped, veh, seat)
     end
 end)
-
-RegisterNetEvent("ND:characterUnloaded")
 
 RegisterNetEvent("ND:clothingMenu", function()
     if GetResourceState("fivem-appearance") ~= "started" then return end
