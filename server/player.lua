@@ -17,6 +17,7 @@ local function createCharacterTable(info)
         id = info.id,
         source = info.source,
         identifier = info.identifier,
+        user_id = info.user_id,
         identifiers = playerInfo.identifiers or {},
         discord = playerInfo.discord or {},
         name = info.name,
@@ -135,9 +136,9 @@ local function createCharacterTable(info)
         return self.metadata
     end
 
-    -- Completely delete character
+    -- Mark character deleted
     function self.delete()
-        local result = MySQL.query.await("DELETE FROM nd_characters WHERE charid = ?", {self.id})
+        local result = MySQL.update.await("UPDATE nd_characters SET deleted_at = NOW() WHERE charid = ?", {self.id})
         if result and NDCore.players[self.source] then
             NDCore.players[self.source] = nil
         end
@@ -201,7 +202,8 @@ local function createCharacterTable(info)
             return affectedRows > 0
         end
 
-        local affectedRows = MySQL.update.await("UPDATE nd_characters SET name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, phonenumber = ?, `groups` = ?, metadata = ? WHERE charid = ?", {
+        local affectedRows = MySQL.update.await("UPDATE nd_characters SET user_id = ?, name = ?, firstname = ?, lastname = ?, dob = ?, gender = ?, cash = ?, bank = ?, phonenumber = ?, `groups` = ?, metadata = ? WHERE charid = ?", {
+            self.user_id,
             self.name,
             self.firstname,
             self.lastname,
@@ -487,10 +489,13 @@ end
 function NDCore.newCharacter(src, info)
     local identifier = NDCore.getPlayerIdentifierByType(src, Config.characterIdentifier)
     if not identifier then return end
+    
+    local userId = PlayersInfo[src] and PlayersInfo[src].userId
 
     local charInfo = {
         source = src,
         identifier = identifier,
+        user_id = userId,
         name = GetPlayerName(src) or "",
         firstname = info.firstname or "",
         lastname = info.lastname or "",
@@ -516,8 +521,9 @@ function NDCore.newCharacter(src, info)
         return
     end
 
-    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, name, firstname, lastname, dob, gender, cash, bank, phonenumber, `groups`, metadata, inventory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
+    charInfo.id = MySQL.insert.await("INSERT INTO nd_characters (identifier, user_id, name, firstname, lastname, dob, gender, cash, bank, phonenumber, `groups`, metadata, inventory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", {
         identifier,
+        userId,
         charInfo.name,
         charInfo.firstname,
         charInfo.lastname,
@@ -539,17 +545,30 @@ end
 function NDCore.fetchCharacter(id, src)
     local result
     if src then
-        result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ? and identifier = ?", {id, NDCore.getPlayerIdentifierByType(src, Config.characterIdentifier)})
+        local identifier = NDCore.getPlayerIdentifierByType(src, Config.characterIdentifier)
+        local userId = PlayersInfo[src] and PlayersInfo[src].userId
+        result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ? AND (identifier = ? OR user_id = ?)", {id, identifier, userId})
     else
         result = MySQL.query.await("SELECT * FROM nd_characters WHERE charid = ?", {id})
     end
 
-    if not result then return end
-    local info = result[1]
+    local info = result?[1]
+    if not info then return end
+    
+    -- Check if character has user_id, if not assign it
+    if not info.user_id and src then
+        local userId = PlayersInfo[src] and PlayersInfo[src].userId
+        if userId then
+            MySQL.update.await("UPDATE nd_characters SET user_id = ? WHERE charid = ?", {userId, info.charid})
+            info.user_id = userId
+        end
+    end
+    
     return createCharacterTable({
         source = src,
         id = info.charid,
         identifier = info.identifier,
+        user_id = info.user_id,
         name = info.name,
         firstname = info.firstname,
         lastname = info.lastname,
@@ -567,15 +586,27 @@ end
 ---@param src number
 ---@return table
 function NDCore.fetchAllCharacters(src)
+    local userId = PlayersInfo[src] and PlayersInfo[src].userId
+    local identifier = NDCore.getPlayerIdentifierByType(src, Config.characterIdentifier)
     local characters = {}
-    local result = MySQL.query.await("SELECT * FROM nd_characters WHERE identifier = ?", {NDCore.getPlayerIdentifierByType(src, Config.characterIdentifier)})
+    
+    -- Query by either identifier OR user_id, excluding deleted characters
+    local result = MySQL.query.await("SELECT * FROM nd_characters WHERE (identifier = ? OR user_id = ?) AND deleted_at IS NULL", {identifier, userId})
 
     for i=1, #result do
         local info = result[i]
+        
+        -- Check if character has user_id, if not assign it
+        if not info.user_id and userId then
+            MySQL.update.await("UPDATE nd_characters SET user_id = ? WHERE charid = ?", {userId, info.charid})
+            info.user_id = userId
+        end
+        
         characters[info.charid] = createCharacterTable({
             source = src,
             id = info.charid,
             identifier = info.identifier,
+            user_id = info.user_id,
             name = info.name,
             firstname = info.firstname,
             lastname = info.lastname,

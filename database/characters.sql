@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS `nd_characters` (
     `charid` INT(10) NOT NULL AUTO_INCREMENT,
+    `user_id` INT(11) DEFAULT NULL,
     `identifier` VARCHAR(200) NOT NULL DEFAULT '0',
     `name` VARCHAR(50) DEFAULT NULL,
     `firstname` VARCHAR(50) DEFAULT NULL,
@@ -9,8 +10,11 @@ CREATE TABLE IF NOT EXISTS `nd_characters` (
     `cash` INT(10) DEFAULT '0',
     `bank` INT(10) DEFAULT '0',
     `phonenumber` VARCHAR(20) DEFAULT NULL,
+    `deleted_at` DATETIME NULL DEFAULT NULL,
     `groups` LONGTEXT DEFAULT ('[]'),
     `metadata` LONGTEXT DEFAULT ('[]'),
     `inventory` LONGTEXT DEFAULT ('[]'),
-    PRIMARY KEY (`charid`) USING BTREE
+    PRIMARY KEY (`charid`) USING BTREE,
+    INDEX `idx_nd_characters_user_id` (`user_id`),
+    CONSTRAINT `fk_nd_characters_user_id` FOREIGN KEY (`user_id`) REFERENCES `nd_users` (`user_id`) ON UPDATE CASCADE ON DELETE SET NULL
 );
