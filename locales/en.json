@@ -66,6 +66,7 @@
     "view_impounded_vehs": "View impounded vehicles",
     "view_garage": "View garage",
     "personal_vehicle": "Personal vehicle",
+    "group_vehicle": "Vehicle",
     "keybind_carkey": "Unlock/lock vehicle (double click)",
     "progress_hotwiring": "Hotwiring",
     "cruise_control": "Cruise control",

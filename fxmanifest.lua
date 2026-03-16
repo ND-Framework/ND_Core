@@ -8,16 +8,25 @@ fx_version "cerulean"
 game "gta5"
 lua54 "yes"
 
+files {
+    "init.lua",
+    "compatibility/**/locale.lua",
+    "locales/*.json",
+    "ui/**"
+}
+
+ui_page "ui/index.html"
+
 shared_script "@ox_lib/init.lua"
 client_scripts {
     "client/main.lua",
     "shared/functions.lua",
     "client/peds.lua",
-    "client/vehicle/main.lua",
-    "client/vehicle/garages.lua",
+    "client/vehicle.lua",
     "client/functions.lua",
     "client/events.lua",
     "client/death.lua",
+    "client/groupadmin.lua",
     "compatibility/**/client.lua"
 }
 server_scripts {
@@ -27,15 +36,10 @@ server_scripts {
     "server/player.lua",
     "server/vehicle.lua",
     "server/functions.lua",
+    "server/groups.lua",
+    "server/groupadmin.lua",
     "compatibility/**/server.lua",
     "server/commands.lua"
-}
-
-files {
-    "init.lua",
-    "client/vehicle/data.lua",
-    "compatibility/**/locale.lua",
-    "locales/*.json"
 }
 
 dependencies {

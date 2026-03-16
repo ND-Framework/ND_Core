@@ -242,21 +242,21 @@ local function getVehicleBlipSprite(entity)
 end
 
 local function getVehFromNetId(netId)
-    local time = GetCloudTimeAsInt()
-    while not NetworkDoesNetworkIdExist(netId) or not NetworkDoesEntityExistWithNetworkId(netId) and time-GetCloudTimeAsInt() < 5 do
+    local startTime = GetCloudTimeAsInt()
+    while (not NetworkDoesNetworkIdExist(netId) or not NetworkDoesEntityExistWithNetworkId(netId)) and (GetCloudTimeAsInt() - startTime < 5) do
         Wait(100)
     end
     return NetToVeh(netId)
 end
 
-RegisterNetEvent("ND_Vehicles:blip", function(netId, status)
-    local veh = getVehFromNetId(netId)
-    if not veh then return end
-    if not status then
-        local blip = GetBlipFromEntity(veh)
-        if not blip or not DoesBlipExist(blip) then return end
-        return RemoveBlip(blip)
+
+local function setVehicleBlip(veh, status, groupVehicle)
+    local currentBlip = GetBlipFromEntity(veh)
+    if currentBlip and DoesBlipExist(currentBlip) then
+        RemoveBlip(currentBlip)
     end
+
+    if not status then return end
 
     local blip = AddBlipForEntity(veh)
     SetBlipSprite(blip, getVehicleBlipSprite(veh))
@@ -264,8 +264,14 @@ RegisterNetEvent("ND_Vehicles:blip", function(netId, status)
     SetBlipScale(blip, 0.8)
     SetBlipAsShortRange(blip, true)
     BeginTextCommandSetBlipName("STRING")
-    AddTextComponentSubstringPlayerName(locale("personal_vehicle"))
+    AddTextComponentSubstringPlayerName(groupVehicle and locale("group_vehicle") or locale("personal_vehicle"))
     EndTextCommandSetBlipName(blip)
+end
+
+RegisterNetEvent("ND_Vehicles:blip", function(netId, status, groupVehicle)
+    local veh = getVehFromNetId(netId)
+    if not veh then return end
+    setVehicleBlip(veh, status, groupVehicle)
 end)
 
 RegisterNetEvent("ND_Vehicles:syncAlarm", function(netId)
@@ -284,13 +290,39 @@ RegisterNetEvent("ND_VehicleSystem:setOwnedIfNot", function(netId)
 end)
 
 AddStateBagChangeHandler("props", nil, function(bagName, key, value, reserved, replicated)
-    local entity = GetEntityFromStateBagName(bagName)
-    if not value or not DoesEntityExist(entity) or NetworkGetEntityOwner(entity) ~= cache.playerId then return end
+    if not value then return end
+
     local props = value
     if type(value) == "string" then
         props = json.decode(value)
     end
+
+    if not props or type(props) ~= "table" then return end
+
+    local entity = GetEntityFromStateBagName(bagName)
+    if not DoesEntityExist(entity) or NetworkGetEntityOwner(entity) ~= cache.playerId then return end
+
     lib.setVehicleProperties(entity, props)
+    TriggerServerEvent("ND_Vehicles:propsApplied", DoesEntityExist(entity) and NetworkGetNetworkIdFromEntity(entity))
+end)
+
+local function hasBlipGroup(player, groups)
+    groups = groups or {}
+    for i=1, #groups do
+        local group = groups[i]
+        if player.groups[group] then
+            return true
+        end
+    end
+end
+
+AddStateBagChangeHandler("blipGroups", nil, function(bagName, key, value, reserved, replicated)
+    local entity = GetEntityFromStateBagName(bagName)
+    if not value or not DoesEntityExist(entity) then return end
+
+    local player = NDCore.getPlayer()
+    if not player then return end
+    setVehicleBlip(entity, hasBlipGroup(player, value), true)
 end)
 
 local playingKey = 0
@@ -411,6 +443,17 @@ local function hasVehicleKeys(veh, checkEngine)
     return hasKey or checkEngine and state.hotwired
 end
 
+AddStateBagChangeHandler("owner", nil, function(bagName, key, value, reserved, replicated)
+    local entity = GetEntityFromStateBagName(bagName)
+    if not value or not DoesEntityExist(entity) or GetEntityType(entity) ~= 2 then return end
+
+    local player = NDCore.getPlayer()
+    if not player or player.id ~= value then return end
+
+    local hasKey = hasVehicleKeys(entity)
+    setVehicleBlip(entity, hasKey)
+end)
+
 local function hasVehicleKeysCheck(veh)
     local time = GetCloudTimeAsInt()
     if time-keyCheckTime.lastCheck < 5 then
@@ -526,6 +569,33 @@ CreateThread(function()
     end
 end)
 
+CreateThread(function()
+    while true do
+        Wait(100)
+        local veh = cache.vehicle
+        if veh then goto skip end
+        
+        local ped = cache.ped
+        local vehEntering = GetVehiclePedIsEntering(ped)
+        if not DoesEntityExist(vehEntering) or NetworkGetEntityOwner(vehEntering) == cache.serverId then goto skip end
+
+        local state = Entity(vehEntering).state
+        if state.owner or state.locked ~= nil then goto skip end
+
+        local driver = GetPedInVehicleSeat(vehEntering, -1)
+        if DoesEntityExist(driver) and IsPedAPlayer(driver) then
+            state.locked = false
+            state.hotwired = true
+            goto skip
+        end
+
+        if math.random(1, 100) <= Config.randomUnlockedVehicleChance then return end
+        state.locked = true
+
+        ::skip::
+    end
+end)
+
 local function hotwireVehicle()
     local state = playerVehicle and Entity(playerVehicle).state
     if not playerVehicle or state.hotwired then return end
@@ -597,34 +667,51 @@ local function lockpickVehicle()
     local veh = lib.getClosestVehicle(pos, 2.5, false)
     if not veh then return end
 
-    local dificulties = {
-        "easy",
-        "medium",
-        "hard"
-    }
-    local dificultyTime = {
-        easy = 500,
-        medium = 800,
-        hard = 1000
-    }
-
-    lib.requestAnimDict("veh@break_in@0h@p_m_one@")
-    for i=1, Config.lockpickTries do
-        TaskPlayAnimAdvanced(cache.ped, "veh@break_in@0h@p_m_one@", "std_force_entry_ds", pos.x, pos.y, pos.z+0.025, rot.x, rot.y, rot.z, 8.0, 8.0, 1800, 28, 0.1)
-        local dificulty = dificulties[math.random(1, #dificulties)]
-        local success = lib.skillCheck(dificulty)
+    local lockPickResource = GetResourceState("lockpick") == "started" and "lockpick" or GetResourceState("t3_lockpick") == "started" and "t3_lockpick"
+    if lockPickResource then
+        local success = exports[lockPickResource]:startLockpick("lockpick_vehicle", 4, Config.lockpickTries)
         if not success or not DoesEntityExist(veh) or #(pos-GetEntityCoords(veh)) > 2.5 then
             TriggerServerEvent("ND_Vehicles:lockpick", VehToNet(veh), false)
+            if success == nil then -- nil would mean the minigame was cancelled
+                return false, false
+            end
             return false, true
         end
-        Wait(dificultyTime[dificulty])
+    else
+        local dificulties = {
+            "easy",
+            "medium",
+            "hard"
+        }
+        local dificultyTime = {
+            easy = 500,
+            medium = 800,
+            hard = 1000
+        }
+    
+        lib.requestAnimDict("veh@break_in@0h@p_m_one@")
+        for i=1, Config.lockpickTries do
+            TaskPlayAnimAdvanced(cache.ped, "veh@break_in@0h@p_m_one@", "std_force_entry_ds", pos.x, pos.y, pos.z+0.025, rot.x, rot.y, rot.z, 8.0, 8.0, 1800, 28, 0.1)
+            local dificulty = dificulties[math.random(1, #dificulties)]
+            local success = lib.skillCheck(dificulty)
+            if not success or not DoesEntityExist(veh) or #(pos-GetEntityCoords(veh)) > 2.5 then
+                TriggerServerEvent("ND_Vehicles:lockpick", VehToNet(veh), false)
+                return false, true
+            end
+            Wait(dificultyTime[dificulty])
+        end
     end
 
     veh = lib.getClosestVehicle(pos, 2.5, false)
     if not veh then return false, true end
     TriggerServerEvent("ND_Vehicles:lockpick", VehToNet(veh), true)
     PlaySoundFromEntity(-1, "Remote_Control_Fob", cache.ped, "PI_Menu_Sounds", true, 0)
-    return true, true
+
+    if lockPickResource then
+        return true, false
+    else
+        return true, true
+    end
 end
 
 exports("lockpick", function(data, slot)
