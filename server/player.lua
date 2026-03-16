@@ -397,6 +397,7 @@ local function createCharacterTable(info)
             TriggerEvent("ND:updateCharacter", self, "groups")
         end
 
+        TriggerEvent("ND:groupAdded", self, self.groups[name])
         lib.addPrincipal(self.source, ("group.%s"):format(name))
 
         return self.groups[name]
