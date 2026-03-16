@@ -121,12 +121,14 @@ local function createCharacterTable(info)
             for k, v in pairs(key) do
                 self[k] = v
                 if k == "cash" or k == "bank" then
+                    logMoney(self.id, "set", k, value, reason, Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()))
                     TriggerEvent("ND:moneyChange", self.source, k, v, "set", reason)
                 end
             end
         else
             self[key] = value
             if key == "cash" or key == "bank" then
+                logMoney(self.id, "set", key, value, reason, Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()))
                 TriggerEvent("ND:moneyChange", self.source, key, value, "set", reason)
             end
         end
