@@ -144,6 +144,34 @@ local function createCharacterTable(info)
         end
         return result
     end
+
+    --save last location
+    function self.saveLastLocation()
+        local ped = GetPlayerPed(self.source)
+        if not ped or ped == 0 then return end
+
+        local coords = GetEntityCoords(ped)
+        local heading = GetEntityHeading(ped)
+        local saveLocation = true
+
+        for i=1, #avoidSavingLastLocations do
+            local loc = avoidSavingLastLocations[i]
+            if #(loc.coords-coords) < loc.dist then
+                saveLocation = false
+            end
+        end
+
+        if not saveLocation then return end
+
+        self.setMetadata("location", {
+            x = coords.x,
+            y = coords.y,
+            z = coords.z,
+            w = heading
+        })
+
+        return true
+    end
     
     -- Unload and save character
     function self.unload()
@@ -153,29 +181,7 @@ local function createCharacterTable(info)
             lib.removePrincipal(self.source, ("group.%s"):format(name))
         end
 
-        local ped = GetPlayerPed(self.source)
-        if ped then
-            local coords = GetEntityCoords(ped)
-            local heading = GetEntityHeading(ped)
-            local saveLocation = true
-
-            for i=1, #avoidSavingLastLocations do
-                local loc = avoidSavingLastLocations[i]
-                if #(loc.coords-coords) < loc.dist then
-                    saveLocation = false
-                end
-            end
-
-            if saveLocation then                
-                self.setMetadata("location", {
-                    x = coords.x,
-                    y = coords.y,
-                    z = coords.z,
-                    w = heading
-                })
-            end
-        end
-
+        self.saveLastLocation()
         self.triggerEvent("ND:characterUnloaded")
         TriggerEvent("ND:characterUnloaded", self.source, self)
 
