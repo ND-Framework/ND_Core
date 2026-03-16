@@ -340,17 +340,36 @@ local function createCharacterTable(info)
         end
 
         local roles = self.discord.roles
-        if roles then            
+        if roles then
+            local hasAdmin = false
             for i=1, #Config.adminDiscordRoles do
                 local role = Config.adminDiscordRoles[i]
                 if lib.table.contains(roles, role) then
-                    self.addGroup("admin")
+                    hasAdmin = true
+                    break
                 end
             end
+
+            if hasAdmin then
+                self.addGroup("admin")
+            elseif self.groups["admin"] then
+                self.removeGroup("admin")
+            end
             
-            for group, role in pairs(Config.groupRoles) do
-                if lib.table.contains(roles, role) then
+            local function hasRole(groupRoles)
+                for i=1, #groupRoles do
+                    local role = groupRoles[i]
+                    if lib.table.contains(roles, role) then
+                        return true
+                    end
+                end
+            end
+
+            for group, groupRoles in pairs(Config.groupRoles) do
+                if hasRole(groupRoles) then
                     self.addGroup(group)
+                elseif self.groups[group] then
+                    self.removeGroup(group)
                 end
             end
         end
