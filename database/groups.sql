@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS `nd_groups` (
+    `name` VARCHAR(50) NOT NULL,
+    `label` VARCHAR(100) NOT NULL,
+    `isJob` TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

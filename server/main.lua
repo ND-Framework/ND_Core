@@ -4,6 +4,7 @@ NDCore.players = {}
 PlayersInfo = {}
 local resourceName = GetCurrentResourceName()
 local tempPlayersInfo = {}
+-- Groups are now loaded from the database in MySQL.ready via NDCore.loadGroups()
 
 Config = {
     serverName = GetConvar("core:serverName", "Unconfigured ND-Core Server"),
@@ -23,7 +24,7 @@ Config = {
     randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
     disableVehicleAirControl = GetConvarInt("core:disableVehicleAirControl", 1) == 1,
     useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
-    groups = json.decode(GetConvar("core:groups", "[]")),
+    groups = {},
     admins = json.decode(GetConvar("core:admins", "[]")),
     adminDiscordRoles = json.decode(GetConvar("core:adminDiscordRoles", "[]")),
     groupRoles = json.decode(GetConvar("core:groupRoles", "[]")),
@@ -253,8 +254,13 @@ MySQL.ready(function()
         "database/users.sql",
         "database/characters.sql",
         "database/vehicles.sql",
-        "database/moneylogs.sql"
+        "database/moneylogs.sql",
+        "database/groups.sql",
+        "database/group_ranks.sql"
     }, resourceName)
+    Wait(200)
+    NDCore.seedGroupsFromJson()
+    NDCore.loadGroups()
 end)
 
 -- Hourly cron, purge soft-deleted characters older than 30 days.

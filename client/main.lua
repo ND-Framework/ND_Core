@@ -15,7 +15,7 @@ Config = {
     randomUnlockedVehicleChance = GetConvarInt("core:randomUnlockedVehicleChance", 30),
     requireKeys = GetConvarInt("core:requireKeys", 1) == 1,
     useInventoryForKeys = GetConvarInt("core:useInventoryForKeys", 1) == 1,
-    groups = json.decode(GetConvar("core:groups", "[]")),
+    groups = {},
     compatibility = json.decode(GetConvar("core:compatibility", "[]")),
     lockpickTries = GetConvarInt("core:lockpickTries", 3)
 }

@@ -404,11 +404,17 @@ local function createCharacterTable(info)
     ---@return boolean
     function self.addGroup(name, rank, customGroup, isJob)
         local groupRank = tonumber(rank) or 1
-        local groupInfo = lib.table.deepclone(Config.groups?[name] or {})
-        local bossRank = groupInfo?.minimumBossRank
+        local groupInfo = Config.groups?[name] or {}
+        local rankData = groupInfo?.ranks?[groupRank]
 
-        for k, v in pairs(customGroup or {}) do
-            groupInfo[k] = v
+        local groupLabel = groupInfo?.label or name
+        local rankName = rankData?.label or groupRank
+        local isBoss = rankData?.isBoss or false
+
+        if customGroup then
+            if customGroup.label then groupLabel = customGroup.label end
+            if customGroup.rankName then rankName = customGroup.rankName end
+            if customGroup.isBoss ~= nil then isBoss = customGroup.isBoss end
         end
 
         if isJob then
@@ -419,12 +425,11 @@ local function createCharacterTable(info)
 
         self.groups[name] = {
             name = name,
-            label = groupInfo?.label or name,
-            rankName = groupInfo?.ranks?[groupRank] or groupRank,
+            label = groupLabel,
+            rankName = rankName,
             rank = groupRank,
             isJob = isJob,
-            isBoss = bossRank and groupRank >= bossRank,
-            metadata = groupInfo.metadata or {}
+            isBoss = isBoss
         }
         
         if not isJob then
