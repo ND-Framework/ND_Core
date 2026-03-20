@@ -24,8 +24,7 @@ function NDCore.getPlayers(key, value, returnArray)
         lastname = "lastname",
         gender = "gender",
         groups = "groups",
-        job = "job",
-        gender = "gender"
+        job = "job"
     }
 
     local findBy = keyTypes[key] or "metadata"
