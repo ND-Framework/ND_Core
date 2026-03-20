@@ -83,3 +83,10 @@ RegisterNetEvent("ND:clothingMenu", function()
         tattoos = true
     })
 end)
+
+RegisterNetEvent("ND:groupsUpdated", function(simplified)
+    if source == "" then return end
+
+    if not simplified then return end
+    Config.groups = simplified
+end)

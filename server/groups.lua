@@ -1,4 +1,4 @@
--- Cache of all groups loaded from DB: Config.groups[name] = { label, isJob, ranks = { [weight] = { id, label, weight, isBoss } } }
+-- Cache of all groups loaded from DB: Config.groups[name] = { label, isJob, ranks = { [weight] = label }, ranksData = { [weight] = { id, label, weight, isBoss } } }
 
 local function loadGroupsFromDB()
     local groups = {}
@@ -8,8 +8,9 @@ local function loadGroupsFromDB()
     for _, row in ipairs(rows) do
         groups[row.name] = {
             label = row.label,
-            isJob = row.isJob == 1,
-            ranks = {}
+            isJob = row.isJob,
+            ranks = {},
+            ranksData = {}
         }
     end
 
@@ -18,11 +19,12 @@ local function loadGroupsFromDB()
         for _, rank in ipairs(ranks) do
             local g = groups[rank.group_name]
             if g then
-                g.ranks[rank.weight] = {
+                g.ranks[rank.weight] = rank.label
+                g.ranksData[rank.weight] = {
                     id = rank.id,
                     label = rank.label,
                     weight = rank.weight,
-                    isBoss = rank.isBoss == 1
+                    isBoss = rank.isBoss
                 }
             end
         end
@@ -63,7 +65,8 @@ function NDCore.createNewGroup(name, label, isJob, ranks)
     Config.groups[name] = {
         label = label or name,
         isJob = isJob or false,
-        ranks = {}
+        ranks = {},
+        ranksData = {}
     }
 
     if ranks and #ranks > 0 then
@@ -71,7 +74,8 @@ function NDCore.createNewGroup(name, label, isJob, ranks)
             local id = MySQL.insert.await("INSERT INTO nd_group_ranks (`group_name`, `label`, `weight`, `isBoss`) VALUES (?, ?, ?, ?)", {
                 name, rank.label, rank.weight, rank.isBoss and 1 or 0
             })
-            Config.groups[name].ranks[rank.weight] = {
+            Config.groups[name].ranks[rank.weight] = rank.label
+            Config.groups[name].ranksData[rank.weight] = {
                 id = id,
                 label = rank.label,
                 weight = rank.weight,
@@ -94,7 +98,7 @@ function NDCore.editGroupData(name, data)
 
     if data.label ~= nil or data.isJob ~= nil then
         local label = data.label or Config.groups[name].label
-        local isJob = data.isJob ~= nil and data.isJob or Config.groups[name].isJob
+        local isJob = data.isJob ~= nil and data.isJob
         MySQL.update.await("UPDATE nd_groups SET `label` = ?, `isJob` = ? WHERE `name` = ?", {
             label, isJob and 1 or 0, name
         })
@@ -106,12 +110,14 @@ function NDCore.editGroupData(name, data)
         -- Delete all old ranks and replace with new set
         MySQL.update.await("DELETE FROM nd_group_ranks WHERE `group_name` = ?", { name })
         Config.groups[name].ranks = {}
+        Config.groups[name].ranksData = {}
 
         for _, rank in ipairs(data.ranks) do
             local id = MySQL.insert.await("INSERT INTO nd_group_ranks (`group_name`, `label`, `weight`, `isBoss`) VALUES (?, ?, ?, ?)", {
                 name, rank.label, rank.weight, rank.isBoss and 1 or 0
             })
-            Config.groups[name].ranks[rank.weight] = {
+            Config.groups[name].ranks[rank.weight] = rank.label
+            Config.groups[name].ranksData[rank.weight] = {
                 id = id,
                 label = rank.label,
                 weight = rank.weight,
@@ -141,7 +147,7 @@ function NDCore.getAllGroups()
     local result = {}
     for name, group in pairs(Config.groups) do
         local ranks = {}
-        for weight, rank in pairs(group.ranks) do
+        for weight, rank in pairs(group.ranksData) do
             ranks[#ranks+1] = {
                 id = rank.id,
                 label = rank.label,
@@ -167,13 +173,13 @@ function NDCore.syncGroupsToClients()
     local simplified = {}
     for name, group in pairs(Config.groups) do
         local rankLabels = {}
-        local sortedRanks = {}
-        for weight, rank in pairs(group.ranks) do
-            sortedRanks[#sortedRanks+1] = rank
+        local sortedWeights = {}
+        for weight in pairs(group.ranks) do
+            sortedWeights[#sortedWeights+1] = weight
         end
-        table.sort(sortedRanks, function(a, b) return a.weight < b.weight end)
-        for _, rank in ipairs(sortedRanks) do
-            rankLabels[#rankLabels+1] = rank.label
+        table.sort(sortedWeights)
+        for _, weight in ipairs(sortedWeights) do
+            rankLabels[#rankLabels+1] = group.ranks[weight]
         end
         simplified[name] = {
             label = group.label,
@@ -182,6 +188,7 @@ function NDCore.syncGroupsToClients()
         }
     end
     SetConvarReplicated("core:groups", json.encode(simplified))
+    TriggerClientEvent("ND:groupsUpdated", -1, simplified)
 end
 
 --- Load groups from DB into Config.groups. Called at startup.
